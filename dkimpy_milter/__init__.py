@@ -268,11 +268,19 @@ class dkimMilter(Milter.Base):
       return res
 
 if __name__ == "__main__":
-  Milter.factory = dkimMilter
-  Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
-  global config
-  config = read_config(['dkim-milter.cfg','/etc/mail/dkim-milter.cfg'])
-  miltername = config.miltername
-  socketname = config.socketname
-  sys.stdout.flush()
-  Milter.runmilter(miltername,socketname,240)
+    Milter.factory = dkimpyMilter
+    Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
+    #global config
+    #config = read_config(['dkim-milter.cfg','/etc/mail/dkim-milter.cfg'])
+    configFile = '/etc/dkimpymilter.conf'
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ( '-?', '--help', '-h' ):
+            print('usage: dkimpy-milter [<configfilename>]')
+            sys.exit(1)
+        configFile = sys.argv[1]
+
+    configGlobal = dkimpy-milter.config._processConfigFile(filename = configFile)
+    miltername = config.miltername
+    socketname = config.socketname
+    sys.stdout.flush()
+    Milter.runmilter(miltername,socketname,240)
