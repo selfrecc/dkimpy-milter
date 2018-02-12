@@ -35,10 +35,8 @@ import StringIO
 import re
 from Milter.config import MilterConfigParser
 from Milter.utils import iniplist,parse_addr,parseaddr
-
-class Config(object):
-  "Hold configuration options."
-  pass
+import dkim_milter.config as config
+from dkim_milter.util import drop_privileges
 
 def read_config(list):
   "Return new config object."
@@ -268,18 +266,16 @@ class dkimMilter(Milter.Base):
       return res
 
 if __name__ == "__main__":
-    Milter.factory = dkimpyMilter
-    Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
-    #global config
-    #config = read_config(['dkim-milter.cfg','/etc/mail/dkim-milter.cfg'])
-    configFile = '/etc/dkimpymilter.conf'
+    configFile = '/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
         if sys.argv[1] in ( '-?', '--help', '-h' ):
             print('usage: dkimpy-milter [<configfilename>]')
             sys.exit(1)
         configFile = sys.argv[1]
-
     configGlobal = dkimpy-milter.config._processConfigFile(filename = configFile)
+
+    Milter.factory = dkimMilter(configGlobal)
+    Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = config.miltername
     socketname = config.socketname
     sys.stdout.flush()
