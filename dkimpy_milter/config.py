@@ -36,6 +36,7 @@ import stat
 #  default values
 defaultConfigData = {
         'Syslog' : 'yes',
+        'SyslogFacility' : 'mail',
         'UMask' : '007',
         'Mode' : 'sv',
         'Socket' : 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
@@ -106,7 +107,10 @@ def readConfigFile(path, configData = None, configGlobal = {}):
     if debugLevel >= 5: syslog.syslog('readConfigFile: Loading "%s"' % path)
     if configData == None: configData = {}
     nameConversion = {
+        'AuthservID' : 'str',
         'Syslog' : 'str',
+        'SyslogFacility' : 'str',
+        'SyslogSuccess' : 'str',
         'UMask' : 'str',
         'Mode' : 'str',
         'Socket' : 'str',
@@ -114,6 +118,7 @@ def readConfigFile(path, configData = None, configGlobal = {}):
         'UserID' : 'str',
         'Domain' : 'str',
         'KeyFile' : 'str',
+        'KeyFileEd25119' : 'str',
         'Selector' : 'str',
         'Canonicalization' : 'str'
             }
