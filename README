@@ -1,0 +1,7 @@
+This is a DKIM signing and verification milter.  In theory it works with both
+Postfix and Sendmail, but the author has zero experience with Sendmail, so
+reports of success/failure with Sendmail and patches are welcom.
+
+The configuration file is designed to be compatible with OpenDKIM, but only
+a subset of OpenDKIM options are supported.  If an unsupported option is
+specified, an error will be raised.
