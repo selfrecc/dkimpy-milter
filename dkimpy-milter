@@ -1,11 +1,25 @@
-# A simple DKIM milter.
-# You must install pydkim/dkimpy for this to work.
-
-# http://www.sendmail.org/doc/sendmail-current/libmilter/docs/installation.html
-
+#! /usr/bin/python2
+# Original dkim-milter.py code:
 # Author: Stuart D. Gathman <stuart@bmsi.com>
 # Copyright 2007 Business Management Systems, Inc.
 # This code is under GPL.  See COPYING for details.
+
+# dkimpy-milter: A DKIM signing/verification Milter application
+# Author: Scott Kitterman <scott@kitterman.com>
+# Copyright 2018 Scott Kitterman
+"""    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA."""
 
 import sys
 import Milter
@@ -260,13 +274,5 @@ if __name__ == "__main__":
   config = read_config(['dkim-milter.cfg','/etc/mail/dkim-milter.cfg'])
   miltername = config.miltername
   socketname = config.socketname
-  print """To use this with sendmail, add the following to sendmail.cf:
-
-O InputMailFilters=%s
-X%s,        S=local:%s
-
-See the sendmail README for libmilter.
-sample dkim-milter startup""" % (miltername,miltername,socketname)
   sys.stdout.flush()
   Milter.runmilter(miltername,socketname,240)
-  print "sample dkim-milter shutdown"
