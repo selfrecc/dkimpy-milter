@@ -51,7 +51,7 @@ setup(
         'data/*',
     ]},
 
-    install_requires = ['dkimpy', 'pymilter'],
+    install_requires = ['dkimpy', 'pymilter', 'authres'],
 
     zip_safe = False,
 )
