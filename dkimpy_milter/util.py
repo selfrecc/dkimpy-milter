@@ -16,15 +16,30 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-def drop_privileges(uid_name, gid_name, umask=0o077):
+def drop_privileges(milterconfig):
+    import os
+    import grp
+    import pwd
+    import syslog
+    import dkim
+
     if os.getuid() != 0:
-        # We're not root so, like, whatever dude
-        self.logger.info("Not running as root. Cannot drop permissions.")
+        if milterconfig.get('Syslog'):
+            syslog.syslog('drop_privileges: Not running as root. Cannot drop permissions.')
         return
 
+    # Figure out if user and group are specified
+    userstr = milterconfig.get('UserID')
+    userlist = userstr.split(':')
+    if len(userlist) == 1:
+        gidname = userlist[0]
+    else:
+        gidname = userlist[1]
+    uidname = userlist[0]
+
     # Get the uid/gid from the name
-    running_uid = pwd.getpwnam(uid_name).pw_uid
-    running_gid = grp.getgrnam(gid_name).gr_gid
+    running_uid = pwd.getpwnam(uidname).pw_uid
+    running_gid = grp.getgrnam(gidname).gr_gid
 
     # Remove group privileges
     os.setgroups([])
@@ -33,5 +48,5 @@ def drop_privileges(uid_name, gid_name, umask=0o077):
     os.setgid(running_gid)
     os.setuid(running_uid)
 
-    # Ensure a very conservative umask
-    old_umask = os.umask(umask)
+    # Set umask
+    old_umask = os.umask(milterconfig.get('UMask'))
