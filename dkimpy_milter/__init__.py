@@ -272,11 +272,12 @@ if __name__ == "__main__":
             print('usage: dkimpy-milter [<configfilename>]')
             sys.exit(1)
         configFile = sys.argv[1]
-    configGlobal = dkimpy-milter.config._processConfigFile(filename = configFile)
+    milterconfig = dkimpy-milter.config._processConfigFile(filename = configFile)
 
-    Milter.factory = dkimMilter(configGlobal)
+    drop_privileges(milterconfig)
+    Milter.factory = dkimMilter(milterconfig)
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
-    miltername = config.miltername
-    socketname = config.socketname
+    miltername = 'dkimpy-filter'
+    socketname = milterconfig.get('Socket')
     sys.stdout.flush()
     Milter.runmilter(miltername,socketname,240)
