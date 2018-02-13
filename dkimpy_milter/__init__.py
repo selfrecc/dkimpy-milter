@@ -35,8 +35,8 @@ import StringIO
 import re
 from Milter.config import MilterConfigParser
 from Milter.utils import iniplist,parse_addr,parseaddr
-import dkim_milter.config as config
-from dkim_milter.util import drop_privileges
+import dkimpy_milter.config as config
+from dkimpy_milter.util import drop_privileges
 
 def read_config(list):
   "Return new config object."
@@ -76,7 +76,7 @@ class dkimMilter(Milter.Base):
   def log(self,*msg):
     self.conf.log.info('[%d] %s' % (self.id,' '.join([str(m) for m in msg])))
 
-  def __init__(self):
+  def __init__(self, milterconfig):
     self.mailfrom = None
     self.id = Milter.uniqueID()
     # we don't want config used to change during a connection
@@ -265,14 +265,14 @@ class dkimMilter(Milter.Base):
         self.log('DKIM: Fail (saved as %s)'%fname)
       return res
 
-if __name__ == "__main__":
+def main():
     configFile = '/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
         if sys.argv[1] in ( '-?', '--help', '-h' ):
             print('usage: dkimpy-milter [<configfilename>]')
             sys.exit(1)
         configFile = sys.argv[1]
-    milterconfig = dkimpy-milter.config._processConfigFile(filename = configFile)
+    milterconfig = config._processConfigFile(filename = configFile)
 
     drop_privileges(milterconfig)
     Milter.factory = dkimMilter(milterconfig)
@@ -281,3 +281,6 @@ if __name__ == "__main__":
     socketname = milterconfig.get('Socket')
     sys.stdout.flush()
     Milter.runmilter(miltername,socketname,240)
+
+if __name__ == "__main__":
+    main()

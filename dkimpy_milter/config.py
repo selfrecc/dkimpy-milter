@@ -53,23 +53,23 @@ class ConfigException(Exception):
 
 
 ####################################################################
-def processConfigFile(filename = None, config = None, useSyslog = 1,
+def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
         useStderr = 0):
     '''Load the specified config file, exit and log errors if it fails,
     otherwise return a config dictionary.'''
 
-    import policydspfsupp
-    if config == None: config = policydspfsupp.defaultConfigData
+    import config
+    if configdata == None: configdata = config.defaultConfigData
     if filename != None:
         try:
-            readConfigFile(filename, config)
+            readConfigFile(filename, configdata)
         except Exception, e:
             if useSyslog:
                 syslog.syslog(e.args[0])
             if useStderr:
                 sys.stderr.write('%s\n' % e.args[0])
             sys.exit(1)
-    return(config)
+    return(configdata)
 
 
 #################
