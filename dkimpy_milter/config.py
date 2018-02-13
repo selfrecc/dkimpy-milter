@@ -73,6 +73,7 @@ def processConfigFile(filename = None, config = None, useSyslog = 1,
 
 
 #################
+# FIXME - still uses string, refactor
 class ExceptHook:
    def __init__(self, useSyslog = 1, useStderr = 0):
       self.useSyslog = useSyslog
@@ -94,6 +95,18 @@ class ExceptHook:
 def setExceptHook():
     sys.excepthook = ExceptHook(useSyslog = 1, useStderr = 1)
 
+####################
+def find_boolean(item):
+        if type(item) == int:
+            item = str(item)
+        if item[0] in ["T", "t", "Y", "y", "1"]:
+            item = True
+        elif item[0] in ["F", "f", "N", "n", "0"]:
+            item = False
+        else:
+            raise dkim.ParameterError()
+        return item
+
 
 ###############################################################
 commentRx = re.compile(r'^(.*)#.*$')
@@ -108,9 +121,9 @@ def readConfigFile(path, configData = None, configGlobal = {}):
     if configData == None: configData = {}
     nameConversion = {
         'AuthservID' : 'str',
-        'Syslog' : 'str',
+        'Syslog' : 'bool',
         'SyslogFacility' : 'str',
-        'SyslogSuccess' : 'str',
+        'SyslogSuccess' : 'bool',
         'UMask' : 'str',
         'Mode' : 'str',
         'Socket' : 'str',
@@ -140,9 +153,9 @@ def readConfigFile(path, configData = None, configGlobal = {}):
         if not line: break
 
         #  parse line
-        line = string.strip(string.split(line, '#', 1)[0])
+        line = line.split('#', 1)[0].strip()
         if not line: continue
-        data = map(string.strip, string.split(line, '=', 1))
+        data = line.split()
         if len(data) != 2:
             if len(data) == 1:
                 if debugLevel >= 1:
@@ -162,7 +175,10 @@ def readConfigFile(path, configData = None, configGlobal = {}):
 
         if debugLevel >= 5: syslog.syslog('readConfigFile: Found entry "%s=%s"'
                 % ( name, value ))
-        configData[name] = conversion(value)
+        if value == bool:
+            configData[name] = find_boolean(name)
+        else:
+            configData[name] = conversion(value)
     fp.close()
     
     return(configData)
