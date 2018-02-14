@@ -141,16 +141,6 @@ class dkimMilter(Milter.Base):
   def eom(self):
     if not self.fp:
       return Milter.ACCEPT      # no message collected - so no eom processing
-    # lookup Author Domain Signing Policy, if any
-    adsp = { 'dkim': 'unknown' }
-    if self.author:
-      author_domain = self.author.split('@',1)[-1]
-      s = get_txt('_adsp._domainkey.'+author_domain)
-      if s:
-        m = parse_tag_value(s)
-        if m.has_key('dkim'):
-          self.log(s)
-          adsp = m
     # Remove existing Authentication-Results headers for our authserv_id
     for i,val in enumerate(self.arheaders,1):
       # FIXME: don't delete A-R headers from trusted MTAs
@@ -177,19 +167,6 @@ class dkimMilter(Milter.Base):
       )
     else:
       result = 'none'
-    # Check if local reject policy and ADSP indicate message should be rejected
-    lp = self.conf.reject	# local policy
-    if lp and result and result != 'pass':
-      p = adsp['dkim']		# author domain policy
-      if lp == p or p == 'discardable' and lp == 'all':
-        if result == 'none':
-          t = 'Missing'
-        else:
-          t = 'Invalid'
-        self.setreply('550','5.7.1',
-          '%s DKIM signature for %s with ADSP dkim=%s'%(t,self.author,p))
-        self.log('REJECT: %s DKIM signature'%t)
-        return Milter.REJECT
     if self.arresults:
       h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
         results=self.arresults)
