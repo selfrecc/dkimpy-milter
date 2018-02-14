@@ -54,7 +54,7 @@ class dkimMilter(Milter.Base):
     self.mailfrom = None
     self.id = Milter.uniqueID()
     # we don't want config used to change during a connection
-    self.conf = config
+    self.conf = milterconfig
     self.fp = None
 
   @Milter.noreply
@@ -65,8 +65,8 @@ class dkimMilter(Milter.Base):
     self.receiver = self.getsymval('j').strip()
     if hostaddr and len(hostaddr) > 0:
       ipaddr = hostaddr[0]
-      if iniplist(ipaddr,self.conf.internal_connect):
-        self.internal_connection = True
+      """if iniplist(ipaddr,self.conf.internal_connect): FIXME
+        self.internal_connection = True"""
     else: ipaddr = ''
     self.connectip = ipaddr
     if self.internal_connection:
@@ -150,11 +150,11 @@ class dkimMilter(Milter.Base):
         self.log('REMOVE: ',val)
     # Check or sign DKIM
     self.fp.seek(0)
-    if self.internal_connection:
+    if self.internal_connection or conf.get('Mode') == 's' or conf.get('Mode') == 'sv':
       txt = self.fp.read()
       self.sign_dkim(txt)
       result = None
-    elif self.has_dkim:
+    if self.has_dkim and (or conf.get('Mode') == 'v' or conf.get('Mode') == 'sv'):
       txt = self.fp.read()
       if self.check_dkim(txt):
         result = 'pass'
