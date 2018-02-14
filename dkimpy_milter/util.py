@@ -50,3 +50,27 @@ def drop_privileges(milterconfig):
 
     # Set umask
     old_umask = os.umask(milterconfig.get('UMask'))
+
+#################
+# FIXME - still uses string, refactor
+class ExceptHook:
+    def __init__(self, useSyslog = 1, useStderr = 0):
+        self.useSyslog = useSyslog
+        self.useStderr = useStderr
+
+    def __call__(self, etype, evalue, etb):
+        import traceback
+        import string
+        tb = traceback.format_exception(*(etype, evalue, etb))
+        tb = map(string.rstrip, tb)
+        tb = string.join(tb, '\n')
+        for line in string.split(tb, '\n'):
+            if self.useSyslog:
+                import syslog
+                syslog.syslog(line)
+
+
+####################
+def setExceptHook():
+    import sys
+    sys.excepthook = ExceptHook(useSyslog = 1, useStderr = 1)

@@ -27,17 +27,17 @@
 import syslog
 import os
 import sys
-import string
 import re
 import urllib
 import stat
+import dkim
 
 
 #  default values
 defaultConfigData = {
         'Syslog' : 'yes',
         'SyslogFacility' : 'mail',
-        'UMask' : '007',
+        'UMask' : 007,
         'Mode' : 'sv',
         'Socket' : 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
         'PidFile'  : '/var/run/dkimpy-milter/dkimpy-milter.pid',
@@ -51,7 +51,6 @@ class ConfigException(Exception):
     '''Exception raised when there's a configuration file error.'''
     pass
 
-
 ####################################################################
 def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
         useStderr = 0):
@@ -62,8 +61,9 @@ def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
     if configdata == None: configdata = config.defaultConfigData
     if filename != None:
         try:
-            readConfigFile(filename, configdata)
+            _readConfigFile(filename, configdata)
         except Exception, e:
+            raise
             if useSyslog:
                 syslog.syslog(e.args[0])
             if useStderr:
@@ -71,46 +71,22 @@ def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
             sys.exit(1)
     return(configdata)
 
-
-#################
-# FIXME - still uses string, refactor
-class ExceptHook:
-   def __init__(self, useSyslog = 1, useStderr = 0):
-      self.useSyslog = useSyslog
-      self.useStderr = useStderr
-   
-   def __call__(self, etype, evalue, etb):
-      import traceback
-      tb = traceback.format_exception(*(etype, evalue, etb))
-      tb = map(string.rstrip, tb)
-      tb = string.join(tb, '\n')
-      for line in string.split(tb, '\n'):
-         if self.useSyslog:
-            syslog.syslog(line)
-         if self.useStderr:
-            sys.stderr.write(line + '\n')
-
-
 ####################
-def setExceptHook():
-    sys.excepthook = ExceptHook(useSyslog = 1, useStderr = 1)
-
-####################
-def find_boolean(item):
-        if type(item) == int:
-            item = str(item)
-        if item[0] in ["T", "t", "Y", "y", "1"]:
-            item = True
-        elif item[0] in ["F", "f", "N", "n", "0"]:
-            item = False
-        else:
-            raise dkim.ParameterError()
-        return item
+def _find_boolean(item):
+    if type(item) == int:
+        item = str(item)
+    if item[0] in ["T", "t", "Y", "y", "1"]:
+        item = True
+    elif item[0] in ["F", "f", "N", "n", "0"]:
+        item = False
+    else:
+        raise dkim.ParameterError()
+    return item
 
 
 ###############################################################
 commentRx = re.compile(r'^(.*)#.*$')
-def readConfigFile(path, configData = None, configGlobal = {}):
+def _readConfigFile(path, configData = None, configGlobal = {}):
     '''Reads a configuration file from the specified path, merging it
     with the configuration data specified in configData.  Returns a
     dictionary of name/value pairs based on configData and the values
@@ -124,7 +100,7 @@ def readConfigFile(path, configData = None, configGlobal = {}):
         'Syslog' : 'bool',
         'SyslogFacility' : 'str',
         'SyslogSuccess' : 'bool',
-        'UMask' : 'str',
+        'UMask' : 'int',
         'Mode' : 'str',
         'Socket' : 'str',
         'PidFile'  : 'str',
@@ -175,9 +151,14 @@ def readConfigFile(path, configData = None, configGlobal = {}):
 
         if debugLevel >= 5: syslog.syslog('readConfigFile: Found entry "%s=%s"'
                 % ( name, value ))
-        if value == bool:
-            configData[name] = find_boolean(name)
+        if conversion == 'bool':
+            configData[name] = _find_boolean(value)
+        elif conversion == 'str':
+            configData[name] = str(value)
+        elif conversion == 'int':
+            configData[name] = int(value)
         else:
+            syslog.syslog(str('name: ' + name + ' value: ' + value + ' conversion: ' + conversion))
             configData[name] = conversion(value)
     fp.close()
     
