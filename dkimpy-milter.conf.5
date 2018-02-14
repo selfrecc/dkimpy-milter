@@ -228,6 +228,17 @@ This parameter is ignored if a
 is defined. [NOT IMPLEMENTED]
 
 .TP
+.I InternalHosts (dataset)
+Identifies a set internal hosts whose mail should be signed rather
+than verified.  Entries in this data set follow the same form as those of
+the
+.I PeerList
+option below.  If not specified, the default of "127.0.0.1" is applied.
+Naturally, providing a value here overrides the default, so if mail from
+127.0.0.1 should be signed, the list provided here should include that
+address explicitly. [PeerList NOT IMPLEMENTED]
+
+.TP
 .I KeyFile (string)
 Gives the location of a PEM-formatted private key to be used for RSA signing
 all messages.  Ignored if a
@@ -261,6 +272,23 @@ be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 [fooTable options NOT IMPLEMENTED]
+
+.TP
+.I PeerList (dataset)
+Identifies a set of "peers" that identifies clients whose connections
+should be accepted without processing by this filter.  The set
+should contain on each line a hostname, domain name (e.g. ".example.com"),
+IP address, an IPv6 address (including an IPv4 mapped address), or a
+CIDR-style IP specification (e.g. "192.168.1.0/24").  An entry beginning
+with a bang ("!") character means "not", allowing exclusions of specific
+hosts that are otherwise members of larger sets.  Host and domain names are 
+matched first, then the IP or IPv6 address depending on the connection 
+type.  More precise entries are preferred over less precise ones, i.e. 
+"192.168.1.1" will match before "!192.168.1.0/24".  The text form of IPv6 
+addresses will be forced to lowercase when queried (RFC5952), so the contents
+of this data set should also use lowercase.  The IP address portion of an
+entry may optionally contain square brackets; both forms (with and without)
+will be checked. [PeerList NOT IMPLEMENTED - included for reference only]
 
 .TP
 .I PidFile (string)
