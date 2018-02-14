@@ -246,9 +246,7 @@ def main():
             print('usage: dkimpy-milter [<configfilename>]')
             sys.exit(1)
         configFile = sys.argv[1]
-    print('configfile', configFile)
     milterconfig = config._processConfigFile(filename = configFile)
-    print('Socket', milterconfig.get('Socket'))
     drop_privileges(milterconfig)
     Milter.factory = dkimMilter(milterconfig)
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)

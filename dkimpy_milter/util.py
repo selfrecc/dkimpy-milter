@@ -21,7 +21,6 @@ def drop_privileges(milterconfig):
     import grp
     import pwd
     import syslog
-    import dkim
 
     if os.getuid() != 0:
         if milterconfig.get('Syslog'):
