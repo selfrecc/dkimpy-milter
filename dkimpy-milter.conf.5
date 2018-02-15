@@ -214,6 +214,12 @@ slash ("/") character, in which case the first will be applied to the
 header and the second to the body.
 
 .TP
+.I DiagnosticDirectory (string)
+Directory into which to write diagnostic reports when message verification
+fails on a message bearing a "z=" tag.  If not set (the default), these files
+are not generated.
+
+.TP
 .I Domain (dataset)
 A set of domains whose mail should be signed by this filter.  Mail from other
 domains will be verified rather than being signed.
