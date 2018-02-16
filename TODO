@@ -1,0 +1,81 @@
+TODO
+
+0.9.1 (Alpha)
+Sign/Verify rsa/ed25519
+Domain
+KeyFile
+Mode
+PidFile
+Selector
+Socket
+Syslog
+UMask
+UserID
+
+0.9.5 (Beta)
+AuthservID
+Canonicalization
+DiagnosticDirectory
+InternalHosts
+SyslogFacility 
+
+1.0.0
+No additional features planned
+
+Considered for near-term feature release
+
+AlwaysAddARHeader
+ChangeRootDirectory
+ClockDrift (requires dkimpy change)
+Diagnostics
+DNSTimeout (required dkmpy change)
+MacroList
+MilterDebug
+MinimumKeyBits
+PeerList
+SignatureAlgorithm
+SyslogSuccess
+
+Later
+
+BaseDirectory
+DontSignMailTo
+ExemptDomains
+ExternalIgnoreList
+FixCRLF
+KeepAuthResults
+KeepTemporaryFiles
+KeyTable
+LogResults
+LogWhy
+MaximumHeaders
+MaximumSignaturesToVerify
+MultipleSignatures
+MustBeSigned
+NoHeaderB 
+OmitHeaders
+On-BadSignature
+On-Default
+On-DNSError
+On-InternalError
+On-KeyNotFound
+On-NoSignature
+On-SignatureError
+OversignHeaders
+RemoveARAll
+RemoveARFrom
+RemoveOldSignatures 
+RequiredHeaders 
+RequireSafeKeys
+SignatureAlgorithm
+SignatureTTL
+SignHeaders
+SigningTable
+SoftwareHeader
+StrictHeaders
+SubDomains
+TemporaryDirectory
+TestDNSData
+TestPublicKeys
+
+Other OpenDKIM options not contemplated
