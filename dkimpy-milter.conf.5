@@ -310,7 +310,7 @@ containing the process ID.
 
 .TP
 .I Selector (string)
-Defines the name of the selector to be used when signing messages.
+Defines the name of the selector to be used when signing messages using RSA.
 See the
 .B DKIM
 specification for details.  Used only when signing with a single key;
@@ -320,6 +320,20 @@ parameter below for more information.
 
 This parameter is ignored if a
 .I KeyTable
+is defined. [KeyTable NOT IMPLEMENTED]
+
+.TP
+.I SelectorEd25519 (string)
+Defines the name of the selector to be used when signing messages using Ed25519.
+See the
+.B DKIM
+specification for details.  Used only when signing with a single key;
+see the
+.I SigningTable
+parameter below for more information.
+
+This parameter is ignored if a
+.I KeyTableEd25519
 is defined. [KeyTable NOT IMPLEMENTED]
 
 .TP

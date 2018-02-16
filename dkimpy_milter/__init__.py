@@ -176,6 +176,12 @@ class dkimMilter(Milter.Base):
                 canonicalize=('relaxed','simple'))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
+        if conf.get('KeyFileEd25519'):
+            d = dkim.DKIM(txt)
+            h = d.sign(conf.get('SelectorEd25519'),conf.get('Domain'),conf.get('KeyFileEd25519'),
+                    canonicalize=('relaxed','simple'))
+            name,val = h.split(': ',1)
+            self.addheader(name,val.strip().replace('\r\n','\n'),0)
       except dkim.DKIMException as x:
           if milterconfig.get('Syslog'):
               syslog.syslog('DKIM: %s'%x)

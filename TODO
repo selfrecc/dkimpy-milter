@@ -1,11 +1,11 @@
 TODO
 
 0.9.1 (Alpha)
-Sign rsa/ed25519
+Sign rsa/ed25519    implemented
 Verify rsa/ed25519  implemented
 Domain              implemented
 KeyFile             implemented
-KeyFileEd25519
+KeyFileEd25519      implemented
 Mode                implemented
 PidFile             implemented     verified
 Selector            implemented
@@ -51,6 +51,7 @@ FixCRLF
 KeepAuthResults
 KeepTemporaryFiles
 KeyTable
+KeytableEd25519
 LogResults
 LogWhy
 MaximumHeaders
