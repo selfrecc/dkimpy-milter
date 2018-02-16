@@ -1,16 +1,18 @@
 TODO
 
 0.9.1 (Alpha)
-Sign/Verify rsa/ed25519
-Domain
-KeyFile
-Mode
+Sign rsa/ed25519
+Verify rsa/ed25519  implemented
+Domain              implemented
+KeyFile             implemented
+KeyFileEd25519
+Mode                implemented
 PidFile
-Selector
-Socket
+Selector            implemented
+Socket              implemented     verified
 Syslog
 UMask
-UserID
+UserID              implemented     verified
 
 0.9.5 (Beta)
 AuthservID
