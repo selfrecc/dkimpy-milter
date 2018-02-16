@@ -17,9 +17,11 @@ UserID              implemented     verified
 0.9.5 (Beta)
 AuthservID
 Canonicalization
+Diagnostics
 DiagnosticDirectory
 InternalHosts
-SyslogFacility 
+SyslogFacility
+SyslogSuccess
 
 1.0.0
 No additional features planned
@@ -29,14 +31,12 @@ Considered for near-term feature release
 AlwaysAddARHeader
 ChangeRootDirectory
 ClockDrift (requires dkimpy change)
-Diagnostics
-DNSTimeout (required dkmpy change)
+DNSTimeout (requires dkmpy change)
 MacroList
 MilterDebug
 MinimumKeyBits
 PeerList
 SignatureAlgorithm
-SyslogSuccess
 
 Later
 
