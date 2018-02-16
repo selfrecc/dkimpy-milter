@@ -72,3 +72,23 @@ class ExceptHook:
 def setExceptHook():
     import sys
     sys.excepthook = ExceptHook(useSyslog = 1, useStderr = 1)
+
+####################
+def write_pid(milterconfig):
+    """Write PID in pidfile.  Will not overwrite an existing file."""
+    import os
+    import syslog
+    if not os.path.isfile(milterconfig.get('PidFile')):
+        pid = str(os.getpid())
+        try:
+            f = open(milterconfig.get('PidFile'), 'w')
+        except IOError as e:
+            if milterconfig.get('Syslog'):
+                syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'.format(milterconfig.get('PidFile'), e))
+            raise
+        f.write(pid)
+        f.close()
+    else:
+        if milterconfig.get('Syslog'):
+            syslog.syslog('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
+        raise RuntimeError('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))

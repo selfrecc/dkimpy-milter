@@ -7,7 +7,7 @@ Domain              implemented
 KeyFile             implemented
 KeyFileEd25519
 Mode                implemented
-PidFile
+PidFile             implemented     verified
 Selector            implemented
 Socket              implemented     verified
 Syslog              implemented     partly tested
@@ -17,6 +17,7 @@ UserID              implemented     verified
 0.9.5 (Beta)
 dkimpy-milter.8
 dkimpy-milter.service
+remove PidFile on stop
 AuthservID
 Canonicalization
 Diagnostics

@@ -37,6 +37,7 @@ from Milter.utils import iniplist,parse_addr,parseaddr
 import dkimpy_milter.config as config
 from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
+from dkimpy_milter.util import write_pid
 
 FWS = re.compile(r'\r?\n[ \t]+')
   
@@ -235,6 +236,7 @@ def main():
     if milterconfig.get('Syslog'):
         syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
         setExceptHook()
+    write_pid(milterconfig)
     drop_privileges(milterconfig)
     Milter.factory = dkimMilter(milterconfig)
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
