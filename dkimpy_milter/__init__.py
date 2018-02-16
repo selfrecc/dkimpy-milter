@@ -28,8 +28,6 @@ import dkim
 from dkim.dnsplug import get_txt
 from dkim.util import parse_tag_value
 import authres
-import logging
-import logging.config
 import os
 import tempfile
 import StringIO
@@ -41,14 +39,9 @@ from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
 
 FWS = re.compile(r'\r?\n[ \t]+')
-syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
-setExceptHook()
   
 class dkimMilter(Milter.Base):
   "Milter to check and sign DKIM.  Each connection gets its own instance."
-
-  def log(self,*msg):
-    self.conf.log.info('[%d] %s' % (self.id,' '.join([str(m) for m in msg])))
 
   def __init__(self, milterconfig):
     self.mailfrom = None
@@ -64,16 +57,17 @@ class dkimMilter(Milter.Base):
     # sometimes people put extra space in sendmail config, so we strip
     self.receiver = self.getsymval('j').strip()
     if hostaddr and len(hostaddr) > 0:
-      ipaddr = hostaddr[0]
-      """if iniplist(ipaddr,self.conf.internal_connect): FIXME
-        self.internal_connection = True"""
+        ipaddr = hostaddr[0]
+        """if iniplist(ipaddr,self.conf.internal_connect): FIXME
+            self.internal_connection = True"""
     else: ipaddr = ''
     self.connectip = ipaddr
     if self.internal_connection:
-      connecttype = 'INTERNAL'
+        connecttype = 'INTERNAL'
     else:
-      connecttype = 'EXTERNAL'
-    self.log("connect from %s at %s %s" % (hostname,hostaddr,connecttype))
+        connecttype = 'EXTERNAL'
+    if milterconfig.get('Syslog'):
+        syslog.syslog("connect from %s at %s %s" % (hostname,hostaddr,connecttype))
     return Milter.CONTINUE
 
   # multiple messages can be received on a single connection
@@ -81,7 +75,8 @@ class dkimMilter(Milter.Base):
   # of each message.
   @Milter.noreply
   def envfrom(self,f,*str):
-    self.log("mail from",f,str)
+    if milterconfig.get('Syslog'):  
+        syslog.syslog("mail from",f,str)
     self.fp = StringIO.StringIO()
     self.mailfrom = f
     t = parse_addr(f)
@@ -98,9 +93,10 @@ class dkimMilter(Milter.Base):
       self.internal_connection = True
       auth_type = self.getsymval('{auth_type}')
       ssl_bits =  self.getsymval('{cipher_bits}')
-      self.log(
-        "SMTP AUTH:",self.user,"sslbits =",ssl_bits, auth_type,
-        "ssf =",self.getsymval('{auth_ssf}'), "INTERNAL"
+      if milterconfig.get('Syslog'):
+          syslog.syslog(
+              "SMTP AUTH:",self.user,"sslbits =",ssl_bits, auth_type,
+              "ssf =",self.getsymval('{auth_ssf}'), "INTERNAL"
       )
       # Detailed authorization policy is configured in the access file below.
       self.arresults.append(
@@ -113,15 +109,17 @@ class dkimMilter(Milter.Base):
   def header(self,name,val):
     lname = name.lower()
     if lname == 'dkim-signature':
-      self.log("%s: %s" % (name,val))
-      self.has_dkim += 1
+        if milterconfig.get('Syslog'):
+          syslog.syslog("%s: %s" % (name,val))
+        self.has_dkim += 1
     if lname == 'from':
-      fname,self.author = parseaddr(val)
-      self.log("%s: %s" % (name,val))
+        fname,self.author = parseaddr(val)
+        if milterconfig.get('Syslog'):
+            syslog.syslog("%s: %s" % (name,val))
     elif lname == 'authentication-results':
-      self.arheaders.append(val)
+        self.arheaders.append(val)
     if self.fp:
-      self.fp.write("%s: %s\n" % (name,val))
+        self.fp.write("%s: %s\n" % (name,val))
     return Milter.CONTINUE
 
   @Milter.noreply
@@ -147,7 +145,8 @@ class dkimMilter(Milter.Base):
       ar = authres.AuthenticationResultsHeader.parse_value(FWS.sub('',val))
       if ar.authserv_id == self.receiver:
         self.chgheader('authentication-results',i,'')
-        self.log('REMOVE: ',val)
+        if milterconfig.get('Syslog'):
+            syslog.syslog('REMOVE: ',val)
     # Check or sign DKIM
     self.fp.seek(0)
     if self.internal_connection or conf.get('Mode') == 's' or conf.get('Mode') == 'sv':
@@ -160,30 +159,33 @@ class dkimMilter(Milter.Base):
     else:
       result = 'none'
     if self.arresults:
-      h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
-        results=self.arresults)
-      self.log(h)
-      name,val = str(h).split(': ',1)
-      self.addheader(name,val,0)
+        h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
+            results=self.arresults)
+        if milterconfig.get('Syslog'):
+            syslog.syslog(h)
+        name,val = str(h).split(': ',1)
+        self.addheader(name,val,0)
     return Milter.CONTINUE
 
   def sign_dkim(self,txt):
       conf = self.conf
       try:
-        d = dkim.DKIM(txt,logger=conf.log)
-        h = d.sign(conf.selector,conf.domain,conf.key,
+        d = dkim.DKIM(txt)
+        h = d.sign(conf.get('Selector'),conf.get('Domain'),conf.get('KeyFile'),
                 canonicalize=('relaxed','simple'))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
       except dkim.DKIMException as x:
-        self.log('DKIM: %s'%x)
+          if milterconfig.get('Syslog'):
+              syslog.syslog('DKIM: %s'%x)
       except Exception as x:
-        conf.log.error("sign_dkim: %s",x,exc_info=True)
+          if milterconfig.get('Syslog'):
+              syslog.syslog("sign_dkim: %s",x,exc_info=True)
       
   def check_dkim(self,txt):
       res = False
       conf = self.conf
-      d = dkim.DKIM(txt,logger=conf.log)
+      d = dkim.DKIM(txt)
       for y in range(self.has_dkim): # Verify _ALL_ the signatures
           try:
             res = d.verify(idx=y)
@@ -193,20 +195,24 @@ class dkimMilter(Milter.Base):
               self.dkim_comment = 'Bad %d bit signature.' % d.keysize
           except dkim.DKIMException as x:
             self.dkim_comment = str(x)
-            #self.log('DKIM: %s'%x)
+            if milterconfig.get('Syslog'):
+                syslog.syslog('DKIM: %s'%x)
           except Exception as x:
             self.dkim_comment = str(x)
-            conf.log.error("check_dkim: %s",x,exc_info=True)
+            if milterconfig.get('Syslog'):
+                syslog.syslog("check_dkim: %s",x,exc_info=True)
           self.header_i = d.signature_fields.get(b'i')
           self.header_d = d.signature_fields.get(b'd')
           if res:
-            #self.log('DKIM: Pass (%s)'%d.domain)
-            self.dkim_domain = d.domain
+              if milterconfig.get('Syslog'):
+                  syslog.syslog('DKIM: Pass (%s)'%d.domain)
+              self.dkim_domain = d.domain
           else:
             fd,fname = tempfile.mkstemp(".dkim")
             with os.fdopen(fd,"w+b") as fp:
-              fp.write(txt)
-            self.log('DKIM: Fail (saved as %s)'%fname)
+                fp.write(txt)
+            if milterconfig.get('Syslog'):
+                syslog.syslog('DKIM: Fail (saved as %s)'%fname)
           if res:
             result = 'pass'
           else:
@@ -226,6 +232,9 @@ def main():
             sys.exit(1)
         configFile = sys.argv[1]
     milterconfig = config._processConfigFile(filename = configFile)
+    if milterconfig.get('Syslog'):
+        syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
+        setExceptHook()
     drop_privileges(milterconfig)
     Milter.factory = dkimMilter(milterconfig)
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)

@@ -10,7 +10,7 @@ Mode                implemented
 PidFile
 Selector            implemented
 Socket              implemented     verified
-Syslog
+Syslog              implemented     partly tested
 UMask
 UserID              implemented     verified
 
