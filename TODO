@@ -15,6 +15,8 @@ UMask
 UserID              implemented     verified
 
 0.9.5 (Beta)
+dkimpy-milter.8
+dkimpy-milter.service
 AuthservID
 Canonicalization
 Diagnostics
