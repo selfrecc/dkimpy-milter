@@ -22,7 +22,7 @@ description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for P
 
 setup(
     name='dkimpy-milter',
-    version='0',
+    version='0.9.1',
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
@@ -47,8 +47,8 @@ setup(
         ],
     },
     package_data={'dkimpy_milter': [
-        'templates/*',
-        'data/*',
+        'etc/*',
+        'man/*',
     ]},
 
     install_requires = ['dkimpy', 'pymilter', 'authres>=1.0.2'],
