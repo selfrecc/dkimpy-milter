@@ -18,12 +18,13 @@
 
 from setuptools import setup
 import os
+import dkimpy_milter
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
 
 setup(
     name='dkimpy-milter',
-    version='0.9.1',
+    version=dkimpy_milter.__version__,
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
@@ -51,6 +52,6 @@ setup(
     data_files=[(os.path.join('share', 'man', 'man5'),
         ['man/dkimpy-milter.conf.5']), ('etc', ['etc/dkimpy-milter.conf'])],
 
-    install_requires = ['dkimpy', 'pymilter', 'authres>=1.0.2'],
+    install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.0.2', 'nacl'],
     zip_safe = False,
 )

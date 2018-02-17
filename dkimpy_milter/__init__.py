@@ -40,6 +40,7 @@ from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import read_keyfile
 
+__version__ = "0.9.2"
 FWS = re.compile(r'\r?\n[ \t]+')
   
 class dkimMilter(Milter.Base):
