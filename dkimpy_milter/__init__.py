@@ -45,13 +45,13 @@ FWS = re.compile(r'\r?\n[ \t]+')
 class dkimMilter(Milter.Base):
   "Milter to check and sign DKIM.  Each connection gets its own instance."
 
-  def __init__(self, milterconfig, privatersa=False, privateed25519=False):
+  def __init__(self):
     self.mailfrom = None
     self.id = Milter.uniqueID()
     # we don't want config used to change during a connection
     self.conf = milterconfig
-    self.privatersa = privatersa
-    self.privateed25519 = privateed25519
+    self.privatersa = privateRSA
+    self.privateed25519 = privateEd25519
     self.fp = None
 
   @Milter.noreply
@@ -71,7 +71,7 @@ class dkimMilter(Milter.Base):
     else:
         connecttype = 'EXTERNAL'
     if milterconfig.get('Syslog'):
-        syslog.syslog("connect from %s at %s %s" % (hostname,hostaddr,connecttype))
+        syslog.syslog("connect from {0} at {1} {2}".format(hostname,hostaddr,connecttype))
     return Milter.CONTINUE
 
   # multiple messages can be received on a single connection
@@ -80,7 +80,7 @@ class dkimMilter(Milter.Base):
   @Milter.noreply
   def envfrom(self,f,*str):
     if milterconfig.get('Syslog'):  
-        syslog.syslog("mail from",f,str)
+        syslog.syslog("mail from: {0} {1}".format(f,str))
     self.fp = StringIO.StringIO()
     self.mailfrom = f
     t = parse_addr(f)
@@ -114,12 +114,12 @@ class dkimMilter(Milter.Base):
     lname = name.lower()
     if lname == 'dkim-signature':
         if milterconfig.get('Syslog'):
-          syslog.syslog("%s: %s" % (name,val))
+          syslog.syslog("{0}: {1}".format(name,val))
         self.has_dkim += 1
     if lname == 'from':
         fname,self.author = parseaddr(val)
         if milterconfig.get('Syslog'):
-            syslog.syslog("%s: %s" % (name,val))
+            syslog.syslog("{0}: {1}".format(name,val))
     elif lname == 'authentication-results':
         self.arheaders.append(val)
     if self.fp:
@@ -150,14 +150,14 @@ class dkimMilter(Milter.Base):
       if ar.authserv_id == self.receiver:
         self.chgheader('authentication-results',i,'')
         if milterconfig.get('Syslog'):
-            syslog.syslog('REMOVE: ',val)
+            syslog.syslog('REMOVE: {0}'.format(val))
     # Check or sign DKIM
     self.fp.seek(0)
-    if self.internal_connection or conf.get('Mode') == 's' or conf.get('Mode') == 'sv':
+    if self.internal_connection or milterconfig.get('Mode') == 's' or milterconfig.get('Mode') == 'sv':
       txt = self.fp.read()
       self.sign_dkim(txt)
       result = None
-    if self.has_dkim and (conf.get('Mode') == 'v' or conf.get('Mode') == 'sv'):
+    if self.has_dkim and (milterconfig.get('Mode') == 'v' or milterconfig.get('Mode') == 'sv'):
       txt = self.fp.read()
       self.check_dkim(txt)
     else:
@@ -175,22 +175,23 @@ class dkimMilter(Milter.Base):
       conf = self.conf
       try:
         d = dkim.DKIM(txt)
-        h = d.sign(conf.get('Selector'),conf.get('Domain'), self.privatersa,
+        h = d.sign(milterconfig.get('Selector'),milterconfig.get('Domain'), privateRSA,
                 canonicalize=('relaxed','simple'))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
-        if self.privateed25519:
+        if privateEd25519:
             d = dkim.DKIM(txt)
-            h = d.sign(conf.get('SelectorEd25519'),conf.get('Domain'), self.privateed25519,
-                    canonicalize=('relaxed','simple'))
+            h = d.sign(milterconfig.get('SelectorEd25519'),milterconfig.get('Domain'), privateEd25519,
+                    canonicalize=('relaxed','simple'), signature_algorithm='ed25519-sha256')
             name,val = h.split(': ',1)
             self.addheader(name,val.strip().replace('\r\n','\n'),0)
       except dkim.DKIMException as x:
           if milterconfig.get('Syslog'):
-              syslog.syslog('DKIM: %s'%x)
+              syslog.syslog('DKIM: {0}'.format(x))
       except Exception as x:
           if milterconfig.get('Syslog'):
-              syslog.syslog("sign_dkim: %s",x,exc_info=True)
+              syslog.syslog("sign_dkim: {0}".format(x))
+          raise
       
   def check_dkim(self,txt):
       res = False
@@ -206,23 +207,23 @@ class dkimMilter(Milter.Base):
           except dkim.DKIMException as x:
             self.dkim_comment = str(x)
             if milterconfig.get('Syslog'):
-                syslog.syslog('DKIM: %s'%x)
+                syslog.syslog('DKIM: {0}'.format(x))
           except Exception as x:
             self.dkim_comment = str(x)
             if milterconfig.get('Syslog'):
-                syslog.syslog("check_dkim: %s",x,exc_info=True)
+                syslog.syslog("check_dkim: {0}".format(x))
           self.header_i = d.signature_fields.get(b'i')
           self.header_d = d.signature_fields.get(b'd')
           if res:
               if milterconfig.get('Syslog'):
-                  syslog.syslog('DKIM: Pass (%s)'%d.domain)
+                  syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
               self.dkim_domain = d.domain
           else:
             fd,fname = tempfile.mkstemp(".dkim")
             with os.fdopen(fd,"w+b") as fp:
                 fp.write(txt)
             if milterconfig.get('Syslog'):
-                syslog.syslog('DKIM: Fail (saved as %s)'%fname)
+                syslog.syslog('DKIM: Fail (saved as {0})'.format(fname))
           if res:
             result = 'pass'
           else:
@@ -235,6 +236,10 @@ class dkimMilter(Milter.Base):
       return
 
 def main():
+    # Ugh, but there's no easy way around this.
+    global milterconfig
+    global privateRSA
+    global privateEd25519
     privateRSA = False
     privateEd25519 = False
     configFile = '/etc/dkimpy-milter.conf'
@@ -255,7 +260,7 @@ def main():
     drop_privileges(milterconfig)
     if milterconfig.get('Syslog'):
         syslog.syslog('dkimpy-milter started.  user: {0}'.format(milterconfig.get('UserID')))
-    Milter.factory = dkimMilter(milterconfig, privatersa=privateRSA, privateed25519=privateEd25519)
+    Milter.factory = dkimMilter
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')

@@ -1,14 +1,14 @@
 TODO
 
 0.9.1 (Alpha)
-Sign rsa/ed25519    implemented
+Sign rsa/ed25519    implemented     verified
 Verify rsa/ed25519  implemented
-Domain              implemented
-KeyFile             implemented
-KeyFileEd25519      implemented
+Domain              implemented     verified
+KeyFile             implemented     verified
+KeyFileEd25519      implemented     verified
 Mode                implemented
 PidFile             implemented     verified
-Selector            implemented
+Selector            implemented     verified
 Socket              implemented     verified
 Syslog              implemented     partly tested
 UMask               implemented

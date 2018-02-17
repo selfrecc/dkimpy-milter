@@ -107,9 +107,11 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'UserID' : 'str',
         'Domain' : 'str',
         'KeyFile' : 'str',
-        'KeyFileEd25119' : 'str',
+        'KeyFileEd25519' : 'str',
         'Selector' : 'str',
-        'Canonicalization' : 'str'
+        'SelectorEd25519': 'str',
+        'Canonicalization' : 'str',
+        'CanonicalizationEd25519' : 'str'
             }
 
     #  check to see if it's a file

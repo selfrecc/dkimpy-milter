@@ -103,10 +103,13 @@ def read_keyfile(milterconfig, keytype):
         keyfile = milterconfig.get('KeyFileEd25519')
     try:
         f = open(keyfile, 'r')
-        key = f.readlines
+        keylist = f.readlines()
     except IOError as e:
         if milterconfig.get('Syslog'):
             syslog.syslog('Unable to read keyfile {0}.  IOError: {1}'.format(keyfile, e))
         raise
     f.close()
+    key = ''
+    for line in keylist:
+        key += line
     return key
