@@ -17,6 +17,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA."""
 
 from setuptools import setup
+import os
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
 
@@ -46,12 +47,10 @@ setup(
             'dkimpy-milter = dkimpy_milter.__init__:main',
         ],
     },
-    package_data={'dkimpy_milter': [
-        'etc/*',
-        'man/*',
-    ]},
+    include_package_data=True,
+    data_files=[(os.path.join('share', 'man', 'man5'),
+        ['man/dkimpy-milter.conf.5']), ('etc', ['etc/dkimpy-milter.conf'])],
 
     install_requires = ['dkimpy', 'pymilter', 'authres>=1.0.2'],
-
     zip_safe = False,
 )
