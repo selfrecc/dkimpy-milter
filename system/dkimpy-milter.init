@@ -1,0 +1,133 @@
+#! /bin/sh
+#
+# skeleton	example file to build /etc/init.d/ scripts.
+#		This file should be used to construct scripts for /etc/init.d.
+#
+#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
+#		Modified for Debian 
+#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
+#
+# Version:	@(#)skeleton  1.9  26-Feb-2001  miquels@cistron.nl
+#
+### BEGIN INIT INFO
+# Provides:          dkim-milter dkim-milter-python dkimpy-milter
+# Required-Start:    $remote_fs $syslog $network $time
+# Required-Stop:     $remote_fs $syslog $network
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: dkimpy-milter
+# Description:       Python DKIM Milter for Sendmail and Postfix
+### END INIT INFO
+prefix="/usr"
+exec_prefix=${prefix}
+sysconfdir="/etc/dkimpy-milter"
+bindir="${exec_prefix}/bin/"
+RUNDIR="/var/run/dkimpy-milter"
+DAEMON=${bindir}/dkimpy-milter
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:
+NAME=dkimpy-milter
+DESC="Python DKIM Milter"
+USER=dkimpy-milter
+GROUP=dkimpy-milter
+SOCKET=$RUNDIR/dkimpy-milter.pid
+
+test -x $DAEMON || exit 0
+
+# Include dkimpy-python defaults if available
+# Typically not used
+if [ -f /etc/default/dkimpy-milter ] ; then
+	. /etc/default/dkimpy-milter
+fi
+
+set -e
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	# Create the run directory if it doesn't exist
+	if [ ! -d $RUNDIR ]; then
+		install -o $USER -g $GROUP -m 755 -d $RUNDIR || return 2
+	fi
+
+	# Clean up stale sockets
+	if [ -f $RUNDIR/$NAME.pid ]; then
+		pid=`cat $RUNDIR/$NAME.pid`
+		if ! ps -C $DAEMON -s $pid >/dev/null; then
+			rm $RUNDIR/$NAME.pid
+			# UNIX sockets may be specified with or without the
+			# local: prefix; handle both
+			t=`echo $SOCKET | cut -d: -f1`
+			s=`echo $SOCKET | cut -d: -f2`
+			if [ -e $s -a -S $s ]; then
+				if [ "$t" = "$s" -o "$t" = "local" ]; then
+					rm $s
+				fi
+			fi
+		fi
+	fi
+
+	start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
+		$RUNDIR/$NAME.pid --exec $DAEMON
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	if [ -f $RUNDIR/$NAME.pid ]; then
+		start-stop-daemon --stop --pidfile $RUNDIR/$NAME.pid 
+		rm $RUNDIR/$NAME.pid
+		#echo $SOCKET
+		if [ -e $SOCKET ]; then
+			rm $SOCKET
+		fi
+	fi
+	echo "$NAME."
+	;;
+  force-reload)
+        echo -n "Force reloading $DESC: "
+        if [ -f $RUNDIR/$NAME.pid ]; then
+                start-stop-daemon --stop --pidfile $RUNDIR/$NAME.pid
+                rm $RUNDIR/$NAME.pid
+                #echo $SOCKET
+                if [ -e $SOCKET ]; then
+                        rm $SOCKET
+                fi
+        fi
+        sleep 1
+        start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
+                $RUNDIR/$NAME.pid --exec $DAEMON
+        echo "$NAME."
+        ;;
+  restart)
+        echo "Restarting $DESC: "
+        echo -n "Stopping $DESC: "
+        if [ -f $RUNDIR/$NAME.pid ]; then
+                start-stop-daemon --stop --pidfile $RUNDIR/$NAME.pid
+                rm $RUNDIR/$NAME.pid
+                #echo $SOCKET
+                if [ -e $SOCKET ]; then
+                        rm $SOCKET
+                fi
+        fi
+        echo "$NAME."
+	sleep 1
+        echo -n "Starting $DESC: "
+        start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
+                $RUNDIR/$NAME.pid --exec $DAEMON
+        echo "$NAME."
+	;;
+  status)
+        status_of_proc -p /var/run/dkimpy-milter/dkimpy-milter.pid /usr/bin/dkimpy-milter dkimpy-milter
+        ;;
+
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|force-reload|restart|}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

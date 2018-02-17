@@ -15,10 +15,13 @@ UMask               implemented
 UserID              implemented     verified
 DKIM 'a' in AR      implemented     verified
 
+0.9.2 (Alpha)
+dkimpy-milter.service  implemented      verified
+sysv init              implemented
+remove PidFile on stop implemented      verified
+
 0.9.5 (Beta)
 dkimpy-milter.8
-dkimpy-milter.service
-remove PidFile on stop
 AuthservID
 Canonicalization
 Diagnostics

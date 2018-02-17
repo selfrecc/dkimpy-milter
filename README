@@ -13,6 +13,12 @@ default is a feature:
 
 python setup.py install --single-version-externally-managed --record=/dev/null
 
+Both a systemd unit file and a sysv init file are provided.  Both make
+assumptions about defaults being used, e.g. if a non-standard pidfile name is
+used, they will need to be updated.  The sysv init file is Debian specific and
+untested, since the developers are not using sysv init.  Feedback/patches
+welcome.
+
 WARNING: This is an alpha grade release to support interoperability testing with
 Ed25519 signatures and basic functionality.  It is known to be incomplete and
 not suitable for general use.
