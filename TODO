@@ -2,17 +2,18 @@ TODO
 
 0.9.1 (Alpha)
 Sign rsa/ed25519    implemented     verified
-Verify rsa/ed25519  implemented
+Verify rsa/ed25519  implemented     verified
 Domain              implemented     verified
 KeyFile             implemented     verified
 KeyFileEd25519      implemented     verified
-Mode                implemented
+Mode                implemented     verified
 PidFile             implemented     verified
 Selector            implemented     verified
 Socket              implemented     verified
-Syslog              implemented     partly tested
+Syslog              implemented     verified
 UMask               implemented
 UserID              implemented     verified
+DKIM 'a' in AR      implemented     verified
 
 0.9.5 (Beta)
 dkimpy-milter.8
