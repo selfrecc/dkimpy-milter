@@ -11,7 +11,7 @@ PidFile             implemented     verified
 Selector            implemented
 Socket              implemented     verified
 Syslog              implemented     partly tested
-UMask
+UMask               implemented
 UserID              implemented     verified
 
 0.9.5 (Beta)
