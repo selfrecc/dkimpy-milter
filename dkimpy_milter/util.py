@@ -92,3 +92,21 @@ def write_pid(milterconfig):
         if milterconfig.get('Syslog'):
             syslog.syslog('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
         raise RuntimeError('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
+
+####################
+def read_keyfile(milterconfig, keytype):
+    """Read private key from file."""
+    import syslog
+    if keytype == "RSA":
+        keyfile = milterconfig.get('KeyFile')
+    if keytype == "Ed25519":
+        keyfile = milterconfig.get('KeyFileEd25519')
+    try:
+        f = open(keyfile, 'r')
+        key = f.readlines
+    except IOError as e:
+        if milterconfig.get('Syslog'):
+            syslog.syslog('Unable to read keyfile {0}.  IOError: {1}'.format(keyfile, e))
+        raise
+    f.close()
+    return key

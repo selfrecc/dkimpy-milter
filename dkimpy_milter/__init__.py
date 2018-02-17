@@ -38,17 +38,20 @@ import dkimpy_milter.config as config
 from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
+from dkimpy_milter.util import read_keyfile
 
 FWS = re.compile(r'\r?\n[ \t]+')
   
 class dkimMilter(Milter.Base):
   "Milter to check and sign DKIM.  Each connection gets its own instance."
 
-  def __init__(self, milterconfig):
+  def __init__(self, milterconfig, privatersa=False, privateed25519=False):
     self.mailfrom = None
     self.id = Milter.uniqueID()
     # we don't want config used to change during a connection
     self.conf = milterconfig
+    self.privatersa = privatersa
+    self.privateed25519 = privateed25519
     self.fp = None
 
   @Milter.noreply
@@ -172,13 +175,13 @@ class dkimMilter(Milter.Base):
       conf = self.conf
       try:
         d = dkim.DKIM(txt)
-        h = d.sign(conf.get('Selector'),conf.get('Domain'),conf.get('KeyFile'),
+        h = d.sign(conf.get('Selector'),conf.get('Domain'), self.privatersa,
                 canonicalize=('relaxed','simple'))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
-        if conf.get('KeyFileEd25519'):
+        if self.privateed25519:
             d = dkim.DKIM(txt)
-            h = d.sign(conf.get('SelectorEd25519'),conf.get('Domain'),conf.get('KeyFileEd25519'),
+            h = d.sign(conf.get('SelectorEd25519'),conf.get('Domain'), self.privateed25519,
                     canonicalize=('relaxed','simple'))
             name,val = h.split(': ',1)
             self.addheader(name,val.strip().replace('\r\n','\n'),0)
@@ -232,6 +235,8 @@ class dkimMilter(Milter.Base):
       return
 
 def main():
+    privateRSA = False
+    privateEd25519 = False
     configFile = '/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
         if sys.argv[1] in ( '-?', '--help', '-h' ):
@@ -243,8 +248,14 @@ def main():
         syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
         setExceptHook()
     write_pid(milterconfig)
+    if milterconfig.get('KeyFile'):
+        privateRSA = read_keyfile(milterconfig, 'RSA')
+    if milterconfig.get('KeyFileEd25519'):
+        privateEd25519 = read_keyfile(milterconfig, 'Ed25519')
     drop_privileges(milterconfig)
-    Milter.factory = dkimMilter(milterconfig)
+    if milterconfig.get('Syslog'):
+        syslog.syslog('dkimpy-milter started.  user: {0}'.format(milterconfig.get('UserID')))
+    Milter.factory = dkimMilter(milterconfig, privatersa=privateRSA, privateed25519=privateEd25519)
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
