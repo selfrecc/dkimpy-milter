@@ -1,0 +1,8 @@
+
+0.9.1 UNRELEASED
+ - DKIM signing and verification using both RSA and Ed25519
+ - The following configuration options are supported (same definition as
+   OpenDKIM): Domain, KeyFile, KeyFileEd25519, Mode, PidFile, Selector,
+   Socket, Syslog, UMask, and UserID (see dkimpy-milter.conf.5)
+ - This is an Alpha grade release and while the implemented features work, it
+   is nowhere near being a complete package
