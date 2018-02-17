@@ -1,5 +1,6 @@
 include etc/*
 include man/*
+include system/*
 include Authors.conf
 include TODO
 include README

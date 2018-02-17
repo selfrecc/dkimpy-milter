@@ -1,0 +1,11 @@
+[Unit]
+Description=DKIMpy Milter
+After=syslog.target network.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/dkimpy-milter/dkimpy-milter.pid
+ExecStart=/usr/local/bin/dkimpy-milter 
+
+[Install]
+WantedBy=multi-user.target

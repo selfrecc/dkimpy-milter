@@ -50,7 +50,8 @@ setup(
     },
     include_package_data=True,
     data_files=[(os.path.join('share', 'man', 'man5'),
-        ['man/dkimpy-milter.conf.5']), ('etc', ['etc/dkimpy-milter.conf'])],
+        ['man/dkimpy-milter.conf.5']), ('etc', ['etc/dkimpy-milter.conf']),
+        (os.path.join('/lib', 'systemd', 'system'), ['system/dkimpy-milter.service'])],
 
     install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.0.2', 'nacl'],
     zip_safe = False,
