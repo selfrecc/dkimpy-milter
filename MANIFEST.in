@@ -1,0 +1,8 @@
+include etc/*
+include man/*
+include Authors.conf
+include TODO
+include README
+include COPYING
+include CHANGES
+include MANIFEST.in
