@@ -5,3 +5,7 @@ reports of success/failure with Sendmail and patches are welcom.
 The configuration file is designed to be compatible with OpenDKIM, but only
 a subset of OpenDKIM options are supported.  If an unsupported option is
 specified, an error will be raised.
+
+WARNING: This is an alpha grade release to support interoperability testing with
+Ed25519 signatures and basic functionality.  It is known to be incomplete and
+not suitable for general use.
