@@ -92,6 +92,7 @@ def write_pid(milterconfig):
         if milterconfig.get('Syslog'):
             syslog.syslog('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
         raise RuntimeError('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
+    return pid
 
 ####################
 def read_keyfile(milterconfig, keytype):

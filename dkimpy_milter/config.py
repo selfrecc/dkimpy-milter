@@ -42,7 +42,7 @@ defaultConfigData = {
         'Socket' : 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
         'PidFile'  : '/var/run/dkimpy-milter/dkimpy-milter.pid',
         'UserID' : 'dkimpy-milter',
-        'Canonicalization' : 'simple'
+        'Canonicalization' : 'relaxed/simple'
         }
 
 
@@ -111,7 +111,6 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'Selector' : 'str',
         'SelectorEd25519': 'str',
         'Canonicalization' : 'str',
-        'CanonicalizationEd25519' : 'str'
             }
 
     #  check to see if it's a file

@@ -19,11 +19,11 @@ DKIM 'a' in AR      implemented     verified
 dkimpy-milter.service  implemented      verified
 sysv init              implemented
 remove PidFile on stop implemented      verified
+dkimpy-milter.8        provided         needs work
+Canonicalization       implementd       verified
 
 0.9.5 (Beta)
-dkimpy-milter.8
 AuthservID
-Canonicalization
 Diagnostics
 DiagnosticDirectory
 InternalHosts
@@ -31,6 +31,7 @@ SyslogFacility
 SyslogSuccess
 
 1.0.0
+Convert dkim-milter-python config
 No additional features planned
 
 Considered for near-term feature release

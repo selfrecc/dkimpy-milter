@@ -133,7 +133,7 @@
 dkimpy-milter \- Python milter for DKIM signing and validation
 .SH "VERSION"
 .IX Header "VERSION"
-0\.9\.1
+0\.9\.2
 
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -208,6 +208,8 @@ the canonicalization method.  The recognized values are
 and
 .I simple
 as defined by the DKIM specification.  The default is
+.I relaxed
+/
 .I simple.
 The value may include two different canonicalizations separated by a
 slash ("/") character, in which case the first will be applied to the

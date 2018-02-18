@@ -10,3 +10,5 @@
 0.9.2 UNRELEASED
  - Improved package requirements definition
  - Added systemd unit file and (untested) sysv init file
+ - Added dkim-milter.8 (based on opendim.8)
+ - Implemented support for Canonicalization option

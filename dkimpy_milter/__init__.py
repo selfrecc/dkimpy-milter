@@ -173,17 +173,24 @@ class dkimMilter(Milter.Base):
     return Milter.CONTINUE
 
   def sign_dkim(self,txt):
-      conf = self.conf
+      canon = milterconfig.get('Canonicalization')
+      if len(canon.split('/')) == 2:
+          canonicalize.append(canon.split('/')[0])
+          canonicalize.append(canon.split('/')[1])
+      else:
+          canonicalize.append(canon)
+          canonicalize.append(canon)
+      syslog.syslog('canonicalize: {0}'.format(canonicalize))
       try:
         d = dkim.DKIM(txt)
         h = d.sign(milterconfig.get('Selector'),milterconfig.get('Domain'), privateRSA,
-                canonicalize=('relaxed','simple'))
+                canonicalize=(canonicalize[0], canonicalize[1]))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
         if privateEd25519:
             d = dkim.DKIM(txt)
             h = d.sign(milterconfig.get('SelectorEd25519'),milterconfig.get('Domain'), privateEd25519,
-                    canonicalize=('relaxed','simple'), signature_algorithm='ed25519-sha256')
+                    canonicalize=(canonicalize[0], canonicalize[1]), signature_algorithm='ed25519-sha256')
             name,val = h.split(': ',1)
             self.addheader(name,val.strip().replace('\r\n','\n'),0)
       except dkim.DKIMException as x:
@@ -254,14 +261,14 @@ def main():
     if milterconfig.get('Syslog'):
         syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
         setExceptHook()
-    write_pid(milterconfig)
+    pid = write_pid(milterconfig)
     if milterconfig.get('KeyFile'):
         privateRSA = read_keyfile(milterconfig, 'RSA')
     if milterconfig.get('KeyFileEd25519'):
         privateEd25519 = read_keyfile(milterconfig, 'Ed25519')
     drop_privileges(milterconfig)
     if milterconfig.get('Syslog'):
-        syslog.syslog('dkimpy-milter started.  user: {0}'.format(milterconfig.get('UserID')))
+        syslog.syslog('dkimpy-milter started:{0} user:{1}'.format(pid,milterconfig.get('UserID')))
     Milter.factory = dkimMilter
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
