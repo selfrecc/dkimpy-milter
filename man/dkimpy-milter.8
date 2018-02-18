@@ -1,0 +1,306 @@
+\"
+.\" Standard preamble:
+.\" ========================================================================
+.de Sh \" Subsection heading
+.br
+.if t .Sp
+.ne 5
+.PP
+\fB\\$1\fR
+.PP
+..
+.de Sp \" Vertical space (when we can't use .PP)
+.if t .sp .5v
+.if n .sp
+..
+.de Vb \" Begin verbatim text
+.ft CW
+.nf
+.ne \\$1
+..
+.de Ve \" End verbatim text
+.ft R
+.fi
+..
+.\" Set up some character translations and predefined strings.  \*(-- will
+.\" give an unbreakable dash, \*(PI will give pi, \*(L" will give a left
+.\" double quote, and \*(R" will give a right double quote.  \*(C+ will
+.\" give a nicer C++.  Capital omega is used to do unbreakable dashes and
+.\" therefore won't be available.  \*(C` and \*(C' expand to `' in nroff,
+.\" nothing in troff, for use with C<>.
+.tr \(*W-
+.ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
+.ie n \{\
+.    ds -- \(*W-
+.    ds PI pi
+.    if (\n(.H=4u)&(1m=24u) .ds -- \(*W\h'-12u'\(*W\h'-12u'-\" diablo 10 pitch
+.    if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\"  diablo 12 pitch
+.    ds L" ""
+.    ds R" ""
+.    ds C` ""
+.    ds C' ""
+'br\}
+.el\{\
+.    ds -- \|\(em\|
+.    ds PI \(*p
+.    ds L" ``
+.    ds R" ''
+'br\}
+.\"
+.\" If the F register is turned on, we'll generate index entries on stderr for
+.\" titles (.TH), headers (.SH), subsections (.Sh), items (.Ip), and index
+.\" entries marked with X<> in POD.  Of course, you'll have to process the
+.\" output yourself in some meaningful fashion.
+.if \nF \{\
+.    de IX
+.    tm Index:\\$1\t\\n%\t"\\$2"
+..
+.    nr % 0
+.    rr F
+.\}
+.\"
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
+.hy 0
+.if n .na
+.\"
+.\" Accent mark definitions (@(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2).
+.\" Fear.  Run.  Save yourself.  No user-serviceable parts.
+.    \" fudge factors for nroff and troff
+.if n \{\
+.    ds #H 0
+.    ds #V .8m
+.    ds #F .3m
+.    ds #[ \f1
+.    ds #] \fP
+.\}
+.if t \{\
+.    ds #H ((1u-(\\\\n(.fu%2u))*.13m)
+.    ds #V .6m
+.    ds #F 0
+.    ds #[ \&
+.    ds #] \&
+.\}
+.    \" simple accents for nroff and troff
+.if n \{\
+.    ds ' \&
+.    ds ` \&
+.    ds ^ \&
+.    ds , \&
+.    ds ~ ~
+.    ds /
+.\}
+.if t \{\
+.    ds ' \\k:\h'-(\\n(.wu*8/10-\*(#H)'\'\h"|\\n:u"
+.    ds ` \\k:\h'-(\\n(.wu*8/10-\*(#H)'\`\h'|\\n:u'
+.    ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'^\h'|\\n:u'
+.    ds , \\k:\h'-(\\n(.wu*8/10)',\h'|\\n:u'
+.    ds ~ \\k:\h'-(\\n(.wu-\*(#H-.1m)'~\h'|\\n:u'
+.    ds / \\k:\h'-(\\n(.wu*8/10-\*(#H)'\z\(sl\h'|\\n:u'
+.\}
+.    \" troff and (daisy-wheel) nroff accents
+.ds : \\k:\h'-(\\n(.wu*8/10-\*(#H+.1m+\*(#F)'\v'-\*(#V'\z.\h'.2m+\*(#F'.\h'|\\n:u'\v'\*(#V'
+.ds 8 \h'\*(#H'\(*b\h'-\*(#H'
+.ds o \\k:\h'-(\\n(.wu+\w'\(de'u-\*(#H)/2u'\v'-.3n'\*(#[\z\(de\v'.3n'\h'|\\n:u'\*(#]
+.ds d- \h'\*(#H'\(pd\h'-\w'~'u'\v'-.25m'\f2\(hy\fP\v'.25m'\h'-\*(#H'
+.ds D- D\\k:\h'-\w'D'u'\v'-.11m'\z\(hy\v'.11m'\h'|\\n:u'
+.ds th \*(#[\v'.3m'\s+1I\s-1\v'-.3m'\h'-(\w'I'u*2/3)'\s-1o\s+1\*(#]
+.ds Th \*(#[\s+2I\s-2\h'-\w'I'u*3/5'\v'-.3m'o\v'.3m'\*(#]
+.ds ae a\h'-(\w'a'u*4/10)'e
+.ds Ae A\h'-(\w'A'u*4/10)'E
+.    \" corrections for vroff
+.if v .ds ~ \\k:\h'-(\\n(.wu*9/10-\*(#H)'\s-2\u~\d\s+2\h'|\\n:u'
+.if v .ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'\v'-.4m'^\v'.4m'\h'|\\n:u'
+.    \" for low resolution devices (crt and lpr)
+.if \n(.H>23 .if \n(.V>19 \
+\{\
+.    ds : e
+.    ds 8 ss
+.    ds o a
+.    ds d- d\h'-1'\(ga
+.    ds D- D\h'-1'\(hy
+.    ds th \o'bp'
+.    ds Th \o'LP'
+.    ds ae ae
+.    ds Ae AE
+.\}
+.rm #[ #] #H #V #F C
+.\" ========================================================================
+.\"
+.IX Title "dkimpy-milter 8"
+.TH dkimpyy-milter 8
+.SH NAME
+.B dkimpy
+\- DKIM signing and verifying filter for MTAs
+.SH SYNOPSIS
+.B dkimpy-milter [configfile]
+
+.SH DESCRIPTION
+.B dkimpy-milter
+implements the 
+.B DKIM
+standard for signing and verifying e-mail messages on a per-domain basis.
+
+.B dkimpy-milter
+uses the
+.I milter
+interface, originally distributed as part of version 8.11 of
+.B sendmail(8),
+to provide DKIM signing and/or verifying service for mail transiting
+a milter-aware MTA.
+
+.SH DATA SETS
+Many of the configuration file parameters will refer to a "dataset" as their
+values.  This refers to a string that either contains the list of desirable
+values, or to a file that contains them, or (if enabled at compile time) a
+database containing the data.
+
+Some data sets require that the value contain more than one entry.  How this
+is done depends on which data set type is used.  Not all these datasets are
+currently used by dkimp-milter.  See
+.B opendkim-milter.conf(5)
+for details about specific options and which dataset types they use.
+
+In particular:
+.TP
+.I a)
+If the string begins with "file:", then the remainder of the string is
+presumed to refer to a flat file that contains elements of the data set,
+one per line.  If a line contains whitespace-separated values, then the
+line is presumed to define a key and its corresponding value.  Blank lines
+are ignored, and the hash ("#") character denotes the start of a comment.
+If a value contains multiple entries, the entries should be separated by
+colons.
+.TP
+.I b)
+If the string begins with "refile:", then the remainder of the string is
+presumed to specify a file that contains a set of patterns, one per line,
+and their associated values.  The pattern is taken as the start of the line
+to the first whitespace, and the portion after that whitespace is taken as
+the value to be used when that pattern is matched.  Patterns are simple
+wildcard patterns, matching all text except that the asterisk ("*") character
+is considered a wildcard.  If a value contains multiple entries, the entries
+should be separated by colons.
+.TP
+.I c)
+If the string begins with "db:" and the program was compiled with
+Sleepycat DB support, then the remainder of the string is presumed to
+identify a Sleepycat database containing keys and corresponding values.
+These may be used only to test for membership in the data set, or for
+storing keys and corresponding values.  If a value contains multiple entries,
+the entries should be separated by colons.
+.TP
+.I h)
+If the string contains none of these prefixes but ends with ".db", it
+is presumed to be a Sleepycat DB as described above (if support for same
+is compiled in).
+.TP
+.I i)
+If the string contains none of these prefixes but starts with a slash ("/")
+character, it is presumed to be a flat file as described above.
+.TP
+.I j)
+If the string begins with "csl:", the string is treated as a comma-separated
+list as described in m) below.
+.TP
+.I l)
+If the string begins with "mdb:", it refers to a directory that contains
+a memory database, as provided by libmdb from OpenLDAP.
+.TP
+.I m)
+In any other case, the string is presumed to be a comma-separated list.
+Elements in the list are either simple data elements that are part of the
+set or, in the case of an entry of the form "x=y", are stored as key-value
+pairs as described above.
+.SH OPTIONS
+.TP
+See
+.I dkimpy-milter.conf(5)
+information about available options.  Unlike OpenDKIM, dkimpy-milter does not
+support command line option switches.
+
+When signing a message, a
+.I DKIM-Signature:
+header will be prepended to the message.  The signature is computed using
+the private key provided.  You must be running a version of
+.I sendmail(8)
+recent enough to be able to do header prepend operations (8.13.0 or later).
+
+When verifying a message, an
+.I Authentication-Results:
+header will be prepended to indicate the presence of a signature and whether
+or not it could be validated against the body of the message using the
+public key advertised by the sender's nameserver.  The value of this header
+can be used by mail user agents to sort or discard messages that were not
+signed or could not be verified.
+
+.SH FILE PERMISSIONS
+When the filter is started as the superuser and the UserID setting is
+used, the filter gives up its root privileges by changing to the specified
+user after the following steps are taken: (1) the configuration file (if any)
+is loaded; (2) if the KeyFile or KeyFileEd25519 settings are used, the keys are
+loaded into memory; (3) all data sets in the configuration file are opened, and
+those that are based on flat files are also read into memory; and (4) if
+ChangeRootDirectory is set, the process root is changed to that directory.
+This means on configuration reload, the filter will not be accessing these
+files or the configuration file as the superuser (and possibly from a
+different root), and any key files referenced by the KeyTable will also be
+accessed by the new user.
+
+Thus, keys referenced by the KeyTable must always be accessible for read by
+the unprivileged user.  Also, run-time reloads are not possible if any of the
+other files will not be readable by the unprivileged user.
+.SH ENVIRONMENT
+The following environment variable(s) can be used to adjust the behaviour
+of this filter:
+.TP
+.I DKIM_TMPDIR
+The directory to use when creating temporary files.  The default is
+.I /tmp.
+.SH NOTES
+When using DNS timeouts be sure not to use a timeout that is larger than the
+timeout being used for interaction between
+.I sendmail
+and the filter.  Otherwise, the MTA could abort a message while waiting for
+a reply from the filter, which in turn is still waiting for a DNS reply.
+
+Features that involve specification of IPv4 addresses or CIDR blocks
+will use the
+.I inet_addr(3)
+function to parse that information.  Users should be familiar with the
+way that function handles the non-trivial cases (for example, "192.0.2/24"
+and "192.0.2.0/24" are not the same thing).
+.SH EXIT STATUS
+Filter exit status codes are selected according to
+.I sysexits(3).
+.SH HISTORY
+DKIM is an amalgam of Yahoo!'s
+.B DomainKeys
+proposal, and Cisco's
+.B Internet Identified Mail
+(IIM) proposal.
+.SH VERSION
+This man page covers version 0.9.2 of
+.I dkimpy-milter.
+.SH COPYRIGHT
+Copyright (c) 2005-2008, Sendmail, Inc. and its suppliers.  All rights
+reserved.
+
+Copyright (c) 2009-2013, 2015, The Trusted Domain Project.
+All rights reserved.
+
+Copyright (c) 2018 Scott Kitterman <scott@kitterman.com>
+.SH SEE ALSO
+.I dkimpy-milter.conf(5), sendmail(8)
+.P
+Sendmail Operations Guide
+.P
+RFC5321 - Simple Mail Transfer Protocol
+.P
+RFC5322 - Internet Messages
+.P
+RFC6376 - DomainKeys Identified Mail
+.P
+RFC7601 - Message Header Field for Indicating Message Authentication Status
+.P
+draft-ietf-dcrup-dkim-crypto - A new cryptographic signature method for DKIM
