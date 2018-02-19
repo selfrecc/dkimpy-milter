@@ -71,7 +71,7 @@ case "$1" in
 	fi
 
 	start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-		$RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
+		$RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/$NAME.conf
 	echo "$NAME."
 	;;
   stop)
@@ -98,7 +98,7 @@ case "$1" in
         fi
         sleep 1
         start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
+                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/$NAME.conf
         echo "$NAME."
         ;;
   restart)
@@ -116,7 +116,7 @@ case "$1" in
 	sleep 1
         echo -n "Starting $DESC: "
         start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
+                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/$NAME.conf
         echo "$NAME."
 	;;
   status)
