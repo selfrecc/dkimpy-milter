@@ -17,7 +17,7 @@ DKIM 'a' in AR      implemented     verified
 
 0.9.2 (Alpha)
 dkimpy-milter.service  implemented      verified
-sysv init              implemented
+sysv init              implemented      lightly tested
 remove PidFile on stop implemented      verified
 dkimpy-milter.8        provided         needs work
 Basic dataset (csl)    implemented      verified
