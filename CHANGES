@@ -12,3 +12,7 @@
  - Added systemd unit file and (untested) sysv init file
  - Added dkim-milter.8 (based on opendim.8)
  - Implemented support for Canonicalization option
+ - Implemented support for SyslogFacility option
+ - Initial dataset support: csl
+ - Only sign if mail from from a domain in Domain and only if Mode is not
+   verfication only

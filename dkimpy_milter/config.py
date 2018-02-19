@@ -84,6 +84,20 @@ def _find_boolean(item):
     return item
 
 
+def _dataset_to_list(dataset):
+    """Convert a dataset (as defined in dkimpymilter.8) and return a python
+       list of values."""
+    if not isinstance(dataset, basestring):
+        # If it was a csl, it's already a list, we only need to remove the name
+        # from the first value
+        if dataset[0][:4] == 'csl:':
+            dataset[0] = dataset[0][4:]
+        for item in dataset:
+            dataset[dataset.index(item)] = item.strip().strip(',')
+        return dataset
+    else:
+        raise dkim.ParameterError('Unimplmented dataset type')
+
 ###############################################################
 commentRx = re.compile(r'^(.*)#.*$')
 def _readConfigFile(path, configData = None, configGlobal = {}):
@@ -105,7 +119,7 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'Socket' : 'str',
         'PidFile'  : 'str',
         'UserID' : 'str',
-        'Domain' : 'str',
+        'Domain' : 'dataset',
         'KeyFile' : 'str',
         'KeyFileEd25519' : 'str',
         'Selector' : 'str',
@@ -138,11 +152,14 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
                 if debugLevel >= 1:
                     syslog.syslog('Configuration item "%s" not defined in file "%s"'
                         % ( line, path ))
-            else:
-                syslog.syslog('ERROR parsing line "%s" from file "%s"'
-                    % ( line, path ))
-            continue
-        name, value = data
+        if len(data) == 1:
+            name = data
+            value = ''
+        if len(data) == 2:
+            name, value = data
+        if len(data) >= 3:
+            name = data[0]
+            value = data[1:]
 
         #  check validity of name
         conversion = nameConversion.get(name)
@@ -158,6 +175,8 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
             configData[name] = str(value)
         elif conversion == 'int':
             configData[name] = int(value)
+        elif conversion == 'dataset':
+            configData[name] = _dataset_to_list(value)
         else:
             syslog.syslog(str('name: ' + name + ' value: ' + value + ' conversion: ' + conversion))
             configData[name] = conversion(value)

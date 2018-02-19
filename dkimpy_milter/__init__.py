@@ -119,6 +119,7 @@ class dkimMilter(Milter.Base):
         self.has_dkim += 1
     if lname == 'from':
         fname,self.author = parseaddr(val)
+        self.fdomain = self.author.split('@')[1]
         if milterconfig.get('Syslog'):
             syslog.syslog("{0}: {1}".format(name,val))
     elif lname == 'authentication-results':
@@ -154,11 +155,11 @@ class dkimMilter(Milter.Base):
             syslog.syslog('REMOVE: {0}'.format(val))
     # Check or sign DKIM
     self.fp.seek(0)
-    if self.internal_connection or milterconfig.get('Mode') == 's' or milterconfig.get('Mode') == 'sv':
+    if (self.fdomain in milterconfig.get('Domain')) and (not milterconfig.get('Mode') == 'v'):
       txt = self.fp.read()
       self.sign_dkim(txt)
       result = None
-    if self.has_dkim and (milterconfig.get('Mode') == 'v' or milterconfig.get('Mode') == 'sv'):
+    if (self.has_dkim) and (not self.internal_connection) and (milterconfig.get('Mode') == 'v' or milterconfig.get('Mode') == 'sv'):
       txt = self.fp.read()
       self.check_dkim(txt)
     else:
@@ -174,6 +175,7 @@ class dkimMilter(Milter.Base):
 
   def sign_dkim(self,txt):
       canon = milterconfig.get('Canonicalization')
+      canonicalize = []
       if len(canon.split('/')) == 2:
           canonicalize.append(canon.split('/')[0])
           canonicalize.append(canon.split('/')[1])
@@ -183,13 +185,13 @@ class dkimMilter(Milter.Base):
       syslog.syslog('canonicalize: {0}'.format(canonicalize))
       try:
         d = dkim.DKIM(txt)
-        h = d.sign(milterconfig.get('Selector'),milterconfig.get('Domain'), privateRSA,
+        h = d.sign(milterconfig.get('Selector'), self.fdomain, privateRSA,
                 canonicalize=(canonicalize[0], canonicalize[1]))
         name,val = h.split(': ',1)
         self.addheader(name,val.strip().replace('\r\n','\n'),0)
         if privateEd25519:
             d = dkim.DKIM(txt)
-            h = d.sign(milterconfig.get('SelectorEd25519'),milterconfig.get('Domain'), privateEd25519,
+            h = d.sign(milterconfig.get('SelectorEd25519'), self.fdomain, privateEd25519,
                     canonicalize=(canonicalize[0], canonicalize[1]), signature_algorithm='ed25519-sha256')
             name,val = h.split(': ',1)
             self.addheader(name,val.strip().replace('\r\n','\n'),0)
@@ -259,7 +261,7 @@ def main():
         configFile = sys.argv[1]
     milterconfig = config._processConfigFile(filename = configFile)
     if milterconfig.get('Syslog'):
-        facility = "syslog.LOG_{0}".format(milterconfig.get('SyslogFacility').upper())
+        facility = eval("syslog.LOG_{0}".format(milterconfig.get('SyslogFacility').upper()))
         syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, facility)
         setExceptHook()
     pid = write_pid(milterconfig)

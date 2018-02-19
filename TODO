@@ -20,8 +20,10 @@ dkimpy-milter.service  implemented      verified
 sysv init              implemented
 remove PidFile on stop implemented      verified
 dkimpy-milter.8        provided         needs work
+Basic dataset (csl)    implemented      verified
+Sign based on Domain   implemented      verified
 Canonicalization       implemented      verified
-SyslogFacility         implemented
+SyslogFacility         implemented      verified
 
 0.9.5 (Beta)
 AuthservID
@@ -34,6 +36,13 @@ SyslogSuccess
 1.0.0
 Convert dkim-milter-python config
 No additional features planned
+
+Plannedataset type support:
+file://
+refile:
+db:/.db
+csl:
+mdb:
 
 Considered for near-term feature release
 
