@@ -259,7 +259,8 @@ def main():
         configFile = sys.argv[1]
     milterconfig = config._processConfigFile(filename = configFile)
     if milterconfig.get('Syslog'):
-        syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, syslog.LOG_MAIL)
+        facility = "syslog.LOG_{0}".format(milterconfig.get('SyslogFacility').upper())
+        syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, facility)
         setExceptHook()
     pid = write_pid(milterconfig)
     if milterconfig.get('KeyFile'):

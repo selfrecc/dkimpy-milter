@@ -19,6 +19,10 @@ used, they will need to be updated.  The sysv init file is Debian specific and
 untested, since the developers are not using sysv init.  Feedback/patches
 welcome.
 
+The python DKIM library, dkimpy, requires the entire message being signed or
+verified to be in memory, so dkimpy-milter does not write messages out to a temp
+file.  This may impact performance on low-memory systems.
+
 WARNING: This is an alpha grade release to support interoperability testing with
 Ed25519 signatures and basic functionality.  It is known to be incomplete and
 not suitable for general use.

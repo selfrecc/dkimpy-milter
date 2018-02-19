@@ -20,14 +20,15 @@ dkimpy-milter.service  implemented      verified
 sysv init              implemented
 remove PidFile on stop implemented      verified
 dkimpy-milter.8        provided         needs work
-Canonicalization       implementd       verified
+Canonicalization       implemented      verified
+SyslogFacility         implemented
 
 0.9.5 (Beta)
 AuthservID
 Diagnostics
 DiagnosticDirectory
 InternalHosts
-SyslogFacility
+
 SyslogSuccess
 
 1.0.0
