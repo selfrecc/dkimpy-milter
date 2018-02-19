@@ -54,7 +54,7 @@ setup(
         ['man/dkimpy-milter.8']), ('etc', ['etc/dkimpy-milter.conf']),
         (os.path.join('/lib', 'systemd', 'system'),
         ['system/dkimpy-milter.service']),(os.path.join('/etc', 'init.d'),
-        ['system/dkimpy-milter.init'])],
+        ['system/dkimpy-milter'])],
     install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.0.2', 'PyNaCl'],
     zip_safe = False,
 )
