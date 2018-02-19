@@ -20,13 +20,13 @@
 # Short-Description: dkimpy-milter
 # Description:       Python DKIM Milter for Sendmail and Postfix
 ### END INIT INFO
-prefix="/usr"
+prefix="/usr/local"
 exec_prefix=${prefix}
 sysconfdir="/etc/dkimpy-milter"
 bindir="${exec_prefix}/bin/"
 RUNDIR="/var/run/dkimpy-milter"
 DAEMON=${bindir}/dkimpy-milter
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:
 NAME=dkimpy-milter
 DESC="Python DKIM Milter"
 USER=dkimpy-milter
@@ -71,7 +71,7 @@ case "$1" in
 	fi
 
 	start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-		$RUNDIR/$NAME.pid --exec $DAEMON
+		$RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
 	echo "$NAME."
 	;;
   stop)
@@ -98,7 +98,7 @@ case "$1" in
         fi
         sleep 1
         start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-                $RUNDIR/$NAME.pid --exec $DAEMON
+                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
         echo "$NAME."
         ;;
   restart)
@@ -116,11 +116,11 @@ case "$1" in
 	sleep 1
         echo -n "Starting $DESC: "
         start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-                $RUNDIR/$NAME.pid --exec $DAEMON
+                $RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/dkimpy-milter.conf
         echo "$NAME."
 	;;
   status)
-        status_of_proc -p /var/run/dkimpy-milter/dkimpy-milter.pid /usr/bin/dkimpy-milter dkimpy-milter
+        status_of_proc -p /var/run/dkimpy-milter/dkimpy-milter.pid /usr/local/bin/dkimpy-milter dkimpy-milter
         ;;
 
   *)
