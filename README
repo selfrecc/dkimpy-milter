@@ -13,6 +13,19 @@ default is a feature:
 
 python setup.py install --single-version-externally-managed --record=/dev/null
 
+For users of Debian Stable (Debian 9, Codename Squueze), all dependencies are
+available in either the main or backports repositories:
+
+[sudo] apt install python-milter python-nacl
+[sudo] apt install -t squeeze-backports python-authres python-dkim
+
+The preferred method of installation is from PyPi using pip:
+
+[sudo] pip install dkimpy_milter
+
+Using pip will cause required packages to be installed via easy_install if they
+have not been previously installed.
+
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
 used, they will need to be updated.  The sysv init file is Debian specific and
