@@ -87,16 +87,40 @@ def _find_boolean(item):
 def _dataset_to_list(dataset):
     """Convert a dataset (as defined in dkimpymilter.8) and return a python
        list of values."""
-    if not isinstance(dataset, basestring):
-        # If it was a csl, it's already a list, we only need to remove the name
-        # from the first value
+    if not isinstance(dataset, str):
+        # If it was a csl with more than one value, it's already a list, we
+        # only need to remove the name from the first value.
         if dataset[0][:4] == 'csl:':
             dataset[0] = dataset[0][4:]
         for item in dataset:
             dataset[dataset.index(item)] = item.strip().strip(',')
         return dataset
-    else:
-        raise dkim.ParameterError('Unimplmented dataset type')
+    elif isinstance(dataset, str):
+        if dataset[0] == '/' or dataset[:5] == 'file:':
+            # This is a flat file dataset
+            ds = []
+            if dataset[0] == '/':
+                dsname = dataset
+            if dataset[:5] == 'file:':
+                dsname = dataset[5:]
+            dsf = open(dsname, 'r')
+            dslines = dsf.readlines
+            dsf.close()
+            for line in dslines:
+                if line[0] != '#':
+                    if len(line.split(':')) == 1:
+                        ds.append(line.strip())
+                    else:
+                        for element in line.split(':'):
+                            ds.append(element.strip().strip(':'))
+            return ds
+        # If it's a str and csl, it has one value and we return a list
+        if dataset[:4] == 'csl:':
+            return [dataset[4:].strip().strip(',')]
+        else:
+            return [dataset.strip().strip(',')]
+            
+    raise dkim.ParameterError('Unimplmented dataset type: {0}'.format(type(dataset)))
 
 ###############################################################
 commentRx = re.compile(r'^(.*)#.*$')
