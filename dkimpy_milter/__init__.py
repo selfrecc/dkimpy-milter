@@ -148,11 +148,15 @@ class dkimMilter(Milter.Base):
     # Remove existing Authentication-Results headers for our authserv_id
     for i,val in enumerate(self.arheaders,1):
       # FIXME: don't delete A-R headers from trusted MTAs
-      ar = authres.AuthenticationResultsHeader.parse_value(FWS.sub('',val))
-      if ar.authserv_id == self.receiver:
-        self.chgheader('authentication-results',i,'')
-        if milterconfig.get('Syslog'):
-            syslog.syslog('REMOVE: {0}'.format(val))
+      try:
+          ar = authres.AuthenticationResultsHeader.parse_value(FWS.sub('',val))
+          if ar.authserv_id == self.receiver:
+              self.chgheader('authentication-results',i,'')
+              if milterconfig.get('Syslog'):
+                  syslog.syslog('REMOVE: {0}'.format(val))
+      except:
+          # Don't error out on unparseable AR header fiels
+          pass
     # Check or sign DKIM
     self.fp.seek(0)
     if (self.fdomain in milterconfig.get('Domain')) and (not milterconfig.get('Mode') == 'v'):
