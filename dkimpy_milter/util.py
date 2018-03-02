@@ -16,10 +16,23 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-def drop_privileges(milterconfig):
-    import os
+def user_group(userid):
+    """Return user and group from UserID"""
     import grp
     import pwd
+
+    userlist = userid.split(':')
+    if len(userlist) == 1:
+        gidname = userlist[0]
+    else:
+        gidname = userlist[1]
+    # Get the uid/gid from the name
+    running_uid = pwd.getpwnam(userlist[0]).pw_uid
+    running_gid = grp.getgrnam(gidname).gr_gid
+    return running_uid, running_gid
+
+def drop_privileges(milterconfig):
+    import os
     import syslog
 
     if os.getuid() != 0:
@@ -27,25 +40,15 @@ def drop_privileges(milterconfig):
             syslog.syslog('drop_privileges: Not running as root. Cannot drop permissions.')
         return
 
-    # Figure out if user and group are specified
-    userstr = milterconfig.get('UserID')
-    userlist = userstr.split(':')
-    if len(userlist) == 1:
-        gidname = userlist[0]
-    else:
-        gidname = userlist[1]
-    uidname = userlist[0]
-
-    # Get the uid/gid from the name
-    running_uid = pwd.getpwnam(uidname).pw_uid
-    running_gid = grp.getgrnam(gidname).gr_gid
+    # Get user and group
+    uid, gid = user_group(milterconfig.get('UserID'))
 
     # Remove group privileges
     os.setgroups([])
 
     # Try setting the new uid/gid
-    os.setgid(running_gid)
-    os.setuid(running_uid)
+    os.setgid(gid)
+    os.setuid(uid)
 
     # Set umask
     old_umask = os.umask(milterconfig.get('UMask'))
@@ -88,11 +91,22 @@ def write_pid(milterconfig):
             raise
         f.write(pid)
         f.close()
+        user, group = user_group(milterconfig.get('UserID'))
+        os.chown(milterconfig.get('PidFile'), user, group)
     else:
         if milterconfig.get('Syslog'):
             syslog.syslog('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
         raise RuntimeError('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
     return pid
+
+def own_socketfile(milterconfig):
+    """If socket is Unix socket, chown to UserID before dropping privileges"""
+    import os
+    user, group = user_group(milterconfig.get('UserID'))
+    if milterconfig.get('Socket')[:1] == '/':
+        os.chown(milterconfig.get('Socket')[1:], user, group)
+    if milterconfig.get('Socket')[:6] == "local:":
+        os.chown(milterconfig.get('Socket')[6:], user, group)
 
 ####################
 def read_keyfile(milterconfig, keytype):

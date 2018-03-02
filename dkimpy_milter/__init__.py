@@ -39,6 +39,7 @@ from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import read_keyfile
+from dkimpy_milter.util import own_socketfile
 
 __version__ = "0.9.3"
 FWS = re.compile(r'\r?\n[ \t]+')
@@ -171,6 +172,7 @@ class dkimMilter(Milter.Base):
     if self.arresults:
         h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
             results=self.arresults)
+        h = dkim.fold(str(h))
         if milterconfig.get('Syslog'):
             syslog.syslog(str(h))
         name,val = str(h).split(': ',1)
@@ -273,15 +275,16 @@ def main():
         privateRSA = read_keyfile(milterconfig, 'RSA')
     if milterconfig.get('KeyFileEd25519'):
         privateEd25519 = read_keyfile(milterconfig, 'Ed25519')
-    drop_privileges(milterconfig)
-    if milterconfig.get('Syslog'):
-        syslog.syslog('dkimpy-milter started:{0} user:{1}'.format(pid,milterconfig.get('UserID')))
     Milter.factory = dkimMilter
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
+    if milterconfig.get('Syslog'):
+        syslog.syslog('dkimpy-milter started:{0} user:{1}'.format(pid,milterconfig.get('UserID')))
     sys.stdout.flush()
     Milter.runmilter(miltername,socketname,240)
+    own_socketfile(milterconfig)
+    drop_privileges(milterconfig)
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,11 @@
-0.9.3 UNRELEASED
+0.9.3 2018-03-02
  - Fixup csl dataset processing for single item lists
  - file: dataset support
  - Bump minimum authres version to 1.1.0 due to known issues with 1.0.2
  - Ignore errors parsing broken authres header fields
+ - Fold added authres header fields
+ - Fix pidfile permissions
+ - Fix socket setup sequence so Unix sockets work
 
 0.9.2 2018-02-19
  - Improved package requirements definition
