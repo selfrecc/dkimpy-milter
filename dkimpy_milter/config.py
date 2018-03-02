@@ -104,15 +104,14 @@ def _dataset_to_list(dataset):
             if dataset[:5] == 'file:':
                 dsname = dataset[5:]
             dsf = open(dsname, 'r')
-            dslines = dsf.readlines
-            dsf.close()
-            for line in dslines:
+            for line in dsf.readlines():
                 if line[0] != '#':
                     if len(line.split(':')) == 1:
                         ds.append(line.strip())
                     else:
                         for element in line.split(':'):
                             ds.append(element.strip().strip(':'))
+            dsf.close()
             return ds
         # If it's a str and csl, it has one value and we return a list
         if dataset[:4] == 'csl:':
