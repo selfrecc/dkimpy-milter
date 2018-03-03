@@ -160,7 +160,11 @@ class dkimMilter(Milter.Base):
           pass
     # Check or sign DKIM
     self.fp.seek(0)
-    if (self.fdomain in milterconfig.get('Domain')) and (not milterconfig.get('Mode') == 'v'):
+    if milterconfig.get('Domain'):
+        domain = milterconfig.get('Domain')
+    else:
+        domain = ''
+    if (self.fdomain in domain) and (not milterconfig.get('Mode') == 'v'):
       txt = self.fp.read()
       self.sign_dkim(txt)
       result = None
