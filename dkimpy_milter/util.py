@@ -86,9 +86,18 @@ def write_pid(milterconfig):
         try:
             f = open(milterconfig.get('PidFile'), 'w')
         except IOError as e:
-            if milterconfig.get('Syslog'):
-                syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'.format(milterconfig.get('PidFile'), e))
-            raise
+            if str(e)[:35] == '[Errno 2] No such file or directory':
+                piddir = milterconfig.get('PidFile').rsplit('/', 1)[0]
+                os.mkdir(piddir)
+                user, group = user_group(milterconfig.get('UserID'))
+                os.chown(piddir, user, group)
+                f = open(milterconfig.get('PidFile'), 'w')
+                if milterconfig.get('Syslog'):
+                    syslog.syslog('Missing pid dir created: {0}'.format(piddir))
+            else:
+                if milterconfig.get('Syslog'):
+                    syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'.format(milterconfig.get('PidFile'), e))
+                raise
         f.write(pid)
         f.close()
         user, group = user_group(milterconfig.get('UserID'))
