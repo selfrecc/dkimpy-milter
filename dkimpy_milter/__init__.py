@@ -41,7 +41,7 @@ from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import read_keyfile
 from dkimpy_milter.util import own_socketfile
 
-__version__ = "0.9.3"
+__version__ = "0.9.4"
 FWS = re.compile(r'\r?\n[ \t]+')
   
 class dkimMilter(Milter.Base):
