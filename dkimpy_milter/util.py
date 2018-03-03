@@ -16,6 +16,39 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+def fold(header):
+    """Fold a header line into multiple crlf-separated lines at column 72.
+    Borrowed from dkimpy and updated to only add \n instead of \r\n because
+    that's what the milter protocol wants.
+
+    >>> text(fold(b'foo'))
+    'foo'
+    >>> text(fold(b'foo  '+b'foo'*24).splitlines()[0])
+    'foo  '
+    >>> text(fold(b'foo'*25).splitlines()[-1])
+    ' foo'
+    >>> len(fold(b'foo'*25).splitlines()[0])
+    72
+    """
+    i = header.rfind(b"\r\n ")
+    if i == -1:
+        pre = b""
+    else:
+        i += 3
+        pre = header[:i]
+        header = header[i:]
+    maxleng = 72
+    while len(header) > maxleng:
+        i = header[:maxleng].rfind(b" ")
+        if i == -1:
+            j = maxleng
+        else:
+            j = i + 1
+        pre += header[:j] + b"\n   "
+        header = header[j:]
+        namelen = 0
+    return pre + header
+
 def user_group(userid):
     """Return user and group from UserID"""
     import grp

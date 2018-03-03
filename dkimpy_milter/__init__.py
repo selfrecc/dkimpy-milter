@@ -40,6 +40,7 @@ from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import read_keyfile
 from dkimpy_milter.util import own_socketfile
+from dkimpy_milter.util import fold
 
 __version__ = "0.9.4"
 FWS = re.compile(r'\r?\n[ \t]+')
@@ -176,7 +177,7 @@ class dkimMilter(Milter.Base):
     if self.arresults:
         h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
             results=self.arresults)
-        h = dkim.fold(str(h))
+        h = fold(str(h))
         if milterconfig.get('Syslog'):
             syslog.syslog(str(h))
         name,val = str(h).split(': ',1)
