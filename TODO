@@ -25,6 +25,11 @@ Sign based on Domain   implemented      verified
 Canonicalization       implemented      verified
 SyslogFacility         implemented      verified
 
+0.9.3 (Alpha)
+File dataset           implemented      verified
+
+0.9.4 (Alpha)
+
 0.9.5 (Beta)
 AuthservID
 Diagnostics
@@ -38,10 +43,8 @@ Convert dkim-milter-python config
 No additional features planned
 
 Plannedataset type support:
-file://
 refile:
 db:/.db
-csl:
 mdb:
 
 Considered for near-term feature release
