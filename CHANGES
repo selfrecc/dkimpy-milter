@@ -3,6 +3,8 @@
  - Fix crash when verifying if domain for signing was not set
  - Fix header folding to use \n only to align with milter protocol
    requirements
+ - Added information about creating a dedicated user and PID file directory
+   creation to README
 
 0.9.3 2018-03-02
  - Fixup csl dataset processing for single item lists

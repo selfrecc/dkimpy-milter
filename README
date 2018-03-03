@@ -32,6 +32,17 @@ used, they will need to be updated.  The sysv init file is Debian specific and
 untested, since the developers are not using sysv init.  Feedback/patches
 welcome.
 
+The dkimpy-milter drops priviledges after setup to the user/group specified in
+UserID.  During initial setup, this system user needs to be manually created.
+As an example, using the default dkimpy-user on Debian, the command would be:
+
+[sudo] adduser --system --no-create-home --quiet --disabled-password \
+               --disabled-login --shell /bin/false --group \
+               --home /var/run/dkimpy-milter dkimpy-milter
+
+Since /var/run or /run is sometimes on a tempfs, if the PID file directory is
+missing, the milter will create it on startup.
+
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a temp
 file.  This may impact performance on low-memory systems.
