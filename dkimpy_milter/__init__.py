@@ -250,6 +250,7 @@ class dkimMilter(Milter.Base):
             result = 'pass'
           else:
             result = 'fail'
+          res = False
           self.arresults.append(
             authres.DKIMAuthenticationResult(result=result,
               header_i = self.header_i, header_d = self.header_d, header_a = self.header_a,
