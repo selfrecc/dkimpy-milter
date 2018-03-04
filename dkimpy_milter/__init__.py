@@ -195,11 +195,12 @@ class dkimMilter(Milter.Base):
           canonicalize.append(canon)
       syslog.syslog('canonicalize: {0}'.format(canonicalize))
       try:
-        d = dkim.DKIM(txt)
-        h = d.sign(milterconfig.get('Selector'), self.fdomain, privateRSA,
-                canonicalize=(canonicalize[0], canonicalize[1]))
-        name,val = h.split(': ',1)
-        self.addheader(name,val.strip().replace('\r\n','\n'),0)
+        if privateRSA:
+            d = dkim.DKIM(txt)
+            h = d.sign(milterconfig.get('Selector'), self.fdomain, privateRSA,
+                    canonicalize=(canonicalize[0], canonicalize[1]))
+            name,val = h.split(': ',1)
+            self.addheader(name,val.strip().replace('\r\n','\n'),0)
         if privateEd25519:
             d = dkim.DKIM(txt)
             h = d.sign(milterconfig.get('SelectorEd25519'), self.fdomain, privateEd25519,
