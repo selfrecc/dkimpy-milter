@@ -29,13 +29,12 @@ SyslogFacility         implemented      verified
 File dataset           implemented      verified
 
 0.9.4 (Alpha)
+AuthservID      implemented     verified
 
 0.9.5 (Beta)
-AuthservID
 Diagnostics
 DiagnosticDirectory
 InternalHosts
-
 SyslogSuccess
 
 1.0.0

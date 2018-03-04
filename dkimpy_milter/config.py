@@ -31,6 +31,7 @@ import re
 import urllib
 import stat
 import dkim
+import socket
 
 
 #  default values
@@ -82,8 +83,14 @@ def _find_boolean(item):
     else:
         raise dkim.ParameterError()
     return item
+####################
+def _calculate_authserv_id(as_id):
+    """Determine AuthservID if needed"""
+    if as_id == 'HOSTNAME':
+        as_id = socket.gethostname()
+    return as_id
 
-
+####################
 def _dataset_to_list(dataset):
     """Convert a dataset (as defined in dkimpymilter.8) and return a python
        list of values."""
@@ -217,5 +224,9 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
             syslog.syslog(str('name: ' + name + ' value: ' + value + ' conversion: ' + conversion))
             configData[name] = conversion(value)
     fp.close()
-    
+    try:
+        configData['AuthservID'] = _calculate_authserv_id(configData['AuthservID'])
+    except:
+        pass
+
     return(configData)

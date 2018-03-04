@@ -63,6 +63,10 @@ class dkimMilter(Milter.Base):
     self.hello_name = None
     # sometimes people put extra space in sendmail config, so we strip
     self.receiver = self.getsymval('j').strip()
+    try:
+        self.AuthservID = milterconfig['AuthservID']
+    except:
+        self.AuthservID = self.receiver
     if hostaddr and len(hostaddr) > 0:
         ipaddr = hostaddr[0]
         """if iniplist(ipaddr,self.conf.internal_connect): FIXME
@@ -152,7 +156,7 @@ class dkimMilter(Milter.Base):
       # FIXME: don't delete A-R headers from trusted MTAs
       try:
           ar = authres.AuthenticationResultsHeader.parse_value(FWS.sub('',val))
-          if ar.authserv_id == self.receiver:
+          if ar.authserv_id == self.AuthservID:
               self.chgheader('authentication-results',i,'')
               if milterconfig.get('Syslog'):
                   syslog.syslog('REMOVE: {0}'.format(val))
@@ -175,7 +179,7 @@ class dkimMilter(Milter.Base):
     else:
       result = 'none'
     if self.arresults:
-        h = authres.AuthenticationResultsHeader(authserv_id = self.receiver, 
+        h = authres.AuthenticationResultsHeader(authserv_id = self.AuthservID, 
             results=self.arresults)
         h = fold(str(h))
         if milterconfig.get('Syslog'):

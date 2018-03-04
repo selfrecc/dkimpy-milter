@@ -10,6 +10,7 @@
  - Make RSA signatures in dkimpy-milter optional, so dkimpy-milter can be
    added after an existing DKIM signing application to add an Ed25519
    signature (Thanks to A. Schulze for the patch)
+ - Added support for AuthservID option
 
 0.9.3 2018-03-02
  - Fixup csl dataset processing for single item lists
