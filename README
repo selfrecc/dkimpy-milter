@@ -16,10 +16,11 @@ python setup.py install --single-version-externally-managed --record=/dev/null
 For users of Debian Stable (Debian 9, Codename Squueze), all dependencies are
 available in either the main or backports repositories:
 
-[sudo] apt install python-milter python-nacl
+[sudo] apt install python-milter python-nacl pthon-ipaddress python-dnspython
 [sudo] apt install -t squeeze-backports python-authres python-dkim
 
-The preferred method of installation is from PyPi using pip:
+The preferred method of installation is from PyPi using pip (if distribution
+packages are not available):
 
 [sudo] pip install dkimpy_milter
 
@@ -42,6 +43,44 @@ As an example, using the default dkimpy-user on Debian, the command would be:
 
 Since /var/run or /run is sometimes on a tempfs, if the PID file directory is
 missing, the milter will create it on startup.
+
+As with all milters, dkimpy-milter needs to be integrated with your MTA of
+choice (Sendmail or Postfix).
+
+For Sendmail:
+
+Configuration is very similar to opendkim, but needs some adjustment for
+dkimpy-milter. Here's an example configuration line to include in your
+sendmail.mc:
+
+INPUT_MAIL_FILTER(`dkimpy-milter', `S=local:/var/run/dkimpy-milter/dkimpy-milter.sock')dnl
+
+Changing the sendmail.mc file requires a Make (to compile it into sendmail.cf)
+and a restart of sendmail.  Note that S= needs to match the value of Socket in
+the dkimpy-milter configuration file.
+
+Milter support should be present by default in most versions of sendmail
+these days, but if not included in your Sendmail build, see:
+http://www.elandsys.com/resources/sendmail/milter.html
+
+For Postfix:
+
+Integration of dkimpy-milter into Postfix is like any milter (See Postfix's
+README_FILES/MILTER_README).  Here's an example master.cf excerpt the talks to
+two dkimpy-milter instances, one configured for signing and one configured for
+verification:
+
+smtp       inet  n       -       -       -      -       smtpd
+    ...
+    -o smtpd_milters=inet:localhost:8892
+    ...
+
+submission inet  n       -       -       -      -       smtpd
+    ...
+    -o smtpd_milters=inet:localhost:8891
+    ...
+
+These need to match the Socket value for each dkimpy-milter instance.
 
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a temp
