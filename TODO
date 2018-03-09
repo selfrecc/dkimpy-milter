@@ -30,11 +30,11 @@ File dataset           implemented      verified
 
 0.9.4 (Alpha)
 AuthservID      implemented     verified
+InternalHosts   implemented     verified
 
 0.9.5 (Beta)
 Diagnostics
 DiagnosticDirectory
-InternalHosts
 SyslogSuccess
 
 1.0.0
@@ -42,7 +42,6 @@ Convert dkim-milter-python config
 No additional features planned
 
 Plannedataset type support:
-refile:
 db:/.db
 mdb:
 

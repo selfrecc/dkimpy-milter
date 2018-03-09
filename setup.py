@@ -55,6 +55,6 @@ setup(
         (os.path.join('/lib', 'systemd', 'system'),
         ['system/dkimpy-milter.service']),(os.path.join('/etc', 'init.d'),
         ['system/dkimpy-milter'])],
-    install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl'],
+    install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'dns'],
     zip_safe = False,
 )

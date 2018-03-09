@@ -69,8 +69,9 @@ class dkimMilter(Milter.Base):
         self.AuthservID = self.receiver
     if hostaddr and len(hostaddr) > 0:
         ipaddr = hostaddr[0]
-        """if iniplist(ipaddr,self.conf.internal_connect): FIXME
-            self.internal_connection = True"""
+        if milterconfig['InternalHostsObj']:
+            if milterconfig['InternalHostsObj'].match(ipaddr):
+                self.internal_connection = True
     else: ipaddr = ''
     self.connectip = ipaddr
     if self.internal_connection:

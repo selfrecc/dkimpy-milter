@@ -32,7 +32,8 @@ import urllib
 import stat
 import dkim
 import socket
-
+import ipaddress
+from dnsplug import Session
 
 #  default values
 defaultConfigData = {
@@ -43,7 +44,9 @@ defaultConfigData = {
         'Socket' : 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
         'PidFile'  : '/var/run/dkimpy-milter/dkimpy-milter.pid',
         'UserID' : 'dkimpy-milter',
-        'Canonicalization' : 'relaxed/simple'
+        'Canonicalization' : 'relaxed/simple',
+        'InternalHosts' : '127.0.0.1',
+        'InternalHostsObj' : False
         }
 
 
@@ -51,6 +54,167 @@ defaultConfigData = {
 class ConfigException(Exception):
     '''Exception raised when there's a configuration file error.'''
     pass
+
+#################################
+class HostsDataset(object):
+    '''Hold a group of host related dataset objects'''
+
+    def __init__(self, dataset):
+        self.dataset = []
+        # Self.dataset will end up being a list of DataSetItem(s).
+        for item in dataset:
+            item = item.rstrip(']')
+            item = item.lstrip('[')
+            self.dataset.append(self.DatasetItem(item))
+
+    class DatasetItem(object):
+        '''Individual dataset item'''
+
+        def __init__(self, item):
+            self.item = item
+            self.isipv4 = False
+            self.isipv4cidr = False
+            self.isipv6 = False
+            self.isipv6cidr = False
+            self.ishostname = False
+            self.isdomain = False
+            self.negative = False
+            if self.item[0] == '!':
+                self.item = item[1:]
+                self.negative = True
+            try:
+                self.item = ipaddress.ip_address(unicode(self.item, "utf-8"))
+                if isinstance(self.item, ipaddress.IPv4Address): self.isipv4 = True
+                elif isinstance(self.item, ipaddress.IPv6Address): self.isipv6 = True
+            except ValueError as e:
+                try:
+                    self.item = ipaddress.ip_network(unicode(self.item, "utf-8"), strict=False)
+                    if isinstance(self.item, ipaddress.IPv4Network): self.isipv4cidr = True
+                    elif isinstance(self.item, ipaddress.IPv6Network): self.isipv6cidr = True
+                except ValueError as e2:
+                    if self.item[0] == '.' and len(self.item.split('.')) > 2:
+                        self.isdomain = True
+                    elif len(self.item.split('.')) > 1: # It has a '.' in it
+                        self.ishostname = True
+                    else:
+                        raise ConfigException('Unknown dataset item: {0}'.format(item))
+
+    def match(self, connectip):
+        '''Check if the connect IP is part of the dataset'''
+        source = ipaddress.ip_address(unicode(connectip, "utf-8"))
+        for item in self.dataset:
+            if item.isdomain or item.ishostname:
+                result = self.matchname(source) # Match host/domain names first
+                if result:
+                    return(result)
+            elif item.isipv4 or item.isipv4cidr:
+                if isinstance(source, ipaddress.IPv4Address): # Then IPv4/6 addresses
+                    return(self.match4(source))               # or networks depending
+            elif item.isipv6 or item.isipv6cidr:              # on the item type and
+                if isinstance(source, ipaddress.IPv6Address): # connection type
+                    return(self.match6(source))
+
+    def matchname(self, source):
+        '''Does source IP address relate to a domain/hostname in the dataset'''
+        match = False
+        matchone = False
+        negativeone = False
+        matchdomain = False
+        negativedomain = False
+        ptrlist = self.getptr(source)
+        for item in self.dataset:
+            if item.isdomain:
+                for ptr in ptrlist:
+                    # Strip the leading '.' off the domain name so exact match works.
+                    if item.item[1:] == ptr[-len(item.item)+1:]:
+                        matchdomain = True
+                        negativedomain = item.negative
+            elif item.ishostname:
+                for ptr in ptrlist:
+                    if item.item == ptr:
+                        matchone = True
+                        negativeone = item.negative
+        if matchdomain and not negativedomain:
+            match = True
+        if matchone and not negativeone:
+            return True
+        if matchone and negativeone:
+            match = False
+        return(match)
+
+    def getptr(self, source):
+        '''Get validated PTR name of IP address'''
+        results = []
+        s = Session()
+        ptrnames = s.dns(source.reverse_pointer, 'PTR')
+        for name in ptrnames:
+            if isinstance(source, ipaddress.IPv4Address):
+                ips = s.dns(name, 'A')
+                for ip in ips:
+                    ip = ipaddress.IPv4Address(unicode(ip, 'UTF-8'))
+                    if ip == source:
+                        results.append(name)
+            if isinstance(source, ipaddress.IPv6Address):
+                ips = s.dns(name, 'AAAA')
+                for ip in ips:
+                    ip = ipaddress.IPv6Address(unicode(ip, 'UTF-8'))
+                if ip == source:
+                    results.append(name)
+        return results
+
+    def match4(self, source):
+        '''Is the source IP related to a IPv4 address/network in the dataset'''
+        match = False
+        matchone = False
+        negativeone = False
+        matchcidr = False
+        negativecidr = False
+        for item in self.dataset:
+            if item.isipv4:
+                if source == item.item:
+                    matchone = True
+                    negativeone = item.negative
+            elif item.isipv4cidr:
+                if source in item.item:
+                    matchcidr = True
+                    negativecidr = item.negative
+        if matchcidr and not negativecidr:
+            match = True
+        if matchone and not negativeone:
+            return True
+        if matchone and negativeone:
+            match = False
+        return(match)
+
+    def match6(self, source):
+        '''Is the source IP realted to a IPv6 address/network in the dataset'''
+        match = False
+        matchone = False
+        negativeone = False
+        matchcidr = False
+        negativecidr = False
+        for item in self.dataset:
+            if item.isipv6:
+                if source == item.item:
+                    matchone = True
+                    negativeone = item.negative
+            elif item.isipv6cidr:
+                if source in item.item:
+                    matchcidr = True
+                    negativecidr = item.negative
+        if matchcidr and not negativecidr:
+            match = True
+        if matchone and not negativeone:
+            return True
+        if matchone and negativeone:
+            match = False
+        return(match)
+
+    def dump(self):
+        for item in self.dataset:
+            print 'name: {0} ip4: {1} cidr4: {2} ip6: {3} cidr6: {4} host: {5} domain: {6} negat: {7} type: {8}'.format(item.item,
+                    item.isipv4, item.isipv4cidr, item.isipv6, item.isipv6cidr, item.ishostname, item.isdomain,
+                    item.negative, type(item.item))
 
 ####################################################################
 def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
@@ -168,6 +332,8 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'Selector' : 'str',
         'SelectorEd25519': 'str',
         'Canonicalization' : 'str',
+        'InternalHosts' : 'dataset',
+        'InternalHostsObj': 'bool',
             }
 
     #  check to see if it's a file
@@ -226,6 +392,7 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
     fp.close()
     try:
         configData['AuthservID'] = _calculate_authserv_id(configData['AuthservID'])
+        configData['InternalHostsObj'] = HostsDataset(configData['InternalHosts'])
     except:
         pass
 

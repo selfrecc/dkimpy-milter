@@ -11,6 +11,8 @@
    added after an existing DKIM signing application to add an Ed25519
    signature (Thanks to A. Schulze for the patch)
  - Added support for AuthservID option
+ - Added support for InternalHosts option (ipaddress and either dns (dnspython)
+   or pydns (DNS) modules are now required)
 
 0.9.3 2018-03-02
  - Fixup csl dataset processing for single item lists
