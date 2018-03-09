@@ -27,6 +27,10 @@ packages are not available):
 Using pip will cause required packages to be installed via easy_install if they
 have not been previously installed.
 
+The milter will work with either pydns (DNS) or dnspython (dns), preferring
+dnspython is both are available.  The dkimpy DKIM module also works with
+either.
+
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
 used, they will need to be updated.  The sysv init file is Debian specific and
