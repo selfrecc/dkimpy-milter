@@ -42,7 +42,7 @@ from dkimpy_milter.util import read_keyfile
 from dkimpy_milter.util import own_socketfile
 from dkimpy_milter.util import fold
 
-__version__ = "0.9.4"
+__version__ = "0.9.5"
 FWS = re.compile(r'\r?\n[ \t]+')
   
 class dkimMilter(Milter.Base):

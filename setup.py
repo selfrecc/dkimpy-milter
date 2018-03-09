@@ -31,7 +31,7 @@ setup(
     description=description,
     download_url = "https://pypi.python.org/pypi/dkimpy-milter",
     classifiers= [
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: No Input/Output (Daemon)',
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: GNU General Public License (GPL)',
