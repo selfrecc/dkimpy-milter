@@ -1,4 +1,4 @@
-0.9.4 UNRELEASED
+0.9.4 2018-03-09
  - Create PID directory if it is missing
  - Fix crash when verifying if domain for signing was not set
  - Fix header folding to use \n only to align with milter protocol
