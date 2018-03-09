@@ -30,11 +30,12 @@ File dataset           implemented      verified
 
 0.9.4 (Alpha)
 AuthservID      implemented     verified
+DiagnosticDirectory     implemented     verified
 InternalHosts   implemented     verified
 
 0.9.5 (Beta)
-Diagnostics
-DiagnosticDirectory
+
+
 SyslogSuccess
 
 1.0.0
@@ -60,6 +61,7 @@ SignatureAlgorithm
 Later
 
 BaseDirectory
+Diagnostics (requires dkimpy changes)
 DontSignMailTo
 ExemptDomains
 ExternalIgnoreList

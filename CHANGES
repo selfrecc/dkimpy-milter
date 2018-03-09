@@ -13,6 +13,8 @@
  - Added support for AuthservID option
  - Added support for InternalHosts option (ipaddress and either dns (dnspython)
    or pydns (DNS) modules are now required)
+ - Added support for DiagnosticDirectory and updated dkimpy-milter specifics in
+   dkimpy-milter.conf.5
 
 0.9.3 2018-03-02
  - Fixup csl dataset processing for single item lists

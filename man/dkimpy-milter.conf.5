@@ -216,17 +216,11 @@ slash ("/") character, in which case the first will be applied to the
 header and the second to the body.
 
 .TP
-.I Diagnostics (Boolean)
-Requests the inclusion of "z=" tags in signatures, which encode the
-original header field set for use by verifiers when diagnosing verification
-failures.  Not recommended for normal operation. [dkimpy-milter specific: also
-increases the verbosity of Syslog logging if enabled.]
-
-.TP
 .I DiagnosticDirectory (string)
 Directory into which to write diagnostic reports when message verification
-fails on a message bearing a "z=" tag.  If not set (the default), these files
-are not generated.
+fails.  If not set (the default), these files are not generated.  [Unlike
+OpenDKIM, this applies to all messages, not just  on messages bearing a "z=" tag
+because dkimpy does not yet support "z=".]
 
 .TP
 .I Domain (dataset)

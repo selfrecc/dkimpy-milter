@@ -247,11 +247,14 @@ class dkimMilter(Milter.Base):
                   syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
               self.dkim_domain = d.domain
           else:
-            fd,fname = tempfile.mkstemp(".dkim")
-            with os.fdopen(fd,"w+b") as fp:
-                fp.write(txt)
-            if milterconfig.get('Syslog'):
-                syslog.syslog('DKIM: Fail (saved as {0})'.format(fname))
+              if milterconfig.get['DiagnosticDirectory']:
+                  fd,fname = tempfile.mkstemp(".dkim")
+                  with os.fdopen(fd,"w+b") as fp:
+                      fp.write(txt)
+                  if milterconfig.get('Syslog'):
+                      syslog.syslog('DKIM: Fail (saved as {0})'.format(fname))
+              else:
+                  syslog.syslog('DKIM: Fail ({0})'.format(d.domain))
           if res:
             result = 'pass'
           else:
