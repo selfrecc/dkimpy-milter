@@ -22,6 +22,13 @@ import dkimpy_milter
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
 
+kw = {}  # Work-around for lack of 'or' requires in setuptools.
+try:
+    import DNS
+    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'PyDNS']
+except ImportError:  # If PyDNS is not installed, prefer dnspython
+    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'dnspython']
+
 setup(
     name='dkimpy-milter',
     version=dkimpy_milter.__version__,
@@ -55,6 +62,6 @@ setup(
         (os.path.join('/lib', 'systemd', 'system'),
         ['system/dkimpy-milter.service']),(os.path.join('/etc', 'init.d'),
         ['system/dkimpy-milter'])],
-    install_requires = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'dnspython'],
     zip_safe = False,
+    **kw
 )

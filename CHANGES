@@ -7,6 +7,8 @@
  - Added support for SyslogSuccess option
  - Rationalized logging to be much less verbose unless SyslogSuccess or
    debugLevel are set - default is generally start/stop/errors only
+ - Fixed install_requires so either dnspython (preferred if neither is
+   installed) or PyDNS satisfies the install requirements
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing
