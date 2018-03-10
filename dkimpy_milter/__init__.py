@@ -241,9 +241,15 @@ class dkimMilter(Milter.Base):
             try:
                 res = d.verify(idx=y)
                 if res:
-                    self.dkim_comment = ('Good {0} bit {1} signature.'
-                                         .format(d.keysize,
-                                                 d.signature_fields.get(b'a')))
+                    if d.signature_fields.get(b'a') == 'ed25519-sha256':
+                        self.dkim_comment = ('Good {0} signature'
+                                            .format(d.signature_fields
+                                                    .get(b'a')))
+                    else:
+                        self.dkim_comment = ('Good {0} bit {1} signature'
+                                             .format(d.keysize,
+                                                     d.signature_fields
+                                                     .get(b'a')))
                 else:
                     self.dkim_comment = ('Bad {0} bit {1} signature.'
                                          .format(d.keysize,

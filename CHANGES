@@ -9,6 +9,8 @@
    debugLevel are set - default is generally start/stop/errors only
  - Fixed install_requires so either dnspython (preferred if neither is
    installed) or PyDNS satisfies the install requirements
+ - Update Authentication Results result comment not to mention key size for
+   ed25519 signatures, since it's irrelevant
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing
