@@ -47,7 +47,8 @@ defaultConfigData = {
         'Canonicalization' : 'relaxed/simple',
         'InternalHosts' : '127.0.0.1',
         'InternalHostsObj' : False,
-        'DiagnosticDirectory' : ''
+        'DiagnosticDirectory' : '',
+        'MacroList' : ''
         }
 
 
@@ -335,7 +336,8 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'Canonicalization' : 'str',
         'InternalHosts' : 'dataset',
         'InternalHostsObj': 'bool',
-        'DiagnosticDirectory' : 'str'
+        'DiagnosticDirectory' : 'str',
+        'MacroList' : 'dataset'
             }
 
     #  check to see if it's a file

@@ -74,6 +74,15 @@ class dkimMilter(Milter.Base):
                 self.internal_connection = True
     else: ipaddr = ''
     self.connectip = ipaddr
+    if milterconfig.get('MacroList') and not self.internal_connection:
+        macrolist = milterconfig.get('MacroList')
+        for macro in macrolist:
+            macroname = macro.split('|')[0]
+            macroname = '{' + macroname + '}'
+            macroresult = self.getsymval(macroname)
+            if (len(macro.split('|')) == 1 and macroresult) or macroresult in \
+                    macro.split('|')[1:]:
+                self.internal_connection = True
     if self.internal_connection:
         connecttype = 'INTERNAL'
     else:
@@ -99,22 +108,6 @@ class dkimMilter(Milter.Base):
     self.author = None
     self.arheaders = []
     self.arresults = []
-    '''if self.user:
-      # Very simple SMTP AUTH policy by default:
-      #   any successful authentication is considered INTERNAL
-      self.internal_connection = True
-      auth_type = self.getsymval('{auth_type}')
-      ssl_bits =  self.getsymval('{cipher_bits}')
-      if milterconfig.get('Syslog'):
-          syslog.syslog(
-              "SMTP AUTH:",self.user,"sslbits =",ssl_bits, auth_type,
-              "ssf =",self.getsymval('{auth_ssf}'), "INTERNAL"
-      )
-      # Detailed authorization policy is configured in the access file below.
-      self.arresults.append(
-        authres.SMTPAUTHAuthenticationResult(result = 'pass',
-      	result_comment = auth_type+' sslbits='+ssl_bits, smtp_auth = self.user)
-      )'''
     return Milter.CONTINUE
 
   @Milter.noreply

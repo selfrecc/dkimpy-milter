@@ -1,5 +1,6 @@
 0.9.5 UNRELEASED
  - Beta 1 (updated Alpha -> Beta warning in README and trove classifiers)
+ - Add support for MacroList option
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing

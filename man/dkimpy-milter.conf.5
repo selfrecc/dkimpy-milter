@@ -263,6 +263,33 @@ generation (as used in dkimpy).  Ignored if a
 is defined.  [KeyTableEd25519 NOT IMPLEMENTED]
 
 .TP
+.I MacroList (dataset)
+Defines a set of MTA-provided
+.I macros
+that should be checked to see if the sender has been determined to be a
+local user and therefore whether or not the message should be signed.  If
+a
+.I value
+is specified matching a macro name in the data set, the value of the macro
+must match a value specified (matching is case-sensitive), otherwise the
+macro must be defined but may contain any value.  The set is empty by
+default, meaning macros are not considered when making the sign-verify
+decision.  The general format of the value is
+.I value1[|value2[|...]];
+if one or more value is defined then the macro must be set to one of the
+listed values, otherwise the macro must be set but can contain any
+value.
+
+In order for the macro and its value to be available to the filter for
+checking, the MTA must send it during the protocol exchange.  This is either
+accomplished via manual configuration of the MTA to send the desired macros
+or, for MTA/filter combinations that support the feature, the filter can
+request those macros that are of interest.  The latter is a feature negotiated
+at the time the filter receives a connection from the MTA and its availability
+depends upon the version of milter used to compile the filter and the version
+of the MTA making the connection.
+
+.TP
 .I Mode (string)
 Selects operating modes.  The string is a concatenation of characters that
 indicate which mode(s) of operation are desired.  Valid modes are
