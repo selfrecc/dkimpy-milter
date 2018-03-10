@@ -2,6 +2,8 @@
  - Beta 1 (updated Alpha -> Beta warning in README and trove classifiers)
  - Added support for MacroList option
  - Added support for MacroListVerify option
+ - Added example in README to show use of MacroList* to separate inbound and
+   outbound mail streams
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing

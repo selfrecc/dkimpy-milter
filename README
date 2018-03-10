@@ -86,6 +86,37 @@ submission inet  n       -       -       -      -       smtpd
 
 These need to match the Socket value for each dkimpy-milter instance.
 
+Care is required to segregate outbound mail to be signed and inbound mail to
+be verified.  The above example uses two instances of dkimpy-milter to do
+this.  There are many possible ways.  Here is another example using milter
+macros to keep the mail streams segregated:
+
+Postfix master.cf:
+
+smtp       inet  n       -       -       -       -       smtpd
+    ...
+    -o smtpd_milters=inet:localhost:8891
+    -o milter_macro_daemon_name=VERIFYING
+    ...
+
+submission inet n       -       -       -       -       smtpd
+    -o syslog_name=postfix/submission
+    -o smtpd_tls_security_level=encrypt
+    -o smtpd_sasl_auth_enable=yes
+    ...
+    -o milter_macro_daemon_name=ORIGINATING
+    -o smtpd_milters=inet:localhost:8891
+    ...
+
+Dkimpy-milter.conf:
+
+...
+Mode			sv
+MacroList		dameon_name|ORIGINATING
+MacroListVerify		daemon_name|VERIFYING
+...
+
+
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a temp
 file.  This may impact performance on low-memory systems.
