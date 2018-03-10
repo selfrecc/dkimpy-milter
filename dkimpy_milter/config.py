@@ -27,7 +27,6 @@
 import syslog
 import os
 import sys
-import re
 import stat
 import dkim
 import socket
