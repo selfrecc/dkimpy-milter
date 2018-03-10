@@ -96,7 +96,7 @@ class dkimMilter(Milter.Base):
             connecttype = 'INTERNAL'
         else:
             connecttype = 'EXTERNAL'
-        if milterconfig.get('Syslog'):
+        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 1:
             syslog.syslog("connect from {0} at {1} {2}"
                           .format(hostname, hostaddr, connecttype))
         return Milter.CONTINUE
@@ -106,7 +106,7 @@ class dkimMilter(Milter.Base):
     # of each message.
     @Milter.noreply
     def envfrom(self, f, *str):
-        if milterconfig.get('Syslog'):
+        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 2:
             syslog.syslog("mail from: {0} {1}".format(f, str))
         self.fp = StringIO.StringIO()
         self.mailfrom = f
@@ -124,13 +124,15 @@ class dkimMilter(Milter.Base):
     def header(self, name, val):
         lname = name.lower()
         if lname == 'dkim-signature':
-            if milterconfig.get('Syslog'):
+            if (milterconfig.get('Syslog') and
+                    milterconfig.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
             self.has_dkim += 1
         if lname == 'from':
             fname, self.author = parseaddr(val)
             self.fdomain = self.author.split('@')[1]
-            if milterconfig.get('Syslog'):
+            if (milterconfig.get('Syslog') and
+                    milterconfig.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
         elif lname == 'authentication-results':
             self.arheaders.append(val)
@@ -163,7 +165,8 @@ class dkimMilter(Milter.Base):
                       .parse_value(FWS.sub('', val)))
                 if ar.authserv_id == self.AuthservID:
                     self.chgheader('authentication-results', i, '')
-                    if milterconfig.get('Syslog'):
+                    if (milterconfig.get('Syslog') and
+                            milterconfig.get('debugLevel') >= 1):
                         syslog.syslog('REMOVE: {0}'.format(val))
             except:
                 # Don't error out on unparseable AR header fiels
@@ -188,7 +191,8 @@ class dkimMilter(Milter.Base):
                                                     self.AuthservID,
                                                     results=self.arresults)
             h = fold(str(h))
-            if milterconfig.get('Syslog'):
+            if (milterconfig.get('Syslog') and
+                    milterconfig.get('debugLevel') >= 2):
                 syslog.syslog(str(h))
             name, val = str(h).split(': ', 1)
             self.addheader(name, val, 0)
@@ -203,7 +207,9 @@ class dkimMilter(Milter.Base):
         else:
             canonicalize.append(canon)
             canonicalize.append(canon)
-        syslog.syslog('canonicalize: {0}'.format(canonicalize))
+            if (milterconfig.get('Syslog') and
+                    milterconfig.get('debugLevel') >= 1):
+                syslog.syslog('canonicalize: {0}'.format(canonicalize))
         try:
             if privateRSA:
                 d = dkim.DKIM(txt)
@@ -254,8 +260,10 @@ class dkimMilter(Milter.Base):
             self.header_d = d.signature_fields.get(b'd')
             self.header_a = d.signature_fields.get(b'a')
             if res:
-                if milterconfig.get('Syslog'):
-                    syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
+                if (milterconfig.get('Syslog') and
+                        (milterconfig.get('SyslogSuccess') or
+                            milterconfig.get('debugLevel') >= 1)):
+                            syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
                 self.dkim_domain = d.domain
             else:
                 if milterconfig.get('DiagnosticDirectory'):

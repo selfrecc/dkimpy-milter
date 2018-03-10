@@ -47,7 +47,8 @@ defaultConfigData = {
     'IntHosts': False,
     'DiagnosticDirectory': '',
     'MacroList': '',
-    'MacroListVerify': ''
+    'MacroListVerify': '',
+    'debugLevel': 0  # Undocumented config item for developer use
     }
 
 
@@ -344,7 +345,8 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'IntHosts': 'bool',
         'DiagnosticDirectory': 'str',
         'MacroList': 'dataset',
-        'MacroListVerify': 'dataset'
+        'MacroListVerify': 'dataset',
+        'debugLevel': 'int'
         }
 
     #  check to see if it's a file

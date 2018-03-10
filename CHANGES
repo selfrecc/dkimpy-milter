@@ -4,6 +4,9 @@
  - Added support for MacroListVerify option
  - Added example in README to show use of MacroList* to separate inbound and
    outbound mail streams
+ - Added support for SyslogSuccess option
+ - Rationalized logging to be much less verbose unless SyslogSuccess or
+   debugLevel are set - default is generally start/stop/errors only
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing
