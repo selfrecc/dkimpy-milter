@@ -28,7 +28,6 @@ import syslog
 import os
 import sys
 import re
-import urllib
 import stat
 import dkim
 import socket

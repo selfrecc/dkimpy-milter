@@ -46,7 +46,6 @@ def fold(header):
             j = i + 1
         pre += header[:j] + b"\n   "
         header = header[j:]
-        namelen = 0
     return pre + header
 
 def user_group(userid):

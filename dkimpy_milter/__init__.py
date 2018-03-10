@@ -25,15 +25,12 @@ import sys
 import syslog
 import Milter
 import dkim
-from dkim.dnsplug import get_txt
-from dkim.util import parse_tag_value
 import authres
 import os
 import tempfile
 import StringIO
 import re
-from Milter.config import MilterConfigParser
-from Milter.utils import iniplist,parse_addr,parseaddr
+from Milter.utils import parse_addr,parseaddr
 import dkimpy_milter.config as config
 from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
@@ -173,15 +170,12 @@ class dkimMilter(Milter.Base):
         domain = milterconfig.get('Domain')
     else:
         domain = ''
-    if (self.fdomain in domain) and ((not milterconfig.get('Mode') == 'v') or not self.external_connection):
+    if (self.fdomain in domain) and not milterconfig.get('Mode') == 'v' and not self.external_connection:
       txt = self.fp.read()
       self.sign_dkim(txt)
-      result = None
     if (self.has_dkim) and (not self.internal_connection) and (milterconfig.get('Mode') == 'v' or milterconfig.get('Mode') == 'sv'):
       txt = self.fp.read()
       self.check_dkim(txt)
-    else:
-      result = 'none'
     if self.arresults:
         h = authres.AuthenticationResultsHeader(authserv_id = self.AuthservID, 
             results=self.arresults)
@@ -225,23 +219,22 @@ class dkimMilter(Milter.Base):
       
   def check_dkim(self,txt):
       res = False
-      conf = self.conf
       for y in range(self.has_dkim): # Verify _ALL_ the signatures
           d = dkim.DKIM(txt)
           try:
-            res = d.verify(idx=y)
-            if res:
-              self.dkim_comment = 'Good {0} bit {1} signature.'.format(d.keysize, d.signature_fields.get(b'a'))
-            else:
-              self.dkim_comment = 'Bad {0} bit {1} signature.'.format(d.keysize, d.signature_fields.get(b'a'))
+              res = d.verify(idx=y)
+              if res:
+                  self.dkim_comment = 'Good {0} bit {1} signature.'.format(d.keysize, d.signature_fields.get(b'a'))
+              else:
+                  self.dkim_comment = 'Bad {0} bit {1} signature.'.format(d.keysize, d.signature_fields.get(b'a'))
           except dkim.DKIMException as x:
-            self.dkim_comment = str(x)
-            if milterconfig.get('Syslog'):
-                syslog.syslog('DKIM: {0}'.format(x))
+              self.dkim_comment = str(x)
+              if milterconfig.get('Syslog'):
+                  syslog.syslog('DKIM: {0}'.format(x))
           except Exception as x:
-            self.dkim_comment = str(x)
-            if milterconfig.get('Syslog'):
-                syslog.syslog("check_dkim: {0}".format(x))
+              self.dkim_comment = str(x)
+              if milterconfig.get('Syslog'):
+                  syslog.syslog("check_dkim: {0}".format(x))
           self.header_i = d.signature_fields.get(b'i')
           self.header_d = d.signature_fields.get(b'd')
           self.header_a = d.signature_fields.get(b'a')
@@ -259,14 +252,14 @@ class dkimMilter(Milter.Base):
               else:
                   syslog.syslog('DKIM: Fail ({0})'.format(d.domain))
           if res:
-            result = 'pass'
+              result = 'pass'
           else:
-            result = 'fail'
+              result = 'fail'
           res = False
           self.arresults.append(
-            authres.DKIMAuthenticationResult(result=result,
-              header_i = self.header_i, header_d = self.header_d, header_a = self.header_a,
-              result_comment = self.dkim_comment)
+              authres.DKIMAuthenticationResult(result=result,
+                  header_i = self.header_i, header_d = self.header_d, header_a = self.header_a,
+                  result_comment = self.dkim_comment)
           )
       return
 
