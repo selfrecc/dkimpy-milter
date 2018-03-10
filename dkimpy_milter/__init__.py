@@ -250,7 +250,7 @@ class dkimMilter(Milter.Base):
                   syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
               self.dkim_domain = d.domain
           else:
-              if milterconfig.get['DiagnosticDirectory']:
+              if milterconfig.get('DiagnosticDirectory'):
                   fd,fname = tempfile.mkstemp(".dkim")
                   with os.fdopen(fd,"w+b") as fp:
                       fp.write(txt)
