@@ -45,7 +45,7 @@ defaultConfigData = {
     'UserID': 'dkimpy-milter',
     'Canonicalization': 'relaxed/simple',
     'InternalHosts': '127.0.0.1',
-    'InternalHostsObj': False,
+    'IntHosts': False,
     'DiagnosticDirectory': '',
     'MacroList': '',
     'MacroListVerify': ''
@@ -252,7 +252,7 @@ def _find_boolean(item):
     return item
 
 
-def _calculate_authserv_id(as_id):
+def _make_authserv_id(as_id):
     """Determine AuthservID if needed"""
     if as_id == 'HOSTNAME':
         as_id = socket.gethostname()
@@ -342,7 +342,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'SelectorEd25519': 'str',
         'Canonicalization': 'str',
         'InternalHosts': 'dataset',
-        'InternalHostsObj': 'bool',
+        'IntHosts': 'bool',
         'DiagnosticDirectory': 'str',
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset'
@@ -410,10 +410,8 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             configData[name] = conversion(value)
     fp.close()
     try:
-        configData['AuthservID'] = _calculate_authserv_id(configData
-                                                          ['AuthservID'])
-        configData['InternalHostsObj'] = HostsDataset(configData
-                                                      ['InternalHosts'])
+        configData['AuthservID'] = _make_authserv_id(configData['AuthservID'])
+        configData['IntHosts'] = HostsDataset(configData['InternalHosts'])
     except:
         pass
 
