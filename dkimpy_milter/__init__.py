@@ -60,6 +60,7 @@ class dkimMilter(Milter.Base):
   @Milter.noreply
   def connect(self,hostname,unused,hostaddr):
     self.internal_connection = False
+    self.external_connection = False
     self.hello_name = None
     # sometimes people put extra space in sendmail config, so we strip
     self.receiver = self.getsymval('j').strip()
@@ -83,6 +84,15 @@ class dkimMilter(Milter.Base):
             if (len(macro.split('|')) == 1 and macroresult) or macroresult in \
                     macro.split('|')[1:]:
                 self.internal_connection = True
+    if milterconfig.get('MacroListVerify'):
+        macrolist = milterconfig.get('MacroListVerify')
+        for macro in macrolist:
+            macroname = macro.split('|')[0]
+            macroname = '{' + macroname + '}'
+            macroresult = self.getsymval(macroname)
+            if (len(macro.split('|')) == 1 and macroresult) or macroresult in \
+                    macro.split('|')[1:]:
+                self.external_connection = True
     if self.internal_connection:
         connecttype = 'INTERNAL'
     else:
@@ -163,7 +173,7 @@ class dkimMilter(Milter.Base):
         domain = milterconfig.get('Domain')
     else:
         domain = ''
-    if (self.fdomain in domain) and (not milterconfig.get('Mode') == 'v'):
+    if (self.fdomain in domain) and ((not milterconfig.get('Mode') == 'v') or not self.external_connection):
       txt = self.fp.read()
       self.sign_dkim(txt)
       result = None

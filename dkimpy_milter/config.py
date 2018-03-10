@@ -48,7 +48,8 @@ defaultConfigData = {
         'InternalHosts' : '127.0.0.1',
         'InternalHostsObj' : False,
         'DiagnosticDirectory' : '',
-        'MacroList' : ''
+        'MacroList' : '',
+        'MacroListVerify' : ''
         }
 
 
@@ -337,7 +338,8 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         'InternalHosts' : 'dataset',
         'InternalHostsObj': 'bool',
         'DiagnosticDirectory' : 'str',
-        'MacroList' : 'dataset'
+        'MacroList' : 'dataset',
+        'MacroListVerify' : 'dataset'
             }
 
     #  check to see if it's a file

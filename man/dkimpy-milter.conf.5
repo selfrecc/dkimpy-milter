@@ -290,6 +290,16 @@ depends upon the version of milter used to compile the filter and the version
 of the MTA making the connection.
 
 .TP
+.I MacroListVerify (dataset)
+Defines a set of MTA-provided
+.I macros
+that should be checked to see if the sender has been determined to be an
+external source and therefore whether or not the message should be signed.
+Entries in this data set follow the same form as those of the
+.I MacroList
+option above.  [this option is not inhereted from OpenDKIM]  
+
+.TP
 .I Mode (string)
 Selects operating modes.  The string is a concatenation of characters that
 indicate which mode(s) of operation are desired.  Valid modes are
