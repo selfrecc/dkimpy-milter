@@ -34,12 +34,11 @@ DiagnosticDirectory     implemented     verified
 InternalHosts   implemented     verified
 
 0.9.5 (Beta)
-
-
+MacroList	implemented	verified
+MacroListVerify	implemented	verified
 SyslogSuccess
 
 1.0.0
-Convert dkim-milter-python config
 No additional features planned
 
 Plannedataset type support:
@@ -52,7 +51,6 @@ AlwaysAddARHeader
 ChangeRootDirectory
 ClockDrift (requires dkimpy change)
 DNSTimeout (requires dkmpy change)
-MacroList
 MilterDebug
 MinimumKeyBits
 PeerList
