@@ -12,7 +12,7 @@
 #        2.0 license - 100% GPL
 '''
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License version 2 as published 
+    it under the terms of the GNU General Public License version 2 as published
     by the Free Software Foundation.
 
     This program is distributed in the hope that it will be useful,
@@ -36,28 +36,27 @@ from dnsplug import Session
 
 #  default values
 defaultConfigData = {
-        'Syslog' : 'yes',
-        'SyslogFacility' : 'mail',
-        'UMask' : 007,
-        'Mode' : 'sv',
-        'Socket' : 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
-        'PidFile'  : '/var/run/dkimpy-milter/dkimpy-milter.pid',
-        'UserID' : 'dkimpy-milter',
-        'Canonicalization' : 'relaxed/simple',
-        'InternalHosts' : '127.0.0.1',
-        'InternalHostsObj' : False,
-        'DiagnosticDirectory' : '',
-        'MacroList' : '',
-        'MacroListVerify' : ''
-        }
+    'Syslog': 'yes',
+    'SyslogFacility': 'mail',
+    'UMask': 007,
+    'Mode': 'sv',
+    'Socket': 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
+    'PidFile': '/var/run/dkimpy-milter/dkimpy-milter.pid',
+    'UserID': 'dkimpy-milter',
+    'Canonicalization': 'relaxed/simple',
+    'InternalHosts': '127.0.0.1',
+    'InternalHostsObj': False,
+    'DiagnosticDirectory': '',
+    'MacroList': '',
+    'MacroListVerify': ''
+    }
 
 
-#################################
 class ConfigException(Exception):
     '''Exception raised when there's a configuration file error.'''
     pass
 
-#################################
+
 class HostsDataset(object):
     '''Hold a group of host related dataset objects'''
 
@@ -86,34 +85,41 @@ class HostsDataset(object):
                 self.negative = True
             try:
                 self.item = ipaddress.ip_address(unicode(self.item, "utf-8"))
-                if isinstance(self.item, ipaddress.IPv4Address): self.isipv4 = True
-                elif isinstance(self.item, ipaddress.IPv6Address): self.isipv6 = True
+                if isinstance(self.item, ipaddress.IPv4Address):
+                    self.isipv4 = True
+                elif isinstance(self.item, ipaddress.IPv6Address):
+                    self.isipv6 = True
             except ValueError as e:
                 try:
-                    self.item = ipaddress.ip_network(unicode(self.item, "utf-8"), strict=False)
-                    if isinstance(self.item, ipaddress.IPv4Network): self.isipv4cidr = True
-                    elif isinstance(self.item, ipaddress.IPv6Network): self.isipv6cidr = True
+                    self.item = ipaddress.ip_network(unicode
+                                                     (self.item, "utf-8"),
+                                                     strict=False)
+                    if isinstance(self.item, ipaddress.IPv4Network):
+                        self.isipv4cidr = True
+                    elif isinstance(self.item, ipaddress.IPv6Network):
+                        self.isipv6cidr = True
                 except ValueError as e2:
                     if self.item[0] == '.' and len(self.item.split('.')) > 2:
                         self.isdomain = True
-                    elif len(self.item.split('.')) > 1: # It has a '.' in it
+                    elif len(self.item.split('.')) > 1:  # It has a '.' in it
                         self.ishostname = True
                     else:
-                        raise ConfigException('Unknown dataset item: {0}'.format(item))
+                        raise ConfigException('Unknown dataset item: {0}'
+                                              .format(item))
 
     def match(self, connectip):
         '''Check if the connect IP is part of the dataset'''
         source = ipaddress.ip_address(unicode(connectip, "utf-8"))
         for item in self.dataset:
             if item.isdomain or item.ishostname:
-                result = self.matchname(source) # Match host/domain names first
+                result = self.matchname(source)   # Match host/domains first
                 if result:
                     return(result)
-            elif item.isipv4 or item.isipv4cidr:
-                if isinstance(source, ipaddress.IPv4Address): # Then IPv4/6 addresses
-                    return(self.match4(source))               # or networks depending
-            elif item.isipv6 or item.isipv6cidr:              # on the item type and
-                if isinstance(source, ipaddress.IPv6Address): # connection type
+            elif item.isipv4 or item.isipv4cidr:  # Then IPv4/6 addresses or
+                if isinstance(source, ipaddress.IPv4Address):  # networks
+                    return(self.match4(source))   # depending on the item type
+            elif item.isipv6 or item.isipv6cidr:  # and connect type
+                if isinstance(source, ipaddress.IPv6Address):
                     return(self.match6(source))
 
     def matchname(self, source):
@@ -127,7 +133,7 @@ class HostsDataset(object):
         for item in self.dataset:
             if item.isdomain:
                 for ptr in ptrlist:
-                    # Strip the leading '.' off the domain name so exact match works.
+                    # Strip the leading '.' off the domain name for exact match
                     if item.item[1:] == ptr[-len(item.item)+1:]:
                         matchdomain = True
                         negativedomain = item.negative
@@ -212,21 +218,16 @@ class HostsDataset(object):
             match = False
         return(match)
 
-    def dump(self):
-        for item in self.dataset:
-            print 'name: {0} ip4: {1} cidr4: {2} ip6: {3} cidr6: {4} host: {5} domain: {6} negat: {7} type: {8}'.format(item.item,
-                    item.isipv4, item.isipv4cidr, item.isipv6, item.isipv6cidr, item.ishostname, item.isdomain,
-                    item.negative, type(item.item))
 
-####################################################################
-def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
-        useStderr = 0):
+def _processConfigFile(filename=None, configdata=None, useSyslog=1,
+                       useStderr=0):
     '''Load the specified config file, exit and log errors if it fails,
     otherwise return a config dictionary.'''
 
     import config
-    if configdata == None: configdata = config.defaultConfigData
-    if filename != None:
+    if configdata is None:
+        configdata = config.defaultConfigData
+    if filename is not None:
         try:
             _readConfigFile(filename, configdata)
         except Exception, e:
@@ -238,7 +239,7 @@ def _processConfigFile(filename = None, configdata = None, useSyslog = 1,
             sys.exit(1)
     return(configdata)
 
-####################
+
 def _find_boolean(item):
     if type(item) == int:
         item = str(item)
@@ -249,14 +250,15 @@ def _find_boolean(item):
     else:
         raise dkim.ParameterError()
     return item
-####################
+
+
 def _calculate_authserv_id(as_id):
     """Determine AuthservID if needed"""
     if as_id == 'HOSTNAME':
         as_id = socket.gethostname()
     return as_id
 
-####################
+
 def _dataset_to_list(dataset):
     """Convert a dataset (as defined in dkimpymilter.8) and return a python
        list of values."""
@@ -292,80 +294,89 @@ def _dataset_to_list(dataset):
         else:
             return [dataset.strip().strip(',')]
         if dataset[-3:] == '.db' or dataset[:3] == 'db:':
-            # This is a Sleepycat (Oracle) DB  dataset
-            import whichdb # Will need rewriting someday for python3
+            #  This is a Sleepycat (Oracle) DB  dataset
+            import whichdb  # Will need rewriting someday for python3
             if dataset[-3:] == '.db':
                 dbname = dataset
             elif dataset[:3] == 'db:':
                 dbname = dataset[3:]
             else:
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'.format(type(dataset)))
+                raise dkim.ParameterError('Unimplmented dataset type: {0}'
+                                          .format(type(dataset)))
             if whichdb.whichdb(dbname) != 'dbhash':
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'.format(type(dataset)))
+                raise dkim.ParameterError('Unimplmented dataset type: {0}'
+                                          .format(type(dataset)))
             #TODO replace this with code to use db maps
-            raise dkim.ParameterError('Unsupported dataset db dataset not yet used: {0}'.format(type(dataset)))
+            raise dkim.ParameterError('Unsupported dataset db datase: {0}'
+                                      .format(type(dataset)))
 
-    raise dkim.ParameterError('Unimplmented dataset type: {0}'.format(type(dataset)))
+    raise dkim.ParameterError('Unimplmented dataset type: {0}'
+                              .format(type(dataset)))
 
-###############################################################
-commentRx = re.compile(r'^(.*)#.*$')
-def _readConfigFile(path, configData = None, configGlobal = {}):
+
+def _readConfigFile(path, configData=None, configGlobal={}):
     '''Reads a configuration file from the specified path, merging it
     with the configuration data specified in configData.  Returns a
     dictionary of name/value pairs based on configData and the values
     read from path.'''
 
     debugLevel = configGlobal.get('debugLevel', 0)
-    if debugLevel >= 5: syslog.syslog('readConfigFile: Loading "%s"' % path)
-    if configData == None: configData = {}
+    if debugLevel >= 5:
+        syslog.syslog('readConfigFile: Loading "%s"' % path)
+    if configData is None:
+        configData = {}
     nameConversion = {
-        'AuthservID' : 'str',
-        'Syslog' : 'bool',
-        'SyslogFacility' : 'str',
-        'SyslogSuccess' : 'bool',
-        'UMask' : 'int',
-        'Mode' : 'str',
-        'Socket' : 'str',
-        'PidFile'  : 'str',
-        'UserID' : 'str',
-        'Domain' : 'dataset',
-        'KeyFile' : 'str',
-        'KeyFileEd25519' : 'str',
-        'Selector' : 'str',
+        'AuthservID': 'str',
+        'Syslog': 'bool',
+        'SyslogFacility': 'str',
+        'SyslogSuccess': 'bool',
+        'UMask': 'int',
+        'Mode': 'str',
+        'Socket': 'str',
+        'PidFile': 'str',
+        'UserID': 'str',
+        'Domain': 'dataset',
+        'KeyFile': 'str',
+        'KeyFileEd25519': 'str',
+        'Selector': 'str',
         'SelectorEd25519': 'str',
-        'Canonicalization' : 'str',
-        'InternalHosts' : 'dataset',
+        'Canonicalization': 'str',
+        'InternalHosts': 'dataset',
         'InternalHostsObj': 'bool',
-        'DiagnosticDirectory' : 'str',
-        'MacroList' : 'dataset',
-        'MacroListVerify' : 'dataset'
-            }
+        'DiagnosticDirectory': 'str',
+        'MacroList': 'dataset',
+        'MacroListVerify': 'dataset'
+        }
 
     #  check to see if it's a file
     try:
         mode = os.stat(path)[0]
     except OSError, e:
-        syslog.syslog(syslog.LOG_ERR,'ERROR stating "%s": %s' % ( path, e.strerror ))
+        syslog.syslog(syslog.LOG_ERR, 'ERROR stating "%s": %s'
+                      % (path, e.strerror))
         return(configData)
     if not stat.S_ISREG(mode):
-        syslog.syslog(syslog.LOG_ERR,'ERROR: is not a file: "%s", mode=%s' % ( path, oct(mode) ))
+        syslog.syslog(syslog.LOG_ERR, 'ERROR: is not a file: "%s", mode=%s'
+                      % (path, oct(mode)))
         return(configData)
 
     #  load file
     fp = open(path, 'r')
     while 1:
         line = fp.readline()
-        if not line: break
+        if not line:
+            break
 
         #  parse line
         line = line.split('#', 1)[0].strip()
-        if not line: continue
+        if not line:
+            continue
         data = line.split()
         if len(data) != 2:
             if len(data) == 1:
                 if debugLevel >= 1:
-                    syslog.syslog('Configuration item "%s" not defined in file "%s"'
-                        % ( line, path ))
+                    syslog.syslog('Config item "%s" not defined in file "%s"'
+                                  % (line, path))
         if len(data) == 1:
             name = data
             value = ''
@@ -377,12 +388,14 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
 
         #  check validity of name
         conversion = nameConversion.get(name)
-        if conversion == None:
-            syslog.syslog('ERROR: Unknown name "%s" in file "%s"' % ( name, path ))
+        if conversion is None:
+            syslog.syslog('ERROR: Unknown name "%s" in file "%s"'
+                          % (name, path))
             continue
 
-        if debugLevel >= 5: syslog.syslog('readConfigFile: Found entry "%s=%s"'
-                % ( name, value ))
+        if debugLevel >= 5:
+            syslog.syslog('readConfigFile: Found entry "%s=%s"'
+                          % (name, value))
         if conversion == 'bool':
             configData[name] = _find_boolean(value)
         elif conversion == 'str':
@@ -392,12 +405,15 @@ def _readConfigFile(path, configData = None, configGlobal = {}):
         elif conversion == 'dataset':
             configData[name] = _dataset_to_list(value)
         else:
-            syslog.syslog(str('name: ' + name + ' value: ' + value + ' conversion: ' + conversion))
+            syslog.syslog(str('name: ' + name + ' value: ' + value +
+                              ' conversion: ' + conversion))
             configData[name] = conversion(value)
     fp.close()
     try:
-        configData['AuthservID'] = _calculate_authserv_id(configData['AuthservID'])
-        configData['InternalHostsObj'] = HostsDataset(configData['InternalHosts'])
+        configData['AuthservID'] = _calculate_authserv_id(configData
+                                                          ['AuthservID'])
+        configData['InternalHostsObj'] = HostsDataset(configData
+                                                      ['InternalHosts'])
     except:
         pass
 

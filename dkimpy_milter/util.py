@@ -16,6 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+
 def fold(header):
     """Fold a header line into multiple crlf-separated lines at column 72.
     Borrowed from dkimpy and updated to only add \n instead of \r\n because
@@ -48,6 +49,7 @@ def fold(header):
         header = header[j:]
     return pre + header
 
+
 def user_group(userid):
     """Return user and group from UserID"""
     import grp
@@ -63,13 +65,14 @@ def user_group(userid):
     running_gid = grp.getgrnam(gidname).gr_gid
     return running_uid, running_gid
 
+
 def drop_privileges(milterconfig):
     import os
     import syslog
 
     if os.getuid() != 0:
         if milterconfig.get('Syslog'):
-            syslog.syslog('drop_privileges: Not running as root. Cannot drop permissions.')
+            syslog.syslog('drop_privileges: Not root. No action taken.')
         return
 
     # Get user and group
@@ -85,9 +88,9 @@ def drop_privileges(milterconfig):
     # Set umask
     old_umask = os.umask(milterconfig.get('UMask'))
 
-#################
+
 class ExceptHook:
-    def __init__(self, useSyslog = 1, useStderr = 0):
+    def __init__(self, useSyslog=1, useStderr=0):
         self.useSyslog = useSyslog
         self.useStderr = useStderr
 
@@ -103,12 +106,11 @@ class ExceptHook:
                 sys.stderr.write(line)
 
 
-####################
 def setExceptHook():
     import sys
-    sys.excepthook = ExceptHook(useSyslog = 1, useStderr = 1)
+    sys.excepthook = ExceptHook(useSyslog=1, useStderr=1)
 
-####################
+
 def write_pid(milterconfig):
     """Write PID in pidfile.  Will not overwrite an existing file."""
     import os
@@ -125,10 +127,11 @@ def write_pid(milterconfig):
                 os.chown(piddir, user, group)
                 f = open(milterconfig.get('PidFile'), 'w')
                 if milterconfig.get('Syslog'):
-                    syslog.syslog('Missing pid dir created: {0}'.format(piddir))
+                    syslog.syslog('PID dir created: {0}'.format(piddir))
             else:
                 if milterconfig.get('Syslog'):
-                    syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'.format(milterconfig.get('PidFile'), e))
+                    syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'
+                                  .format(milterconfig.get('PidFile'), e))
                 raise
         f.write(pid)
         f.close()
@@ -136,9 +139,12 @@ def write_pid(milterconfig):
         os.chown(milterconfig.get('PidFile'), user, group)
     else:
         if milterconfig.get('Syslog'):
-            syslog.syslog('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
-        raise RuntimeError('Unable to write pidfle {0}.  File exists.'.format(milterconfig.get('PidFile')))
+            syslog.syslog('Unable to write pidfle {0}.  File exists.'
+                          .format(milterconfig.get('PidFile')))
+        raise RuntimeError('Unable to write pidfle {0}.  File exists.'
+                           .format(milterconfig.get('PidFile')))
     return pid
+
 
 def own_socketfile(milterconfig):
     """If socket is Unix socket, chown to UserID before dropping privileges"""
@@ -149,7 +155,7 @@ def own_socketfile(milterconfig):
     if milterconfig.get('Socket')[:6] == "local:":
         os.chown(milterconfig.get('Socket')[6:], user, group)
 
-####################
+
 def read_keyfile(milterconfig, keytype):
     """Read private key from file."""
     import syslog
@@ -162,7 +168,8 @@ def read_keyfile(milterconfig, keytype):
         keylist = f.readlines()
     except IOError as e:
         if milterconfig.get('Syslog'):
-            syslog.syslog('Unable to read keyfile {0}.  IOError: {1}'.format(keyfile, e))
+            syslog.syslog('Unable to read keyfile {0}.  IOError: {1}'
+                          .format(keyfile, e))
         raise
     f.close()
     key = ''
