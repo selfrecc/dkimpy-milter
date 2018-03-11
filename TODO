@@ -41,7 +41,7 @@ SyslogSuccess   implemented     verified
 1.0.0
 No additional features planned
 
-Plannedataset type support:
+Plannedataset type support (if needed):
 db:/.db
 mdb:
 

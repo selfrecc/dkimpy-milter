@@ -4,13 +4,14 @@
  - Added support for MacroListVerify option
  - Added example in README to show use of MacroList* to separate inbound and
    outbound mail streams
- - Added support for SyslogSuccess option
+ - Added support for SyslogSuccess option (both signing and verifying)
  - Rationalized logging to be much less verbose unless SyslogSuccess or
    debugLevel are set - default is generally start/stop/errors only
  - Fixed install_requires so either dnspython (preferred if neither is
    installed) or PyDNS satisfies the install requirements
- - Update Authentication Results result comment not to mention key size for
+ - Updated Authentication Results result comment not to mention key size for
    ed25519 signatures, since it's irrelevant
+ - Enhanced signature verification logging to provide more useful information
 
 0.9.4 2018-03-09
  - Create PID directory if it is missing

@@ -218,6 +218,14 @@ class dkimMilter(Milter.Base):
                                                      canonicalize[1]))
                 name, val = h.split(': ', 1)
                 self.addheader(name, val.strip().replace('\r\n', '\n'), 0)
+                if (milterconfig.get('Syslog') and
+                    (milterconfig.get('SyslogSuccess')
+                     or milterconfig.get('debugLevel') >= 1)):
+                    syslog.syslog('{0}: {1} DKIM-Signature field added (s={2} '
+                                  'd={3})'.format(self.getsymval('i'),
+                                                  d.signature_fields.get(b'a'),
+                                                  d.signature_fields.get(b's'),
+                                                  d.domain))
             if privateEd25519:
                 d = dkim.DKIM(txt)
                 h = d.sign(milterconfig.get('SelectorEd25519'), self.fdomain,
@@ -226,6 +234,14 @@ class dkimMilter(Milter.Base):
                            signature_algorithm='ed25519-sha256')
                 name, val = h.split(': ', 1)
                 self.addheader(name, val.strip().replace('\r\n', '\n'), 0)
+                if (milterconfig.get('Syslog') and
+                    (milterconfig.get('SyslogSuccess')
+                     or milterconfig.get('debugLevel') >= 1)):
+                    syslog.syslog('{0}: {1} DKIM-Signature field added (s={2} '
+                                  'd={3})'.format(self.getsymval('i'),
+                                                  d.signature_fields.get(b'a'),
+                                                  d.signature_fields.get(b's'),
+                                                  d.domain))
         except dkim.DKIMException as x:
             if milterconfig.get('Syslog'):
                 syslog.syslog('DKIM: {0}'.format(x))
@@ -243,8 +259,8 @@ class dkimMilter(Milter.Base):
                 if res:
                     if d.signature_fields.get(b'a') == 'ed25519-sha256':
                         self.dkim_comment = ('Good {0} signature'
-                                            .format(d.signature_fields
-                                                    .get(b'a')))
+                                             .format(d.signature_fields
+                                                     .get(b'a')))
                     else:
                         self.dkim_comment = ('Good {0} bit {1} signature'
                                              .format(d.keysize,
@@ -268,8 +284,12 @@ class dkimMilter(Milter.Base):
             if res:
                 if (milterconfig.get('Syslog') and
                         (milterconfig.get('SyslogSuccess') or
-                            milterconfig.get('debugLevel') >= 1)):
-                            syslog.syslog('DKIM: Pass ({0})'.format(d.domain))
+                         milterconfig.get('debugLevel') >= 1)):
+                    syslog.syslog('{0}: {1} DKIM signature verified (s={2} '
+                                  'd={3})'.format(self.getsymval('i'),
+                                                  d.signature_fields.get(b'a'),
+                                                  d.signature_fields.get(b's'),
+                                                  d.domain))
                 self.dkim_domain = d.domain
             else:
                 if milterconfig.get('DiagnosticDirectory'):
