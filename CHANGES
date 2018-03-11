@@ -1,5 +1,7 @@
-0.9.5.1
+0.9.5.1 2018-03-10
  - Add conf file location to systemd unit file
+ - Add information to README about manually putting init scripts in the right
+   locations
 
 0.9.5 2018-03-10
  - Beta 1 (updated Alpha -> Beta warning in README and trove classifiers)

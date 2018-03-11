@@ -13,6 +13,12 @@ default is a feature:
 
 python setup.py install --single-version-externally-managed --record=/dev/null
 
+This should install everything, except for the service/init scripts to the
+correct locations.  dkimpy-milter.service needs to be manually copied to
+/lib/systemd/system (on Debian, location may be different on other
+distributions or operating systems).  Similary, the sysv init script needs to
+be copied to /etc/init.d for sysv users.
+
 For users of Debian Stable (Debian 9, Codename Squueze), all dependencies are
 available in either the main or backports repositories:
 
