@@ -5,7 +5,7 @@ After=syslog.target network.target
 [Service]
 Type=simple
 PIDFile=/var/run/dkimpy-milter/dkimpy-milter.pid
-ExecStart=/usr/local/bin/dkimpy-milter 
+ExecStart=/usr/local/bin/dkimpy-milter /usr/local/etc/dkimpy-milter.conf 
 
 [Install]
 WantedBy=multi-user.target
