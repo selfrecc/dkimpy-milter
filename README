@@ -48,6 +48,14 @@ As an example, using the default dkimpy-user on Debian, the command would be:
 Since /var/run or /run is sometimes on a tempfs, if the PID file directory is
 missing, the milter will create it on startup.
 
+To start dkimpy-milter with systemd for the first time, you will need to take
+the following steps:
+
+[sudo] systemctl daemon-reload
+[sudo] systemctl enable dkimpy-milter
+[sudo] systemctl start dkimpy-milter
+[sudo] systemctl status dkimpy-milter (to verify it started correctly)
+
 As with all milters, dkimpy-milter needs to be integrated with your MTA of
 choice (Sendmail or Postfix).
 
