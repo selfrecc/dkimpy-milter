@@ -1,3 +1,6 @@
+0.9.6 UNRELEASED
+ - Fixed typo in package installation section of README
+
 0.9.5.1 2018-03-10
  - Add conf file location to systemd unit file
  - Fix setup.py install locations so they are installed correctly
