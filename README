@@ -16,7 +16,7 @@ python setup.py install --single-version-externally-managed --record=/dev/null
 For users of Debian Stable (Debian 9, Codename Squueze), all dependencies are
 available in either the main or backports repositories:
 
-[sudo] apt install python-milter python-nacl pthon-ipaddress python-dnspython
+[sudo] apt install python-milter python-nacl python-ipaddress python-dnspython
 [sudo] apt install -t squeeze-backports python-authres python-dkim
 
 The preferred method of installation is from PyPi using pip (if distribution
