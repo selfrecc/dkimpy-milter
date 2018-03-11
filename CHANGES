@@ -1,4 +1,4 @@
-0.9.5 UNRELEASED
+0.9.5 2018-03-10
  - Beta 1 (updated Alpha -> Beta warning in README and trove classifiers)
  - Added support for MacroList option
  - Added support for MacroListVerify option
