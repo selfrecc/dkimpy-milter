@@ -324,7 +324,7 @@ def main():
     global privateEd25519
     privateRSA = False
     privateEd25519 = False
-    configFile = '/usr/loca/etc/dkimpy-milter.conf'
+    configFile = '/usr/local/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
         if sys.argv[1] in ('-?', '--help', '-h'):
             print('usage: dkimpy-milter [<configfilename>]')
