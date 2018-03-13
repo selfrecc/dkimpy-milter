@@ -53,6 +53,7 @@ ClockDrift (requires dkimpy change)
 DNSTimeout (requires dkmpy change)
 MilterDebug
 MinimumKeyBits
+OversignHeaders (may require dkimpy changes)
 PeerList
 SignatureAlgorithm
 
@@ -83,7 +84,6 @@ On-InternalError
 On-KeyNotFound
 On-NoSignature
 On-SignatureError
-OversignHeaders
 RemoveARAll
 RemoveARFrom
 RemoveOldSignatures 
