@@ -130,7 +130,10 @@ class dkimMilter(Milter.Base):
             self.has_dkim += 1
         if lname == 'from':
             fname, self.author = parseaddr(val)
-            self.fdomain = self.author.split('@')[1]
+            try:
+                self.fdomain = self.author.split('@')[1]
+            except IndexError as er:
+                self.fdomain = ''  # self.author was not a proper email address
             if (milterconfig.get('Syslog') and
                     milterconfig.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))

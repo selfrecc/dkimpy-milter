@@ -1,8 +1,11 @@
-0.9.6 UNRELEASED
+0.9.6 2018-03-13
  - Fixed typo in package installation section of README
  - Added more to README about first run with systemd
  - Fixed typo in path for fallback location of the config file if one is not
    provided
+ - Added protection for malformed From addresses.  If the From does not at
+   least have an '@' in the address, then the signing domain is not extracted
+   and the message will not be signed
 
 0.9.5.1 2018-03-10
  - Add conf file location to systemd unit file
