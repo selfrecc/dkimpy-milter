@@ -18,7 +18,6 @@
 
 from setuptools import setup
 import os
-import dkimpy_milter
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
 
@@ -31,7 +30,7 @@ except ImportError:  # If PyDNS is not installed, prefer dnspython
 
 setup(
     name='dkimpy-milter',
-    version=dkimpy_milter.__version__,
+    version='0.9.7',
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
