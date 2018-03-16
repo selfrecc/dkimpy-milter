@@ -13,8 +13,6 @@
 # Provides:          dkim-milter dkim-milter-python dkimpy-milter
 # Required-Start:    $remote_fs $syslog $network $time
 # Required-Stop:     $remote_fs $syslog $network
-# Should-Start:
-# Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: dkimpy-milter
@@ -31,7 +29,7 @@ NAME=dkimpy-milter
 DESC="Python DKIM Milter"
 USER=dkimpy-milter
 GROUP=dkimpy-milter
-SOCKET=$RUNDIR/dkimpy-milter.pid
+SOCKET=$RUNDIR/dkimpy-milter.sock
 
 test -x $DAEMON || exit 0
 
@@ -70,8 +68,8 @@ case "$1" in
 		fi
 	fi
 
-	start-stop-daemon --start --chuid $USER --background --quiet --pidfile \
-		$RUNDIR/$NAME.pid --exec $DAEMON $sysconfdir/$NAME.conf
+        start-stop-daemon --start --quiet --pidfile $RUNDIR/$NAME.pid --startas \
+                $DAEMON $sysconfdir/$NAME.conf --name $NAME --test > /dev/null \
 	echo "$NAME."
 	;;
   stop)
