@@ -1,3 +1,6 @@
+0.9.7 UNRELEASED
+ - Made sysv init executable
+
 0.9.6 2018-03-13
  - Fixed typo in package installation section of README
  - Added more to README about first run with systemd
