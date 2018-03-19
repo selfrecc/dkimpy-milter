@@ -1,4 +1,4 @@
-0.9.7 UNRELEASED
+0.9.7 2018-03-19
  - Made sysv init executable
  - Add missing documentation key to system/dkimpy-milter.service
  - Put version directly in setup.py and do not import dkimpy_milter to ease
