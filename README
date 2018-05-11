@@ -1,6 +1,5 @@
-This is a DKIM signing and verification milter.  In theory it works with both
-Postfix and Sendmail, but the author has zero experience with Sendmail, so
-reports of success/failure with Sendmail and patches are welcom.
+This is a DKIM signing and verification milter.  In theory it has been tested
+with both Postfix and Sendmail.
 
 The configuration file is designed to be compatible with OpenDKIM, but only
 a subset of OpenDKIM options are supported.  If an unsupported option is
@@ -25,7 +24,10 @@ packages are not available):
 [sudo] pip install dkimpy_milter
 
 Using pip will cause required packages to be installed via easy_install if they
-have not been previously installed.
+have not been previously installed.  Because pymilter and PyNaCl are compiled
+Python extensions, the system will need appropriate development packages and
+an C compiler.  Alternately, install these dependencies from dsitribution/OS
+packages and then pip install dkimpy_milter.
 
 The milter will work with either pydns (DNS) or dnspython (dns), preferring
 dnspython is both are available.  The dkimpy DKIM module also works with
@@ -126,10 +128,13 @@ MacroListVerify		daemon_name|VERIFYING
 
 
 The python DKIM library, dkimpy, requires the entire message being signed or
-verified to be in memory, so dkimpy-milter does not write messages out to a temp
-file.  This may impact performance on low-memory systems.
+verified to be in memory, so dkimpy-milter does not write messages out to a
+temp file.  This may impact performance on low-memory systems.
 
-This is an beta grade release to support interoperability testing with Ed25519
-signatures sufficient functionality for basic use.  The documented
-functionality has been implemented and at least partially tested.  It is free
-of known major defects, but is not fully tested in a variety of environments.
+This is an initial production release to support interoperability testing with
+Ed25519 signatures sufficient functionality for basic use.  The documented
+functionality has been implemented and at generally partially tested.  It is
+free of known defects, but is not fully tested in a variety of environments.
+
+DKIM Ed25519 signatures are still in development, but the specification is
+technically stable.  Version 1.0.0 supports draft-ietf-dcrup-dkim-crypto-09.

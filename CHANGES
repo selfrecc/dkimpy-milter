@@ -1,3 +1,6 @@
+1.0.0 2018-05-11
+ - Minor documentation updates
+
 0.9.7 2018-03-19
  - Made sysv init executable
  - Add missing documentation key to system/dkimpy-milter.service
