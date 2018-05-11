@@ -1,7 +1,7 @@
 [Unit]
 Description=DKIMpy Milter
 Documentation=man:dkimpy-milter(8) man:dkimpy-milter.conf(5) 
-After=syslog.target network.target
+After=network.target
 
 [Service]
 Type=simple

@@ -1,5 +1,6 @@
 1.0.0 2018-05-11
  - Minor documentation updates
+ - Deleted reference to obsolete syslog target in unit file
 
 0.9.7 2018-03-19
  - Made sysv init executable
