@@ -41,6 +41,12 @@ SyslogSuccess   implemented     verified
 1.0.0
 No additional features planned
 
+1.1.0
+KeyTable
+KeytableEd25519
+SigningTable
+SigningTableEd25519
+
 Plannedataset type support (if needed):
 db:/.db
 mdb:
@@ -67,8 +73,6 @@ ExternalIgnoreList
 FixCRLF
 KeepAuthResults
 KeepTemporaryFiles
-KeyTable
-KeytableEd25519
 LogResults
 LogWhy
 MaximumHeaders
@@ -92,7 +96,6 @@ RequireSafeKeys
 SignatureAlgorithm
 SignatureTTL
 SignHeaders
-SigningTable
 SoftwareHeader
 StrictHeaders
 SubDomains

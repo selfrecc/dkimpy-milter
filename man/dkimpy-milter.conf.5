@@ -133,7 +133,7 @@
 dkimpy-milter \- Python milter for DKIM signing and validation
 .SH "VERSION"
 .IX Header "VERSION"
-0\.9\.2
+1\.1\.0
 
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
@@ -229,12 +229,16 @@ domains will be verified rather than being signed.
 
 This parameter is not required if a
 .I SigningTable
+or
+.I SigningTableEd25519
 is in use; in that case, the list of signed domains is implied by the
-lines in that file. [SigningTable NOT IMPLEMENTED]
+lines in that file.
 
 This parameter is ignored if a
 .I KeyTable
-is defined. [KeyTable NOT IMPLEMENTED]
+or
+.I KeyTableD25119
+is defined.
 
 .TP
 .I InternalHosts (dataset)
@@ -252,7 +256,7 @@ address explicitly. [PeerList NOT IMPLEMENTED]
 Gives the location of a PEM-formatted private key to be used for RSA signing
 all messages.  Ignored if a
 .I KeyTable
-is defined. [KeyTable NOT IMPLEMENTED]
+is defined.
 
 .TP
 .I KeyFileEd25519 (string)
@@ -260,7 +264,17 @@ Gives the location of a Ed25519 private key to be used for Ed25519 signing
 all messages.  File is the Base64 encoded output of RFC 8032 Ed25519 private Key
 generation (as used in dkimpy).  Ignored if a 
 .I KeyTableEd25519
-is defined.  [KeyTableEd25519 NOT IMPLEMENTED]
+is defined.
+
+.TP
+.I KeyTable (dataset)
+Gives the location of a file mapping key names to RSA signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not supported.
+
+.TP
+.I KeyTableEd25519 (dataset)
+Gives the location of a file mapping key names to Ed25519 signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not support
+ed.
+
 
 .TP
 .I MacroList (dataset)
@@ -317,7 +331,6 @@ When signing mode is enabled, one of the following combinations must also
 be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
-[fooTable options NOT IMPLEMENTED]
 
 .TP
 .I PeerList (dataset)
@@ -353,7 +366,7 @@ parameter below for more information.
 
 This parameter is ignored if a
 .I KeyTable
-is defined. [KeyTable NOT IMPLEMENTED]
+is defined.
 
 .TP
 .I SelectorEd25519 (string)
@@ -367,7 +380,33 @@ parameter below for more information.
 
 This parameter is ignored if a
 .I KeyTableEd25519
-is defined. [KeyTable NOT IMPLEMENTED]
+is defined.
+
+.TP
+.I SigningTable (dataset)
+
+Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
+
+If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
+
+If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file. ["refile support not implemented"].
+
+For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
+
+In any case, only the first match is applied.
+
+.TP
+.I SigningTableEd25519 (dataset)
+
+Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
+
+If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
+
+If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file. ["refile support not implemented"].
+
+For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
+
+In any case, only the first match is applied.
 
 .TP
 .I Socket (string)

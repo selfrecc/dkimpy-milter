@@ -136,5 +136,5 @@ Ed25519 signatures sufficient functionality for basic use.  The documented
 functionality has been implemented and at generally partially tested.  It is
 free of known defects, but is not fully tested in a variety of environments.
 
-DKIM Ed25519 signatures are still in development, but the specification is
-technically stable.  Version 1.0.0 supports draft-ietf-dcrup-dkim-crypto-09.
+DKIM Ed25519 signatures have finished development.  The specification is
+complete.  Version 1.0.0 and later support RFC 8463.
