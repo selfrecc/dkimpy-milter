@@ -176,3 +176,26 @@ def read_keyfile(milterconfig, keytype):
     for line in keylist:
         key += line
     return key
+
+def read_keytable(milterconfig, tabletype):
+    """Read keytables into in memory configuration data so all keys are read
+    before priviledges are dropped."""
+    import syslog
+    if tabletype == "RSA":
+        tablefile = milterconfig.get('KeyTable')
+    if tabletype == "Ed25519":
+        tablefile = milterconfig.get('KeyTableEd25519')
+    if milterconfig.get(tablefile):
+        keytabledata = []
+        try:
+            f = open(milterconfig.get(tablefile))
+            for row in f:
+                keytabledata.append(row) 
+            f.close()
+        except IOError as e:
+            if milterconfig.get('Syslog'):
+                syslog.syslog('Unable to read keytable {0}.  IOError: {1}'
+                              .format(tablefile, e))
+            raise
+        
+    return keytabledata
