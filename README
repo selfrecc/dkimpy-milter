@@ -80,9 +80,9 @@ http://www.elandsys.com/resources/sendmail/milter.html
 For Postfix:
 
 Integration of dkimpy-milter into Postfix is like any milter (See Postfix's
-README_FILES/MILTER_README).  Here's an example master.cf excerpt the talks to
-two dkimpy-milter instances, one configured for signing and one configured for
-verification:
+README_FILES/MILTER_README).  Here's an example master.cf excerpt that talks
+to two dkimpy-milter instances, one configured for signing and one configured
+for verification:
 
 smtp       inet  n       -       -       -      -       smtpd
     ...
