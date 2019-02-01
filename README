@@ -12,7 +12,7 @@ default is a feature:
 
 python setup.py install --single-version-externally-managed --record=/dev/null
 
-For users of Debian Stable (Debian 9, Codename Squueze), all dependencies are
+For users of Debian Stable (Debian 9, Codename Squeeze), all dependencies are
 available in either the main or backports repositories:
 
 [sudo] apt install python-milter python-nacl python-ipaddress python-dnspython
