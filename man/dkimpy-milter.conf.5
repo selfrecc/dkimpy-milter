@@ -127,16 +127,13 @@
 .rm #[ #] #H #V #F C
 .\" ========================================================================
 .\"
-.IX Title "dkimpy-milter.conf 5"
 .TH dkimpy-milter.conf 5 "2018-02-12"
 .SH "NAME"
 dkimpy-milter \- Python milter for DKIM signing and validation
 .SH "VERSION"
-.IX Header "VERSION"
 0\.9\.2
 
 .SH "DESCRIPTION"
-.IX Header "DESCRIPTION"
 .I dkimpy-milter(8)
 implements the
 .B DKIM
@@ -160,18 +157,15 @@ The provided setup.py installs this configuration file in /etc or
 Command line invocation of parameters as is done by OpenDKIM is not supported.
 
 .SH "USAGE"
-.IX Header "USAGE"
 Usage:
   dkimpy-milter [/etc/dkimpy-milter.conf]
 
 .SH "OTHER DOCUMENTATION"
-.IX Header "OTHER DOCUMENTATION"
 This documentation assumes you have read Postfix's README_FILES/MILTER_README
 (or Sendmail equivalent) and are generally familiar with Domain Keys Identified
 Mail (DKIM).  See RFC 6376 for details.
 
 .SH "SYNOPSIS"
-.IX Header "SYNOPSIS"
 
 dkimpy-milter operates with a default installed configuration file and 
 set of default configuration options that are used if the configuration file
@@ -181,14 +175,12 @@ files can be used directly.  Not all OpenDKIM options are supported.  If an
 unsupported option from OpenDKIM is specified, an error will be raised.
 
 .SH "DESCRIPTION"
-.IX Header "DESCRIPTION"
 
 Configuration options are described here and in the configuration file 
 provided with the package.  The provided setup.py installs this configuration 
 file in /etc or /usr/local/etc.
 
 .SH "OPTIONS"
-.IX Header "OPTIONS"
 
 .TP
 .I AuthservID (string)
@@ -441,7 +433,6 @@ unless an alternate
 is specified.
 
 .SH "AUTHORS"
-.IX Header "AUTHORS"
 \ddkimpy-milter\fR was written by Scott Kitterman <scott@kitterman.com>.
 It is based on dkimpy-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
 Copyright (c) 2013-2015 Stuart D. Gathman
