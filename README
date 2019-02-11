@@ -1,9 +1,16 @@
-This is a DKIM signing and verification milter.  In theory it has been tested
-with both Postfix and Sendmail.
+OVERVIEW
+========
+
+This is a DKIM signing and verification milter.  It has been tested with both
+Postfix and Sendmail.
 
 The configuration file is designed to be compatible with OpenDKIM, but only
 a subset of OpenDKIM options are supported.  If an unsupported option is
 specified, an error will be raised.
+
+
+INSTALLATION
+===========
 
 This package includes a default configuration file and man pages.  For those
 to be installed when installing using setup.py, the following incantation is
@@ -33,6 +40,48 @@ The milter will work with either pydns (DNS) or dnspython (dns), preferring
 dnspython is both are available.  The dkimpy DKIM module also works with
 either.
 
+
+SETUP
+====
+
+SIGNING KEYS
+============
+
+In order to create DKIM signatures, a private key must be available.  Signing
+keys should be protected (owned by root:root with permissions 600 in a
+directory that is not world readable).  Different keys are required for RSA
+and (if used) Ed25519.
+
+RSA
+===
+
+Both public and private keys for RSA have standard formats and there are many
+tools available to create them.  Keys must (RFC 8302) have a minimum size of
+1024 bits and should have a size of at least 2048 bits.  The dknewkey script
+that is provided with dkimpy is one such tool:
+
+dknewkey exampleprivkey
+
+will produce both the private key file (.key suffix) and a file with the DKIM
+public key record to be published DNS (.dns suffix).  RSA is the default key
+type.  2048 bits is the default key size.
+
+ED25519
+=======
+
+There is no standardized non-binary representation for Ed25519 private keys,
+so in order to generate Ed25519 keys for dkimpy-milter, dkimpy specific tools
+must be used to be compatible.  The same dknewkey script support Ed25519:
+
+dknewkey --ktype ed25519 anothernewkey
+
+will provide both the private key file (.key suffix) and a file with the DKIM
+public key record to be published DNS (.dns suffix).  Ed25519 keys do not have
+variable bit lengths.
+
+MTA INTEGRATION
+==============
+
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
 used, they will need to be updated.  The sysv init file is Debian specific and
@@ -61,7 +110,8 @@ the following steps:
 As with all milters, dkimpy-milter needs to be integrated with your MTA of
 choice (Sendmail or Postfix).
 
-For Sendmail:
+SENDMAIL
+========
 
 Configuration is very similar to opendkim, but needs some adjustment for
 dkimpy-milter. Here's an example configuration line to include in your
@@ -128,7 +178,8 @@ and deserve consideration.
     in the rewritten form, guaranteeing the input and output are the same
     and thus the signature matches the payload.
 
-For Postfix:
+POSTFIX
+=======
 
 Integration of dkimpy-milter into Postfix is like any milter (See Postfix's
 README_FILES/MILTER_README).  Here's an example master.cf excerpt that talks
@@ -178,14 +229,15 @@ MacroListVerify		daemon_name|VERIFYING
 ...
 
 
+NOTES
+=====
+
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a
 temp file.  This may impact performance on low-memory systems.
 
-This is an initial production release to support interoperability testing with
-Ed25519 signatures sufficient functionality for basic use.  The documented
-functionality has been implemented and at generally partially tested.  It is
-free of known defects, but is not fully tested in a variety of environments.
-
-DKIM Ed25519 signatures are still in development, but the specification is
-technically stable.  Version 1.0.0 supports draft-ietf-dcrup-dkim-crypto-09.
+DKIM with Ed25519 signatures are described in RFC 8463.  Version 1.0.0 and
+later support Ed25519 signing and verification.  RFC 8301 removed rsa-sha1
+from DKIM.  dkimpy-milter does not sign with rsa-sha1, but still considers
+rsa-sha1 signatures as valid for verification because they are still in
+common use and are not known to be cryptographically broken.

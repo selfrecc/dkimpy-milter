@@ -1,6 +1,7 @@
 1.0.1 UNRELEASED
  - Add additional Sendmail configuration information to README from OpenDKIM
    update based on input from Дилян Палаузов (LP: #1801619)
+ - Add information on Ed25519 key creation to README (LP: #1815313)
 
 1.0.0 2018-05-11
  - Minor documentation updates
