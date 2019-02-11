@@ -1,4 +1,6 @@
 1.0.1 UNRELEASED
+ * Reorder milter start and dropping privileges so permissions on Unix socket
+   are correct (LP: 1797720)
  - Make domain checks case insensitive for determining if signing should be
    done (LP: #1815311)
  - Add additional Sendmail configuration information to README from OpenDKIM

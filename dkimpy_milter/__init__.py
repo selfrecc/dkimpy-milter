@@ -348,13 +348,13 @@ def main():
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
+    own_socketfile(milterconfig)
+    drop_privileges(milterconfig)
+    sys.stdout.flush()
+    Milter.runmilter(miltername, socketname, 240)
     if milterconfig.get('Syslog'):
         syslog.syslog('dkimpy-milter started:{0} user:{1}'
                       .format(pid, milterconfig.get('UserID')))
-    sys.stdout.flush()
-    Milter.runmilter(miltername, socketname, 240)
-    own_socketfile(milterconfig)
-    drop_privileges(milterconfig)
 
 if __name__ == "__main__":
     main()
