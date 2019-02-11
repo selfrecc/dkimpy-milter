@@ -1,4 +1,6 @@
 1.0.1 UNRELEASED
+ - Make domain checks case insensitive for determining if signing should be
+   done (LP: #1815311)
  - Add additional Sendmail configuration information to README from OpenDKIM
    update based on input from Дилян Палаузов (LP: #1801619)
  - Add information on Ed25519 key creation to README (LP: #1815313)

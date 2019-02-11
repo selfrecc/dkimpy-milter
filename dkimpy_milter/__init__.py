@@ -131,7 +131,7 @@ class dkimMilter(Milter.Base):
         if lname == 'from':
             fname, self.author = parseaddr(val)
             try:
-                self.fdomain = self.author.split('@')[1]
+                self.fdomain = self.author.split('@')[1].lower()
             except IndexError as er:
                 self.fdomain = ''  # self.author was not a proper email address
             if (milterconfig.get('Syslog') and
@@ -228,7 +228,7 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
+                                                  d.domain.lower()))
             if privateEd25519:
                 d = dkim.DKIM(txt)
                 h = d.sign(milterconfig.get('SelectorEd25519'), self.fdomain,
@@ -244,7 +244,7 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
+                                                  d.domain.lower()))
         except dkim.DKIMException as x:
             if milterconfig.get('Syslog'):
                 syslog.syslog('DKIM: {0}'.format(x))
@@ -292,8 +292,8 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
-                self.dkim_domain = d.domain
+                                                  d.domain.lower()))
+                self.dkim_domain = d.domain.lower()
             else:
                 if milterconfig.get('DiagnosticDirectory'):
                     fd, fname = tempfile.mkstemp(".dkim")
@@ -303,7 +303,7 @@ class dkimMilter(Milter.Base):
                         syslog.syslog('DKIM: Fail (saved as {0})'
                                       .format(fname))
                 else:
-                    syslog.syslog('DKIM: Fail ({0})'.format(d.domain))
+                    syslog.syslog('DKIM: Fail ({0})'.format(d.domain.lower()))
             if res:
                 result = 'pass'
             else:
