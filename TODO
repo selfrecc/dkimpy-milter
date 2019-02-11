@@ -39,10 +39,16 @@ MacroListVerify	implemented	verified
 SyslogSuccess   implemented     verified
 
 1.0.0
-No additional features planned
+No additional features
 
-Plannedataset type support (if needed):
-db:/.db
+1.0.1
+Bug fix only, improved documentation
+
+1.1.0 (planned)
+Port to Python 3
+Subdomain support
+
+Planned dataset type support (if needed):
 mdb:
 
 Considered for near-term feature release
@@ -50,7 +56,7 @@ Considered for near-term feature release
 AlwaysAddARHeader
 ChangeRootDirectory
 ClockDrift (requires dkimpy change)
-DNSTimeout (requires dkmpy change)
+DNSTimeout (requires dkimpy change)
 MilterDebug
 MinimumKeyBits
 OversignHeaders (may require dkimpy changes)
