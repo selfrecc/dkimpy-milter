@@ -294,19 +294,7 @@ def _dataset_to_list(dataset):
         else:
             return [dataset.strip().strip(',')]
         if dataset[-3:] == '.db' or dataset[:3] == 'db:':
-            #  This is a Sleepycat (Oracle) DB  dataset
-            import whichdb  # Will need rewriting someday for python3
-            if dataset[-3:] == '.db':
-                dbname = dataset
-            elif dataset[:3] == 'db:':
-                dbname = dataset[3:]
-            else:
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'
-                                          .format(type(dataset)))
-            if whichdb.whichdb(dbname) != 'dbhash':
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'
-                                          .format(type(dataset)))
-            #TODO replace this with code to use db maps
+            #  This is a Sleepycat (Oracle) DB  dataset, which we dont support
             raise dkim.ParameterError('Unsupported dataset db datase: {0}'
                                       .format(type(dataset)))
 
