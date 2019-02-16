@@ -61,7 +61,9 @@ class dkimMilter(Milter.Base):
         self.external_connection = False
         self.hello_name = None
         # sometimes people put extra space in sendmail config, so we strip
-        self.receiver = self.getsymval('j').strip()
+        self.receiver = self.getsymval('j')
+        if self.receiver is not None:
+            self.receiver = self.receiver.strip()
         try:
             self.AuthservID = milterconfig['AuthservID']
         except:
