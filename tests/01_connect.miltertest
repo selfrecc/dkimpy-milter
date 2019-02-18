@@ -1,0 +1,14 @@
+-- -*- lua -*-
+mt.echo("beginning test")
+conn = mt.connect("unix:signing.sock")
+if conn == nil then
+  error "mt.connect() failed"
+end
+if mt.conninfo(conn, "localhost", "127.0.0.1") ~= nil then
+  error "mt.conninfo() failed"
+end
+if mt.getreply(conn) ~= SMFIR_CONTINUE then
+     error "mt.conninfo() unexpected reply"
+end
+mt.disconnect(conn)
+mt.echo("test complete")

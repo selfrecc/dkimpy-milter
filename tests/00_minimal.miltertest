@@ -1,0 +1,8 @@
+-- -*- lua -*-
+mt.echo("beginning test")
+conn = mt.connect("unix:signing.sock")
+if conn == nil then
+  error "mt.connect() failed"
+end
+mt.disconnect(conn)
+mt.echo("test complete")
