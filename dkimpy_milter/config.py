@@ -401,7 +401,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             configData[name] = conversion(value)
     fp.close()
     try:
-        configData['AuthservID'] = _make_authserv_id(configData['AuthservID'])
+        configData['AuthservID'] = _make_authserv_id(configData.get('AuthservID', 'HOSTNAME'))
         configData['IntHosts'] = HostsDataset(configData['InternalHosts'])
     except:
         pass
