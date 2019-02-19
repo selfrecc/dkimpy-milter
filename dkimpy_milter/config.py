@@ -390,7 +390,10 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         if conversion == 'bool':
             configData[name] = _find_boolean(value)
         elif conversion == 'str':
-            configData[name] = str(value)
+            if isinstance(value, list):
+                configData[name] = line.split(None, 1)[1]
+            else:
+                configData[name] = str(value)
         elif conversion == 'int':
             configData[name] = int(value)
         elif conversion == 'dataset':
