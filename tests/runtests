@@ -3,8 +3,11 @@
 set -e
 WORKDIR=$(mktemp -d)
 TESTDIR=$(realpath "$(dirname "$0")")
+DKIMPY_MILTER=${DKIMPY_MILTER:-"$TESTDIR/dkimpy-milter"}
 
 cd "$WORKDIR"
+
+printf "Testing %s from directory %s\n" "$DKIMPY_MILTER" "$WORKDIR"
 
 dknewkey --ktype ed25519 testkey
 cat > signing.conf <<EOF
@@ -45,8 +48,8 @@ cleanup() {
     rm -rf "$WORKDIR"
 }
 
-PYTHONPATH="$(dirname "$TESTDIR")" dkimpy-milter signing.conf 2>signing.stderr &
-PYTHONPATH="$(dirname "$TESTDIR")" dkimpy-milter verify.conf 2>verify.stderr &
+PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" signing.conf 2>signing.stderr &
+PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" verify.conf 2>verify.stderr &
 trap cleanup EXIT
 
 # ugly ugly (how are we supposed to know that the filter is ready?):
