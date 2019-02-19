@@ -48,6 +48,7 @@ defaultConfigData = {
     'DiagnosticDirectory': '',
     'MacroList': '',
     'MacroListVerify': '',
+    'DNSOverride': None,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -334,6 +335,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'DiagnosticDirectory': 'str',
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset',
+        'DNSOverride': 'str',
         'debugLevel': 'int'
         }
 

@@ -260,7 +260,12 @@ class dkimMilter(Milter.Base):
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
             d = dkim.DKIM(txt)
             try:
-                res = d.verify(idx=y)
+                dnsoverride = milterconfig.get('DNSOverride')
+                if isinstance(dnsoverride, str):
+                    syslog.syslog("DNSOverride: {0}".format(dnsoverride))
+                    res = d.verify(idx=y, dnsfunc=lambda _x: dnsoverride)
+                else:
+                    res = d.verify(idx=y)
                 if res:
                     if d.signature_fields.get(b'a') == 'ed25519-sha256':
                         self.dkim_comment = ('Good {0} signature'
