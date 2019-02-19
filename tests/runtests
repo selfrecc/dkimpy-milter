@@ -12,28 +12,41 @@ Domain example.net
 KeyFileEd25519 testkey.key
 SelectorEd25519 testkey
 Socket unix:signing.sock
-PidFile milter.pid
+PidFile signing.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
 EOF
-rm -f milter.pid milter.sock
+
+cat > verify.conf <<EOF
+Socket unix:verify.sock
+PidFile verify.pid
+Mode v
+DNSOverride $(cat testkey.dns)
+UserID $(id --name --user):$(id --name --group)
+EOF
 
 cleanup() {
     echo cleaning up jobs:
     jobs
-    if [ -s milter.pid ] && kill -0 "$(cat milter.pid)"; then
-        kill "$(cat milter.pid)"
-        wait
+    if [ -s signing.pid ] && kill -0 "$(cat signing.pid)"; then
+        kill "$(cat signing.pid)"
     fi
-    if [ -s stderr ]; then
-        printf -- "-> stderr:\n"
-        cat stderr
-        printf -- "-> end stderr\n"
+    if [ -s verify.pid ] && kill -0 "$(cat verify.pid)"; then
+        kill "$(cat verify.pid)"
     fi
+    wait
+    for errdata in signing.stderr verify.stderr; do
+        if [ -s "$errdata" ]; then
+            printf -- "-> %s:\n" "$errdata"
+            cat "$errdata"
+            printf -- "-> end %s\n" "$errdata"
+        fi
+    done
     rm -rf "$WORKDIR"
 }
 
-PYTHONPATH="$(dirname "$TESTDIR")" dkimpy-milter signing.conf 2>stderr &
+PYTHONPATH="$(dirname "$TESTDIR")" dkimpy-milter signing.conf 2>signing.stderr &
+PYTHONPATH="$(dirname "$TESTDIR")" dkimpy-milter verify.conf 2>verify.stderr &
 trap cleanup EXIT
 
 # ugly ugly (how are we supposed to know that the filter is ready?):
