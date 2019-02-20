@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/python3
 # Original dkim-milter.py code:
 # Author: Stuart D. Gathman <stuart@bmsi.com>
 # Copyright 2007 Business Management Systems, Inc.

@@ -31,13 +31,13 @@ import stat
 import dkim
 import socket
 import ipaddress
-from dnsplug import Session
+from .dnsplug import Session
 
 #  default values
 defaultConfigData = {
     'Syslog': 'yes',
     'SyslogFacility': 'mail',
-    'UMask': 007,
+    'UMask': 0o07,
     'Mode': 'sv',
     'Socket': 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
     'PidFile': '/var/run/dkimpy-milter/dkimpy-milter.pid',
@@ -85,14 +85,14 @@ class HostsDataset(object):
                 self.item = item[1:]
                 self.negative = True
             try:
-                self.item = ipaddress.ip_address(unicode(self.item, "utf-8"))
+                self.item = ipaddress.ip_address(str(self.item, "utf-8"))
                 if isinstance(self.item, ipaddress.IPv4Address):
                     self.isipv4 = True
                 elif isinstance(self.item, ipaddress.IPv6Address):
                     self.isipv6 = True
             except ValueError as e:
                 try:
-                    self.item = ipaddress.ip_network(unicode
+                    self.item = ipaddress.ip_network(str
                                                      (self.item, "utf-8"),
                                                      strict=False)
                     if isinstance(self.item, ipaddress.IPv4Network):
@@ -110,7 +110,7 @@ class HostsDataset(object):
 
     def match(self, connectip):
         '''Check if the connect IP is part of the dataset'''
-        source = ipaddress.ip_address(unicode(connectip, "utf-8"))
+        source = ipaddress.ip_address(str(connectip, "utf-8"))
         for item in self.dataset:
             if item.isdomain or item.ishostname:
                 result = self.matchname(source)   # Match host/domains first
@@ -160,13 +160,13 @@ class HostsDataset(object):
             if isinstance(source, ipaddress.IPv4Address):
                 ips = s.dns(name, 'A')
                 for ip in ips:
-                    ip = ipaddress.IPv4Address(unicode(ip, 'UTF-8'))
+                    ip = ipaddress.IPv4Address(str(ip, 'UTF-8'))
                     if ip == source:
                         results.append(name)
             if isinstance(source, ipaddress.IPv6Address):
                 ips = s.dns(name, 'AAAA')
                 for ip in ips:
-                    ip = ipaddress.IPv6Address(unicode(ip, 'UTF-8'))
+                    ip = ipaddress.IPv6Address(str(ip, 'UTF-8'))
                 if ip == source:
                     results.append(name)
         return results
@@ -225,13 +225,13 @@ def _processConfigFile(filename=None, configdata=None, useSyslog=1,
     '''Load the specified config file, exit and log errors if it fails,
     otherwise return a config dictionary.'''
 
-    import config
+    from . import config
     if configdata is None:
         configdata = config.defaultConfigData
     if filename is not None:
         try:
             _readConfigFile(filename, configdata)
-        except Exception, e:
+        except Exception as e:
             raise
             if useSyslog:
                 syslog.syslog(e.args[0])
@@ -342,7 +342,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
     #  check to see if it's a file
     try:
         mode = os.stat(path)[0]
-    except OSError, e:
+    except OSError as e:
         syslog.syslog(syslog.LOG_ERR, 'ERROR stating "%s": %s'
                       % (path, e.strerror))
         return(configData)

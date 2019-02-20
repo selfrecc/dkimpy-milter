@@ -84,7 +84,7 @@ class Session(object):
             raise DNSError('Length of CNAME chain exceeds %d' % MAX_CNAME)
         cnames[name] = cname
         if cname in cnames:
-            raise DNSError, 'CNAME loop'
+            raise DNSError('CNAME loop')
         result = self.dns(cname, qtype, cnames=cnames)
     return result
 
@@ -103,16 +103,16 @@ def DNSLookup_pydns(name, qtype, tcpfallback=True, timeout=30):
         #
         if resp.header['tc'] == True:
           if not tcpfallback:
-              raise DNS.DNSError, 'DNS: Truncated UDP Reply, SPF records should fit in a UDP packet'
+              raise DNS.DNSError('DNS: Truncated UDP Reply, SPF records should fit in a UDP packet')
           try:
               req = DNS.DnsRequest(name, qtype=qtype, protocol='tcp',
                         timeout=timeout)
               resp = req.req()
-          except DNS.DNSError, x:
-              raise DNS.DNSError, 'TCP Fallback error: ' + str(x)
+          except DNS.DNSError as x:
+              raise DNS.DNSError('TCP Fallback error: ' + str(x))
         return [((a['name'], a['typename']), a['data']) for a in resp.answers]
-    except IOError, x:
-        raise DNS.DNSError, 'DNS: ' + str(x)
+    except IOError as x:
+        raise DNS.DNSError('DNS: ' + str(x))
 
 def DNSLookup_dnspython(name,qtype,tcpfallback=True,timeout=30):
   retVal = []
@@ -164,5 +164,5 @@ if __name__ == '__main__':
   import sys
   s = Session()
   for n,t in zip(*[iter(sys.argv[1:])]*2):
-    print n,t
-    print s.dns(n,t)
+    print(n,t)
+    print(s.dns(n,t))
