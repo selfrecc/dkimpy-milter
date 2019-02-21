@@ -40,7 +40,7 @@ defaultConfigData = {
     'UMask': 0o07,
     'Mode': 'sv',
     'Socket': None,
-    'PidFile': '/var/run/dkimpy-milter/dkimpy-milter.pid',
+    'PidFile': None,
     'UserID': 'dkimpy-milter',
     'Canonicalization': 'relaxed/simple',
     'InternalHosts': '127.0.0.1',
