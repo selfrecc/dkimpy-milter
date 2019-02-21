@@ -4,55 +4,72 @@ set -e
 WORKDIR=$(mktemp -d)
 TESTDIR=$(realpath "$(dirname "$0")")
 DKIMPY_MILTER=${DKIMPY_MILTER:-"$TESTDIR/dkimpy-milter"}
+KEY_TYPES=(ed25519 rsa)
 
 cd "$WORKDIR"
 
 printf "Testing %s from directory %s\n" "$DKIMPY_MILTER" "$WORKDIR"
 
-dknewkey --ktype ed25519 testkey
-cat > signing.conf <<EOF
+for keytype in "${KEY_TYPES[@]}"; do
+    dknewkey --ktype "$keytype" "testkey.$keytype"
+    if [ "$keytype" = ed25519 ]; then
+        keyfile=KeyFileEd25519
+        selector=SelectorEd25519
+    else
+        keyfile=KeyFile
+        selector=Selector
+    fi
+    cat > "$keytype.signing.conf" <<EOF
 Domain example.net
-KeyFileEd25519 testkey.key
-SelectorEd25519 testkey
-Socket unix:signing.sock
-PidFile signing.pid
+$keyfile testkey.$keytype.key
+$selector testkey
+Socket unix:$keytype.signing.sock
+PidFile $keytype.signing.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
 EOF
 
-cat > verify.conf <<EOF
-Socket unix:verify.sock
-PidFile verify.pid
+    cat > "$keytype.verify.conf" <<EOF
+Socket unix:$keytype.verify.sock
+PidFile $keytype.verify.pid
 Mode v
-DNSOverride $(cat testkey.dns)
+DNSOverride $(cat testkey.$keytype.dns)
 UserID $(id --name --user):$(id --name --group)
 EOF
+done
 
 cleanup() {
     echo cleaning up jobs:
     jobs
-    if [ -s signing.pid ] && kill -0 "$(cat signing.pid)"; then
-        kill "$(cat signing.pid)"
-    fi
-    if [ -s verify.pid ] && kill -0 "$(cat verify.pid)"; then
-        kill "$(cat verify.pid)"
-    fi
+    for keytype in "${KEY_TYPES[@]}"; do
+        for func in signing verify; do
+            if [ -s "$keytype.$func.pid" ] && kill -0 "$(cat "$keytype.$func.pid")"; then
+                kill "$(cat $keytype.$func.pid)"
+            fi
+        done
+    done
     wait
-    for errdata in signing.stderr verify.stderr; do
-        if [ -s "$errdata" ]; then
-            printf -- "-> %s:\n" "$errdata"
-            cat "$errdata"
-            printf -- "-> end %s\n" "$errdata"
-        fi
+    for keytype in "${KEY_TYPES[@]}"; do
+        for func in signing verify; do
+            errdata="$keytype.$func.stderr"
+            if [ -s "$errdata" ]; then
+                printf -- "-> %s:\n" "$errdata"
+                cat "$errdata"
+                printf -- "-> end %s\n" "$errdata"
+            fi
+        done
     done
     rm -rf "$WORKDIR"
 }
 
-PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" signing.conf 2>signing.stderr &
-PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" verify.conf 2>verify.stderr &
+for keytype in "${KEY_TYPES[@]}"; do
+    for func in signing verify; do
+        PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" "$keytype.$func.conf" 2>"$keytype.$func.stderr" &
+    done
+done
 trap cleanup EXIT
 
-# ugly ugly (how are we supposed to know that the filter is ready?):
+# ugly ugly (how are we supposed to know that the milters are all ready?):
 sleep 2
 
 # uses miltertest from opendkim:

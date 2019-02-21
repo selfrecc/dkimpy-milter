@@ -1,5 +1,4 @@
 -- -*- lua -*-
-mt.echo("beginning test")
 
 msg = {
    ['headers'] = {
@@ -70,29 +69,32 @@ function connect_and_send (sockname, headers, body)
    return conn
 end
 
-signing = connect_and_send("unix:signing.sock", msg.headers, msg.body)
--- verify that a test header field got added
-if not mt.eom_check(signing, MT_HDRINSERT) then
-   error "no header added by signer"
+for _, keytype in ipairs({"ed25519", "rsa"}) do
+   mt.echo("testing "..keytype)
+   signing = connect_and_send("unix:"..keytype..".signing.sock", msg.headers, msg.body)
+   -- verify that a test header field got added
+   if not mt.eom_check(signing, MT_HDRINSERT) then
+      error "no header added by signer"
+   end
+
+   signature = mt.getheader(signing, "DKIM-Signature", 0)
+
+   mt.disconnect(signing)
+
+   mt.echo("DKIM-Signature: " .. signature)
+
+   msg.headers['DKIM-Signature'] = signature
+
+   verify = connect_and_send("unix:"..keytype..".verify.sock", msg.headers, msg.body)
+
+   if not mt.eom_check(verify, MT_HDRINSERT) then
+      error "no header added in verify"
+   end
+
+   authres = mt.getheader(verify, "Authentication-Results", 0)
+   mt.echo("Authentication-Results: "..authres)
+
+   mt.disconnect(verify)
+
+   mt.echo(keytype.." complete")
 end
-
-signature = mt.getheader(signing, "DKIM-Signature", 0)
-
-mt.disconnect(signing)
-
-mt.echo("DKIM-Signature: " .. signature)
-
-msg.headers['DKIM-Signature'] = signature
-
-verify = connect_and_send("unix:verify.sock", msg.headers, msg.body)
-
-if not mt.eom_check(verify, MT_HDRINSERT) then
-   error "no header added in verify"
-end
-
-authres = mt.getheader(verify, "Authentication-Results", 0)
-mt.echo("Authentication-Results: "..authres)
-
-mt.disconnect(verify)
-
-mt.echo("test complete")

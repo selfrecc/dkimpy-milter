@@ -1,36 +1,40 @@
 -- -*- lua -*-
-mt.echo("beginning test")
-conn = mt.connect("unix:signing.sock")
-if conn == nil then
-  error "mt.connect() failed"
-end
-if mt.conninfo(conn, "localhost", "127.0.0.1") ~= nil then
-  error "mt.conninfo() failed"
-end
-if mt.getreply(conn) ~= SMFIR_CONTINUE then
-     error "mt.conninfo() unexpected reply"
-end
+for _, keytype in ipairs({"ed25519", "rsa"}) do
+   for _, func in ipairs({"signing", "verify"}) do
+      mt.echo("testing "..keytype.." "..func)
+      conn = mt.connect("unix:"..keytype.."."..func..".sock")
+      if conn == nil then
+         error("mt.connect() failed "..keytype.." "..func)
+      end
+      if mt.conninfo(conn, "localhost", "127.0.0.1") ~= nil then
+         error("mt.conninfo() failed "..keytype.." "..func)
+      end
+      if mt.getreply(conn) ~= SMFIR_CONTINUE then
+         error("mt.conninfo() unexpected reply "..keytype.." "..func)
+      end
 
-if mt.test_action(conn, SMFIF_ADDHDRS) then
-   print "could add headers"
-else
-   error "mt.test_action() says could not add headers"
-end
+      if mt.test_action(conn, SMFIF_ADDHDRS) then
+         print("could add headers "..keytype.." "..func)
+      else
+         error("mt.test_action() says could not add headers "..keytype.." "..func)
+      end
 
-if mt.test_action(conn, SMFIF_CHGHDRS) then
-   print "could change headers"
-else
-   error "mt.test_action() says could not change headers"
-end
+      if mt.test_action(conn, SMFIF_CHGHDRS) then
+         print("could change headers "..keytype.." "..func)
+      else
+         error("mt.test_action() says could not change headers "..keytype.." "..func)
+      end
 
 -- -- FIXME: this part of the test fails, as apparently the
 -- -- dkimpy-milter claims the right to change the body of a message,
 -- -- even though it shouldn't.  How can we fix the negotiation?
--- if mt.test_action(conn, SMFIF_CHGBODY) then
---   error "mt.test_action() says could change body"
--- else
---   print "could not change body"
--- end
+--      if mt.test_action(conn, SMFIF_CHGBODY) then
+--         error("mt.test_action() says could change body "..keytype.." "..func)
+--      else
+--         print("could not change body "..keytype.." "..func)
+--      end
 
-mt.disconnect(conn)
-mt.echo("test complete")
+      mt.disconnect(conn)
+      mt.echo(keytype.." "..func.." test complete")
+   end
+end
