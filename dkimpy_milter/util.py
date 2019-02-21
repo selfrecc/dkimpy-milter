@@ -160,7 +160,8 @@ def own_socketfile(milterconfig):
         offset = 5
 
     if offset is not None:
-        os.chown(sockname[offset:], user, group)
+        if os.path.exists(sockname[offset:]):
+            os.chown(sockname[offset:], user, group)
 
 
 def read_keyfile(milterconfig, keytype):
