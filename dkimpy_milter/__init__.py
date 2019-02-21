@@ -354,7 +354,9 @@ def main():
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
-    own_socketfile(milterconfig)
+    if socketname is None:
+        socketname = 'local:/var/run/dkimpy-milter/dkimpy-milter.sock'
+    own_socketfile(milterconfig, socketname)
     drop_privileges(milterconfig)
     sys.stdout.flush()
     Milter.runmilter(miltername, socketname, 240)

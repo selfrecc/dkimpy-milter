@@ -39,7 +39,7 @@ defaultConfigData = {
     'SyslogFacility': 'mail',
     'UMask': 0o07,
     'Mode': 'sv',
-    'Socket': 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
+    'Socket': None,
     'PidFile': '/var/run/dkimpy-milter/dkimpy-milter.pid',
     'UserID': 'dkimpy-milter',
     'Canonicalization': 'relaxed/simple',
