@@ -150,10 +150,17 @@ def own_socketfile(milterconfig):
     """If socket is Unix socket, chown to UserID before dropping privileges"""
     import os
     user, group = user_group(milterconfig.get('UserID'))
-    if milterconfig.get('Socket')[:1] == '/':
-        os.chown(milterconfig.get('Socket'), user, group)
-    if milterconfig.get('Socket')[:6] == "local:":
-        os.chown(milterconfig.get('Socket')[6:], user, group)
+    offset = None
+    sockname = milterconfig.get('Socket')
+    if sockname[:1] == '/':
+        offset = 0
+    elif sockname[:6] == "local:":
+        offset = 6
+    elif sockname[:5] == "unix:":
+        offset = 5
+
+    if offset is not None:
+        os.chown(sockname[offset:], user, group)
 
 
 def read_keyfile(milterconfig, keytype):
