@@ -1,5 +1,10 @@
 1.1.0 UNRELEASED
  - Port to python3
+ - Add test suite using opendkim miltertest
+ - When Socket is absolute path, do not strip leading /
+ - Handle unix: socket prefix the same as local:
+ - Set up correct AuthservID defaults
+ - config: Reassemble strings sensibly
 
 1.0.1 2019-02-11
  - Reorder milter start and dropping privileges so permissions on Unix socket
