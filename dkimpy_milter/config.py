@@ -48,6 +48,7 @@ defaultConfigData = {
     'DiagnosticDirectory': '',
     'MacroList': '',
     'MacroListVerify': '',
+    'DNSOverride': None,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -334,6 +335,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'DiagnosticDirectory': 'str',
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset',
+        'DNSOverride': 'str',
         'debugLevel': 'int'
         }
 
@@ -388,7 +390,10 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         if conversion == 'bool':
             configData[name] = _find_boolean(value)
         elif conversion == 'str':
-            configData[name] = str(value)
+            if isinstance(value, list):
+                configData[name] = line.split(None, 1)[1]
+            else:
+                configData[name] = str(value)
         elif conversion == 'int':
             configData[name] = int(value)
         elif conversion == 'dataset':
@@ -399,7 +404,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             configData[name] = conversion(value)
     fp.close()
     try:
-        configData['AuthservID'] = _make_authserv_id(configData['AuthservID'])
+        configData['AuthservID'] = _make_authserv_id(configData.get('AuthservID', 'HOSTNAME'))
         configData['IntHosts'] = HostsDataset(configData['InternalHosts'])
     except:
         pass

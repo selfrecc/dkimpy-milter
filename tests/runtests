@@ -1,0 +1,84 @@
+#!/bin/bash
+
+set -e
+WORKDIR=$(mktemp -d)
+TESTDIR=$(realpath "$(dirname "$0")")
+DKIMPY_MILTER=${DKIMPY_MILTER:-"$TESTDIR/dkimpy-milter"}
+KEY_TYPES=(ed25519 rsa)
+
+cd "$WORKDIR"
+
+printf "Testing %s from directory %s\n" "$DKIMPY_MILTER" "$WORKDIR"
+
+for keytype in "${KEY_TYPES[@]}"; do
+    dknewkey --ktype "$keytype" "testkey.$keytype"
+    if [ "$keytype" = ed25519 ]; then
+        keyfile=KeyFileEd25519
+        selector=SelectorEd25519
+    else
+        keyfile=KeyFile
+        selector=Selector
+    fi
+    cat > "$keytype.signing.conf" <<EOF
+Domain example.net
+$keyfile testkey.$keytype.key
+$selector testkey
+Socket unix:$keytype.signing.sock
+PidFile $keytype.signing.pid
+Mode s
+UserID $(id --name --user):$(id --name --group)
+EOF
+
+    cat > "$keytype.verify.conf" <<EOF
+Socket unix:$keytype.verify.sock
+PidFile $keytype.verify.pid
+Mode v
+DNSOverride $(cat testkey.$keytype.dns)
+UserID $(id --name --user):$(id --name --group)
+EOF
+done
+
+cleanup() {
+    echo cleaning up jobs:
+    jobs
+    for keytype in "${KEY_TYPES[@]}"; do
+        for func in signing verify; do
+            if [ -s "$keytype.$func.pid" ] && kill -0 "$(cat "$keytype.$func.pid")"; then
+                kill "$(cat $keytype.$func.pid)"
+            fi
+        done
+    done
+    wait
+    for keytype in "${KEY_TYPES[@]}"; do
+        for func in signing verify; do
+            errdata="$keytype.$func.stderr"
+            if [ -s "$errdata" ]; then
+                printf -- "-> %s:\n" "$errdata"
+                cat "$errdata"
+                printf -- "-> end %s\n" "$errdata"
+            fi
+        done
+    done
+    rm -rf "$WORKDIR"
+}
+
+for keytype in "${KEY_TYPES[@]}"; do
+    for func in signing verify; do
+        PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" "$keytype.$func.conf" 2>"$keytype.$func.stderr" &
+    done
+done
+trap cleanup EXIT
+
+# ugly ugly (how are we supposed to know that the milters are all ready?):
+sleep 2
+
+# uses miltertest from opendkim:
+for x in ${TESTS:-"$TESTDIR"/*.miltertest}; do
+    if ! [ -e "$x" ]; then
+        if [ -e "$TESTDIR/$x" ]; then
+            x="$TESTDIR/$x"
+        fi
+    fi
+    printf -- "-> running %s...\n" "$x"
+    miltertest -s "$x"
+done

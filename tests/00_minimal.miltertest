@@ -1,0 +1,12 @@
+-- -*- lua -*-
+for _, keytype in ipairs({"ed25519", "rsa"}) do
+   for _, func in ipairs({"signing", "verify"}) do
+      mt.echo("testing "..keytype.." "..func)
+      conn = mt.connect("unix:"..keytype.."."..func..".sock")
+      if conn == nil then
+         error("mt.connect() failed "..keytype.." "..func)
+      end
+      mt.disconnect(conn)
+      mt.echo(keytype.." "..func.." complete")
+   end
+end

@@ -311,6 +311,13 @@ be set:
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 [fooTable options NOT IMPLEMENTED]
 
+.TP 
+.I DNSOverride (string)
+Provide a text string that a verifying milter should use instead of
+consulting the DNS on each message.  This is useful primarily for
+testing purposes in environments where it is awkward to modify the
+system DNS resolution.  It should not be used in production.
+
 .TP
 .I PeerList (dataset)
 Identifies a set of "peers" that identifies clients whose connections

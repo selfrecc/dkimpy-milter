@@ -61,7 +61,9 @@ class dkimMilter(Milter.Base):
         self.external_connection = False
         self.hello_name = None
         # sometimes people put extra space in sendmail config, so we strip
-        self.receiver = self.getsymval('j').strip()
+        self.receiver = self.getsymval('j')
+        if self.receiver is not None:
+            self.receiver = self.receiver.strip()
         try:
             self.AuthservID = milterconfig['AuthservID']
         except:
@@ -258,7 +260,12 @@ class dkimMilter(Milter.Base):
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
             d = dkim.DKIM(txt)
             try:
-                res = d.verify(idx=y)
+                dnsoverride = milterconfig.get('DNSOverride')
+                if isinstance(dnsoverride, str):
+                    syslog.syslog("DNSOverride: {0}".format(dnsoverride))
+                    res = d.verify(idx=y, dnsfunc=lambda _x: dnsoverride)
+                else:
+                    res = d.verify(idx=y)
                 if res:
                     if d.signature_fields.get(b'a') == 'ed25519-sha256':
                         self.dkim_comment = ('Good {0} signature'
