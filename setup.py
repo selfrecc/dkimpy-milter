@@ -1,7 +1,7 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 # dkimpy-milter: A DKIM signing/verification Milter application
 # Author: Scott Kitterman <scott@kitterman.com>
-# Copyright 2018 Scott Kitterman
+# Copyright 2018,2019 Scott Kitterman
 """    This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@ except ImportError:  # If PyDNS is not installed, prefer dnspython
 
 setup(
     name='dkimpy-milter',
-    version='1.0.1',
+    version='1.1.0',
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
@@ -43,7 +43,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 2 :: Only',
+        'Programming Language :: Python :: 3',
         'Topic :: Communications :: Email :: Mail Transport Agents',
         'Topic :: Communications :: Email :: Filters',
         'Topic :: Security',

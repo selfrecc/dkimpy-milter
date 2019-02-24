@@ -1,5 +1,8 @@
+1.1.0 UNRELEASED
+ - Port to python3
+
 1.0.1 2019-02-11
- * Reorder milter start and dropping privileges so permissions on Unix socket
+ - Reorder milter start and dropping privileges so permissions on Unix socket
    are correct (LP: 1797720)
  - Make domain checks case insensitive for determining if signing should be
    done (LP: #1815311)
