@@ -24,9 +24,9 @@ description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for P
 kw = {}  # Work-around for lack of 'or' requires in setuptools.
 try:
     import dns
-    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'dnspython']
+    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'dnspython']
 except ImportError:  # If PyDNS is not installed, prefer dnspython
-    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'ipaddress', 'PyDNS']
+    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'PyDNS']
 
 setup(
     name='dkimpy-milter',
@@ -43,7 +43,7 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Natural Language :: English',
         'Operating System :: POSIX',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Topic :: Communications :: Email :: Mail Transport Agents',
         'Topic :: Communications :: Email :: Filters',
         'Topic :: Security',

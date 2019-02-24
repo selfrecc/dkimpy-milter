@@ -1,2 +1,2 @@
 #!/bin/sh
-python2 -m dkimpy_milter "$@"
+python3 -m dkimpy_milter "$@"
