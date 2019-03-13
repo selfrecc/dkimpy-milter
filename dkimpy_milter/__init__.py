@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/bin/python3
 # Original dkim-milter.py code:
 # Author: Stuart D. Gathman <stuart@bmsi.com>
 # Copyright 2007 Business Management Systems, Inc.
@@ -28,8 +28,9 @@ import dkim
 import authres
 import os
 import tempfile
-import StringIO
+import io
 import re
+import codecs
 from Milter.utils import parse_addr, parseaddr
 import dkimpy_milter.config as config
 from dkimpy_milter.util import drop_privileges
@@ -39,7 +40,7 @@ from dkimpy_milter.util import read_keyfile
 from dkimpy_milter.util import own_socketfile
 from dkimpy_milter.util import fold
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 FWS = re.compile(r'\r?\n[ \t]+')
 
 
@@ -61,7 +62,9 @@ class dkimMilter(Milter.Base):
         self.external_connection = False
         self.hello_name = None
         # sometimes people put extra space in sendmail config, so we strip
-        self.receiver = self.getsymval('j').strip()
+        self.receiver = self.getsymval('j')
+        if self.receiver is not None:
+            self.receiver = self.receiver.strip()
         try:
             self.AuthservID = milterconfig['AuthservID']
         except:
@@ -108,7 +111,7 @@ class dkimMilter(Milter.Base):
     def envfrom(self, f, *str):
         if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 2:
             syslog.syslog("mail from: {0} {1}".format(f, str))
-        self.fp = StringIO.StringIO()
+        self.fp = io.BytesIO()
         self.mailfrom = f
         t = parse_addr(f)
         if len(t) == 2:
@@ -131,7 +134,7 @@ class dkimMilter(Milter.Base):
         if lname == 'from':
             fname, self.author = parseaddr(val)
             try:
-                self.fdomain = self.author.split('@')[1]
+                self.fdomain = self.author.split('@')[1].lower()
             except IndexError as er:
                 self.fdomain = ''  # self.author was not a proper email address
             if (milterconfig.get('Syslog') and
@@ -140,13 +143,13 @@ class dkimMilter(Milter.Base):
         elif lname == 'authentication-results':
             self.arheaders.append(val)
         if self.fp:
-            self.fp.write("%s: %s\n" % (name, val))
+            self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'ascii')))
         return Milter.CONTINUE
 
     @Milter.noreply
     def eoh(self):
         if self.fp:
-            self.fp.write("\n")   # terminate headers
+            self.fp.write(b"\n")   # terminate headers
         self.bodysize = 0
         return Milter.CONTINUE
 
@@ -193,20 +196,20 @@ class dkimMilter(Milter.Base):
             h = authres.AuthenticationResultsHeader(authserv_id=
                                                     self.AuthservID,
                                                     results=self.arresults)
-            h = fold(str(h))
+            h = fold(codecs.encode(str(h), 'ascii'))
             if (milterconfig.get('Syslog') and
                     milterconfig.get('debugLevel') >= 2):
-                syslog.syslog(str(h))
-            name, val = str(h).split(': ', 1)
+                syslog.syslog(codecs.decode(h, 'ascii'))
+            name, val = codecs.decode(h, 'ascii').split(': ', 1)
             self.addheader(name, val, 0)
         return Milter.CONTINUE
 
     def sign_dkim(self, txt):
-        canon = milterconfig.get('Canonicalization')
+        canon = codecs.encode(milterconfig.get('Canonicalization'), 'ascii')
         canonicalize = []
-        if len(canon.split('/')) == 2:
-            canonicalize.append(canon.split('/')[0])
-            canonicalize.append(canon.split('/')[1])
+        if len(canon.split(b'/')) == 2:
+            canonicalize.append(canon.split(b'/')[0])
+            canonicalize.append(canon.split(b'/')[1])
         else:
             canonicalize.append(canon)
             canonicalize.append(canon)
@@ -216,11 +219,12 @@ class dkimMilter(Milter.Base):
         try:
             if privateRSA:
                 d = dkim.DKIM(txt)
-                h = d.sign(milterconfig.get('Selector'), self.fdomain,
-                           privateRSA, canonicalize=(canonicalize[0],
-                                                     canonicalize[1]))
-                name, val = h.split(': ', 1)
-                self.addheader(name, val.strip().replace('\r\n', '\n'), 0)
+                h = d.sign(codecs.encode(milterconfig.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
+                           codecs.encode(privateRSA, 'ascii'),
+                           canonicalize=(canonicalize[0],
+                                         canonicalize[1]))
+                name, val = h.split(b': ', 1)
+                self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
                 if (milterconfig.get('Syslog') and
                     (milterconfig.get('SyslogSuccess')
                      or milterconfig.get('debugLevel') >= 1)):
@@ -228,15 +232,15 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
+                                                  d.domain.lower()))
             if privateEd25519:
                 d = dkim.DKIM(txt)
-                h = d.sign(milterconfig.get('SelectorEd25519'), self.fdomain,
+                h = d.sign(codecs.encode(milterconfig.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
                            privateEd25519, canonicalize=(canonicalize[0],
                                                          canonicalize[1]),
-                           signature_algorithm='ed25519-sha256')
-                name, val = h.split(': ', 1)
-                self.addheader(name, val.strip().replace('\r\n', '\n'), 0)
+                           signature_algorithm=b'ed25519-sha256')
+                name, val = h.split(b': ', 1)
+                self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
                 if (milterconfig.get('Syslog') and
                     (milterconfig.get('SyslogSuccess')
                      or milterconfig.get('debugLevel') >= 1)):
@@ -244,7 +248,7 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
+                                                  d.domain.lower()))
         except dkim.DKIMException as x:
             if milterconfig.get('Syslog'):
                 syslog.syslog('DKIM: {0}'.format(x))
@@ -258,21 +262,23 @@ class dkimMilter(Milter.Base):
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
             d = dkim.DKIM(txt)
             try:
-                res = d.verify(idx=y)
+                dnsoverride = milterconfig.get('DNSOverride')
+                if isinstance(dnsoverride, str):
+                    syslog.syslog("DNSOverride: {0}".format(dnsoverride))
+                    res = d.verify(idx=y, dnsfunc=lambda _x: dnsoverride)
+                else:
+                    res = d.verify(idx=y)
+                algo = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
                 if res:
-                    if d.signature_fields.get(b'a') == 'ed25519-sha256':
+                    if algo == 'ed25519-sha256':
                         self.dkim_comment = ('Good {0} signature'
-                                             .format(d.signature_fields
-                                                     .get(b'a')))
+                                             .format(algo))
                     else:
                         self.dkim_comment = ('Good {0} bit {1} signature'
-                                             .format(d.keysize,
-                                                     d.signature_fields
-                                                     .get(b'a')))
+                                             .format(d.keysize, algo))
                 else:
                     self.dkim_comment = ('Bad {0} bit {1} signature.'
-                                         .format(d.keysize,
-                                                 d.signature_fields.get(b'a')))
+                                         .format(d.keysize, algo))
             except dkim.DKIMException as x:
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
@@ -281,9 +287,9 @@ class dkimMilter(Milter.Base):
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
                     syslog.syslog("check_dkim: {0}".format(x))
-            self.header_i = d.signature_fields.get(b'i')
-            self.header_d = d.signature_fields.get(b'd')
-            self.header_a = d.signature_fields.get(b'a')
+            self.header_i = codecs.decode(d.signature_fields.get(b'i'), 'ascii')
+            self.header_d = codecs.decode(d.signature_fields.get(b'd'), 'ascii')
+            self.header_a = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
             if res:
                 if (milterconfig.get('Syslog') and
                         (milterconfig.get('SyslogSuccess') or
@@ -292,8 +298,8 @@ class dkimMilter(Milter.Base):
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a'),
                                                   d.signature_fields.get(b's'),
-                                                  d.domain))
-                self.dkim_domain = d.domain
+                                                  d.domain.lower()))
+                self.dkim_domain = d.domain.lower()
             else:
                 if milterconfig.get('DiagnosticDirectory'):
                     fd, fname = tempfile.mkstemp(".dkim")
@@ -303,7 +309,7 @@ class dkimMilter(Milter.Base):
                         syslog.syslog('DKIM: Fail (saved as {0})'
                                       .format(fname))
                 else:
-                    syslog.syslog('DKIM: Fail ({0})'.format(d.domain))
+                    syslog.syslog('DKIM: Fail ({0})'.format(d.domain.lower()))
             if res:
                 result = 'pass'
             else:
@@ -348,13 +354,24 @@ def main():
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
+    if socketname is None:
+        if int(os.environ.get('LISTEN_PID', '0')) == os.getpid():
+            lfds = os.environ.get('LISTEN_FDS')
+            if lfds is not None:
+                if lfds != '1':
+                    syslog.syslog('LISTEN_FDS is set to "{0}", but we only know how to deal with "1", ignoring it'.
+                                  format(lfds))
+                else:
+                    socketname = 'fd:3'
+        if socketname is None:
+            socketname = 'local:/var/run/dkimpy-milter/dkimpy-milter.sock'
+    own_socketfile(milterconfig, socketname)
+    drop_privileges(milterconfig)
+    sys.stdout.flush()
+    Milter.runmilter(miltername, socketname, 240)
     if milterconfig.get('Syslog'):
         syslog.syslog('dkimpy-milter started:{0} user:{1}'
                       .format(pid, milterconfig.get('UserID')))
-    sys.stdout.flush()
-    Milter.runmilter(miltername, socketname, 240)
-    own_socketfile(milterconfig)
-    drop_privileges(milterconfig)
 
 if __name__ == "__main__":
     main()

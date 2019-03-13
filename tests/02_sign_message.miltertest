@@ -1,0 +1,100 @@
+-- -*- lua -*-
+
+msg = {
+   ['headers'] = {
+      ['From'] = 'Alice <alice@example.net>',
+      ['Message-Id'] = '<dkimpy-milter-test-02@example.net>',
+      ['To'] = 'Bob <bob@example.biz>',
+      ['Date'] = 'Mon, 18 Feb 2019 08:32:50 -0500',
+      ['Subject'] = 'Signing test',
+      ['Content-Type'] = 'text/plain',
+   },
+   ['body'] = "This is a test!\r\n",
+}
+
+-- returns miltertest connection object
+function connect_and_send (sockname, headers, body)
+   conn = mt.connect(sockname)
+   if conn == nil then
+      error "mt.connect() failed"
+   end
+   if mt.conninfo(conn, "localhost", "127.0.0.1") ~= nil then
+      error "mt.conninfo() failed"
+   end
+   if mt.getreply(conn) ~= SMFIR_CONTINUE then
+      error "mt.conninfo() unexpected reply"
+   end
+
+   -- mt.macro(conn, SMFIC_MAIL, "i", "simple-message")
+   if mt.mailfrom(conn, "<alice@example.net>") ~= nil then
+      error "mt.mailfrom() failed"
+   end
+   if mt.getreply(conn) ~= SMFIR_CONTINUE then
+      error "mt.mailfrom() unexpected reply"
+   end
+   -- mt.rcptto() is called implicitly
+
+   -- send headers
+   for key,value in pairs(headers) do
+      if mt.header(conn, key, value) ~= nil then
+         error("mt.header(" .. key .. ") failed")
+      end
+      if mt.getreply(conn) ~= SMFIR_CONTINUE then
+         error("mt.header(" .. key .. ") unexpected reply")
+      end
+   end
+   -- send EOH
+   if mt.eoh(conn) ~= nil then
+      error "mt.eoh() failed"
+   end
+   if mt.getreply(conn) ~= SMFIR_CONTINUE then
+      error "mt.eoh() unexpected reply"
+   end
+
+   -- send body
+   if mt.bodystring(conn, body) ~= nil then
+      error "mt.bodystring() failed"
+   end
+   if mt.getreply(conn) ~= SMFIR_CONTINUE then
+      error "mt.bodystring() unexpected reply"
+   end
+   -- end of message; let the filter react
+   if mt.eom(conn) ~= nil then
+      error "mt.eom() failed"
+   end
+   reply = mt.getreply(conn)
+   if reply ~= SMFIR_CONTINUE then
+      error ("mt.eom() unexpected reply: " .. reply)
+   end
+   return conn
+end
+
+for _, keytype in ipairs({"ed25519", "rsa"}) do
+   mt.echo("testing "..keytype)
+   signing = connect_and_send("unix:"..keytype..".signing.sock", msg.headers, msg.body)
+   -- verify that a test header field got added
+   if not mt.eom_check(signing, MT_HDRINSERT) then
+      error "no header added by signer"
+   end
+
+   signature = mt.getheader(signing, "DKIM-Signature", 0)
+
+   mt.disconnect(signing)
+
+   mt.echo("DKIM-Signature: " .. signature)
+
+   msg.headers['DKIM-Signature'] = signature
+
+   verify = connect_and_send("unix:"..keytype..".verify.sock", msg.headers, msg.body)
+
+   if not mt.eom_check(verify, MT_HDRINSERT) then
+      error "no header added in verify"
+   end
+
+   authres = mt.getheader(verify, "Authentication-Results", 0)
+   mt.echo("Authentication-Results: "..authres)
+
+   mt.disconnect(verify)
+
+   mt.echo(keytype.." complete")
+end

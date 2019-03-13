@@ -324,6 +324,13 @@ be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 
+.TP 
+.I DNSOverride (string)
+Provide a text string that a verifying milter should use instead of
+consulting the DNS on each message.  This is useful primarily for
+testing purposes in environments where it is awkward to modify the
+system DNS resolution.  It should not be used in production.
+
 .TP
 .I PeerList (dataset)
 Identifies a set of "peers" that identifies clients whose connections
@@ -344,7 +351,7 @@ will be checked. [PeerList NOT IMPLEMENTED - included for reference only]
 .TP
 .I PidFile (string)
 Specifies the path to a file that should be created at process start
-containing the process ID.
+containing the process ID.  If not specified, no such file will be created.
 
 .TP
 .I Selector (string)

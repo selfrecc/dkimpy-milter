@@ -1,16 +1,23 @@
-This is a DKIM signing and verification milter.  In theory it has been tested
-with both Postfix and Sendmail.
+OVERVIEW
+========
+
+This is a DKIM signing and verification milter.  It has been tested with both
+Postfix and Sendmail.
 
 The configuration file is designed to be compatible with OpenDKIM, but only
 a subset of OpenDKIM options are supported.  If an unsupported option is
 specified, an error will be raised.
+
+
+INSTALLATION
+===========
 
 This package includes a default configuration file and man pages.  For those
 to be installed when installing using setup.py, the following incantation is
 required because setuptools developers decided not being able to do this by
 default is a feature:
 
-python setup.py install --single-version-externally-managed --record=/dev/null
+python3 setup.py install --single-version-externally-managed --record=/dev/null
 
 For users of Debian Stable (Debian 9, Codename Squeeze), all dependencies are
 available in either the main or backports repositories:
@@ -32,6 +39,48 @@ packages and then pip install dkimpy_milter.
 The milter will work with either pydns (DNS) or dnspython (dns), preferring
 dnspython is both are available.  The dkimpy DKIM module also works with
 either.
+
+
+SETUP
+====
+
+SIGNING KEYS
+============
+
+In order to create DKIM signatures, a private key must be available.  Signing
+keys should be protected (owned by root:root with permissions 600 in a
+directory that is not world readable).  Different keys are required for RSA
+and (if used) Ed25519.
+
+RSA
+===
+
+Both public and private keys for RSA have standard formats and there are many
+tools available to create them.  Keys must (RFC 8302) have a minimum size of
+1024 bits and should have a size of at least 2048 bits.  The dknewkey script
+that is provided with dkimpy is one such tool:
+
+dknewkey exampleprivkey
+
+will produce both the private key file (.key suffix) and a file with the DKIM
+public key record to be published DNS (.dns suffix).  RSA is the default key
+type.  2048 bits is the default key size.
+
+ED25519
+=======
+
+There is no standardized non-binary representation for Ed25519 private keys,
+so in order to generate Ed25519 keys for dkimpy-milter, dkimpy specific tools
+must be used to be compatible.  The same dknewkey script support Ed25519:
+
+dknewkey --ktype ed25519 anothernewkey
+
+will provide both the private key file (.key suffix) and a file with the DKIM
+public key record to be published DNS (.dns suffix).  Ed25519 keys do not have
+variable bit lengths.
+
+MTA INTEGRATION
+==============
 
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
@@ -61,7 +110,8 @@ the following steps:
 As with all milters, dkimpy-milter needs to be integrated with your MTA of
 choice (Sendmail or Postfix).
 
-For Sendmail:
+SENDMAIL
+========
 
 Configuration is very similar to opendkim, but needs some adjustment for
 dkimpy-milter. Here's an example configuration line to include in your
@@ -77,7 +127,59 @@ Milter support should be present by default in most versions of sendmail
 these days, but if not included in your Sendmail build, see:
 http://www.elandsys.com/resources/sendmail/milter.html
 
-For Postfix:
+ISSUES USING SENDMAIL TO SIGN AND VERIFY
+========================================
+
+When using the sendmail MTA in both signing and verifying mode, there are
+a few issues of which to be aware that might cause operational problems
+and deserve consideration.
+
+(a) When the MTA will be used for relaying emails, e.g. delivering to other
+    hosts using the aliases mechanism, it is important not to break
+    signatures inserted by the original sender.  This is particularly sensitive
+    particular when the sending domain has published a "reject" DMARC policy.
+
+    By default, sendmail quotes to address header fields when there are no
+    quotes and the display part of the address contains a period or an
+    apostrophe.  However, opendkim only sees the raw, unmodified form of
+    the header field, and so the content that gets verified and what gets
+    signed will not be the same, guaranteeing the attached signature is not
+    valid.
+
+    To direct sendmail not to modify the headers, add this to your sendmail.mc:
+
+    	conf(`confMUST_QUOTE_CHARS', `')
+
+(b) As stated in sendmail's KNOWNBUGS file, sendmail truncates header field
+    values longer than 256 characters, which could mean truncating the domain
+    of a long From: header field value and invalidating the signature.
+    You may wish to consider increasing MAXNAME in sendmail/conf.h to mitigate
+    changing the messages and invalidating their signatures.  This change
+    requires recompiling sendmail.
+
+(c) Similar to (a) above, sendmail may wrap very long single-line recipient
+    fields for presentation purposes; for example:
+
+    To: very long name <a@example.org>,anotherloo...ong name b <b@example.org>
+
+    ...might be rewritten as:
+
+    To: very long name <a@example.org>,
+    	anotherloo...ong name b <b@example.org>
+
+    This rewrite is also done after opendkim has seen the message, meaning
+    the signature opendkim attaches to the message does not match the
+    content it signed.  There is not a known configuration change to
+    mitigate this mutation.
+
+    The only known mechanism for dealing with this is to have distinct
+    instances of opendkim do the verifying (inbound) and signing (outbound)
+    so that the version that arrives at the signing instance is already
+    in the rewritten form, guaranteeing the input and output are the same
+    and thus the signature matches the payload.
+
+POSTFIX
+=======
 
 Integration of dkimpy-milter into Postfix is like any milter (See Postfix's
 README_FILES/MILTER_README).  Here's an example master.cf excerpt that talks
@@ -127,14 +229,15 @@ MacroListVerify		daemon_name|VERIFYING
 ...
 
 
+NOTES
+=====
+
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a
 temp file.  This may impact performance on low-memory systems.
 
-This is an initial production release to support interoperability testing with
-Ed25519 signatures sufficient functionality for basic use.  The documented
-functionality has been implemented and at generally partially tested.  It is
-free of known defects, but is not fully tested in a variety of environments.
-
-DKIM Ed25519 signatures have finished development.  The specification is
-complete.  Version 1.0.0 and later support RFC 8463.
+DKIM with Ed25519 signatures are described in RFC 8463.  Version 1.0.0 and
+later support Ed25519 signing and verification.  RFC 8301 removed rsa-sha1
+from DKIM.  dkimpy-milter does not sign with rsa-sha1, but still considers
+rsa-sha1 signatures as valid for verification because they are still in
+common use and are not known to be cryptographically broken.

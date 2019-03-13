@@ -31,16 +31,16 @@ import stat
 import dkim
 import socket
 import ipaddress
-from dnsplug import Session
+from .dnsplug import Session
 
 #  default values
 defaultConfigData = {
     'Syslog': 'yes',
     'SyslogFacility': 'mail',
-    'UMask': 007,
+    'UMask': 0o07,
     'Mode': 'sv',
-    'Socket': 'local:/var/run/dkimpy-milter/dkimpy-milter.sock',
-    'PidFile': '/var/run/dkimpy-milter/dkimpy-milter.pid',
+    'Socket': None,
+    'PidFile': None,
     'UserID': 'dkimpy-milter',
     'Canonicalization': 'relaxed/simple',
     'InternalHosts': '127.0.0.1',
@@ -48,6 +48,7 @@ defaultConfigData = {
     'DiagnosticDirectory': '',
     'MacroList': '',
     'MacroListVerify': '',
+    'DNSOverride': None,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -84,14 +85,14 @@ class HostsDataset(object):
                 self.item = item[1:]
                 self.negative = True
             try:
-                self.item = ipaddress.ip_address(unicode(self.item, "utf-8"))
+                self.item = ipaddress.ip_address(str(self.item, "utf-8"))
                 if isinstance(self.item, ipaddress.IPv4Address):
                     self.isipv4 = True
                 elif isinstance(self.item, ipaddress.IPv6Address):
                     self.isipv6 = True
             except ValueError as e:
                 try:
-                    self.item = ipaddress.ip_network(unicode
+                    self.item = ipaddress.ip_network(str
                                                      (self.item, "utf-8"),
                                                      strict=False)
                     if isinstance(self.item, ipaddress.IPv4Network):
@@ -109,7 +110,7 @@ class HostsDataset(object):
 
     def match(self, connectip):
         '''Check if the connect IP is part of the dataset'''
-        source = ipaddress.ip_address(unicode(connectip, "utf-8"))
+        source = ipaddress.ip_address(str(connectip, "utf-8"))
         for item in self.dataset:
             if item.isdomain or item.ishostname:
                 result = self.matchname(source)   # Match host/domains first
@@ -159,13 +160,13 @@ class HostsDataset(object):
             if isinstance(source, ipaddress.IPv4Address):
                 ips = s.dns(name, 'A')
                 for ip in ips:
-                    ip = ipaddress.IPv4Address(unicode(ip, 'UTF-8'))
+                    ip = ipaddress.IPv4Address(str(ip, 'UTF-8'))
                     if ip == source:
                         results.append(name)
             if isinstance(source, ipaddress.IPv6Address):
                 ips = s.dns(name, 'AAAA')
                 for ip in ips:
-                    ip = ipaddress.IPv6Address(unicode(ip, 'UTF-8'))
+                    ip = ipaddress.IPv6Address(str(ip, 'UTF-8'))
                 if ip == source:
                     results.append(name)
         return results
@@ -224,13 +225,13 @@ def _processConfigFile(filename=None, configdata=None, useSyslog=1,
     '''Load the specified config file, exit and log errors if it fails,
     otherwise return a config dictionary.'''
 
-    import config
+    from . import config
     if configdata is None:
         configdata = config.defaultConfigData
     if filename is not None:
         try:
             _readConfigFile(filename, configdata)
-        except Exception, e:
+        except Exception as e:
             raise
             if useSyslog:
                 syslog.syslog(e.args[0])
@@ -294,19 +295,7 @@ def _dataset_to_list(dataset):
         else:
             return [dataset.strip().strip(',')]
         if dataset[-3:] == '.db' or dataset[:3] == 'db:':
-            #  This is a Sleepycat (Oracle) DB  dataset
-            import whichdb  # Will need rewriting someday for python3
-            if dataset[-3:] == '.db':
-                dbname = dataset
-            elif dataset[:3] == 'db:':
-                dbname = dataset[3:]
-            else:
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'
-                                          .format(type(dataset)))
-            if whichdb.whichdb(dbname) != 'dbhash':
-                raise dkim.ParameterError('Unimplmented dataset type: {0}'
-                                          .format(type(dataset)))
-            #TODO replace this with code to use db maps
+            #  This is a Sleepycat (Oracle) DB  dataset, which we dont support
             raise dkim.ParameterError('Unsupported dataset db datase: {0}'
                                       .format(type(dataset)))
 
@@ -346,13 +335,14 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'DiagnosticDirectory': 'str',
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset',
+        'DNSOverride': 'str',
         'debugLevel': 'int'
         }
 
     #  check to see if it's a file
     try:
         mode = os.stat(path)[0]
-    except OSError, e:
+    except OSError as e:
         syslog.syslog(syslog.LOG_ERR, 'ERROR stating "%s": %s'
                       % (path, e.strerror))
         return(configData)
@@ -400,7 +390,10 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         if conversion == 'bool':
             configData[name] = _find_boolean(value)
         elif conversion == 'str':
-            configData[name] = str(value)
+            if isinstance(value, list):
+                configData[name] = line.split(None, 1)[1]
+            else:
+                configData[name] = str(value)
         elif conversion == 'int':
             configData[name] = int(value)
         elif conversion == 'dataset':
@@ -411,7 +404,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             configData[name] = conversion(value)
     fp.close()
     try:
-        configData['AuthservID'] = _make_authserv_id(configData['AuthservID'])
+        configData['AuthservID'] = _make_authserv_id(configData.get('AuthservID', 'HOSTNAME'))
         configData['IntHosts'] = HostsDataset(configData['InternalHosts'])
     except:
         pass

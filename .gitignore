@@ -1,3 +1,4 @@
 dist
 dkimpy_milter.egg-info
 *.pyc
+*~
