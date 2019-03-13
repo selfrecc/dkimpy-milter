@@ -115,43 +115,49 @@ def write_pid(milterconfig):
     """Write PID in pidfile.  Will not overwrite an existing file."""
     import os
     import syslog
-    if not os.path.isfile(milterconfig.get('PidFile')):
+    pidfile = milterconfig.get('PidFile')
+    if pidfile is None:
+        return
+    if not os.path.isfile(pidfile):
         pid = str(os.getpid())
         try:
-            f = open(milterconfig.get('PidFile'), 'w')
+            f = open(pidfile, 'w')
         except IOError as e:
             if str(e)[:35] == '[Errno 2] No such file or directory':
-                piddir = milterconfig.get('PidFile').rsplit('/', 1)[0]
+                piddir = pidfile.rsplit('/', 1)[0]
                 os.mkdir(piddir)
                 user, group = user_group(milterconfig.get('UserID'))
                 os.chown(piddir, user, group)
-                f = open(milterconfig.get('PidFile'), 'w')
+                f = open(pidfile, 'w')
                 if milterconfig.get('Syslog'):
                     syslog.syslog('PID dir created: {0}'.format(piddir))
             else:
                 if milterconfig.get('Syslog'):
                     syslog.syslog('Unable to write pidfle {0}.  IOError: {1}'
-                                  .format(milterconfig.get('PidFile'), e))
+                                  .format(pidfile, e))
                 raise
         f.write(pid)
         f.close()
         user, group = user_group(milterconfig.get('UserID'))
-        os.chown(milterconfig.get('PidFile'), user, group)
+        os.chown(pidfile, user, group)
     else:
         if milterconfig.get('Syslog'):
             syslog.syslog('Unable to write pidfle {0}.  File exists.'
-                          .format(milterconfig.get('PidFile')))
+                          .format(pidfile))
         raise RuntimeError('Unable to write pidfle {0}.  File exists.'
-                           .format(milterconfig.get('PidFile')))
+                           .format(pidfile))
     return pid
 
 
-def own_socketfile(milterconfig):
+def own_socketfile(milterconfig, sockname=None):
     """If socket is Unix socket, chown to UserID before dropping privileges"""
     import os
     user, group = user_group(milterconfig.get('UserID'))
     offset = None
-    sockname = milterconfig.get('Socket')
+    if sockname is None:
+        sockname = milterconfig.get('Socket')
+    if sockname is None:
+        return
     if sockname[:1] == '/':
         offset = 0
     elif sockname[:6] == "local:":

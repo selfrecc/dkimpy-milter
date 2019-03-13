@@ -354,7 +354,18 @@ def main():
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
     socketname = milterconfig.get('Socket')
-    own_socketfile(milterconfig)
+    if socketname is None:
+        if int(os.environ.get('LISTEN_PID', '0')) == os.getpid():
+            lfds = os.environ.get('LISTEN_FDS')
+            if lfds is not None:
+                if lfds != '1':
+                    syslog.syslog('LISTEN_FDS is set to "{0}", but we only know how to deal with "1", ignoring it'.
+                                  format(lfds))
+                else:
+                    socketname = 'fd:3'
+        if socketname is None:
+            socketname = 'local:/var/run/dkimpy-milter/dkimpy-milter.sock'
+    own_socketfile(milterconfig, socketname)
     drop_privileges(milterconfig)
     sys.stdout.flush()
     Milter.runmilter(miltername, socketname, 240)
