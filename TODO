@@ -45,18 +45,19 @@ No additional features
 Bug fix only, improved documentation
 
 1.1.0
-Port to Python 3
-Subdomain support
-KeyTable
-KeytableEd25519
-SigningTable
-SigningTableEd25519
+Port to Python 3  implemented	verified
+Subdomain support implemented	verified
+Test suite	  implemented	verified
 
 Planned dataset type support (if needed):
 mdb:
 
 Considered for near-term feature release
 
+KeyTable
+KeytableEd25519
+SigningTable
+SigningTableEd25519
 AlwaysAddARHeader
 ChangeRootDirectory
 ClockDrift (requires dkimpy change)
