@@ -26,7 +26,7 @@ try:
     import dns
     kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'dnspython']
 except ImportError:  # If PyDNS is not installed, prefer dnspython
-    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'PyDNS']
+    kw['install_requires'] = ['dkimpy>=0.7', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'Py3DNS']
 
 setup(
     name='dkimpy-milter',
