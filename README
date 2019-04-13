@@ -22,8 +22,8 @@ python3 setup.py install --single-version-externally-managed --record=/dev/null
 For users of Debian Stable (Debian 9, Codename Squeeze), all dependencies are
 available in either the main or backports repositories:
 
-[sudo] apt install python-milter python-nacl python-ipaddress python-dnspython
-[sudo] apt install -t stretch-backports python-authres python-dkim
+[sudo] apt install python3-milter python3-nacl python3-ipaddress python3-dnspython
+[sudo] apt install -t stretch-backports python3-authres python3-dkim
 
 The preferred method of installation is from PyPi using pip (if distribution
 packages are not available):
@@ -36,7 +36,7 @@ Python extensions, the system will need appropriate development packages and
 an C compiler.  Alternately, install these dependencies from dsitribution/OS
 packages and then pip install dkimpy_milter.
 
-The milter will work with either pydns (DNS) or dnspython (dns), preferring
+The milter will work with either py3dns (DNS) or dnspython (dns), preferring
 dnspython is both are available.  The dkimpy DKIM module also works with
 either.
 
