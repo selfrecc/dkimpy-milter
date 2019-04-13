@@ -1,4 +1,5 @@
 1.1.0 2019-04-12
+ - Add SubDomains option to enable signing for sub-domains (LP: #1811535)
  - Port to python3 (LP: #1815502)
  - Add test suite using opendkim miltertest
  - When Socket is absolute path, do not strip leading /
