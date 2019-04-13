@@ -183,6 +183,8 @@ class dkimMilter(Milter.Base):
             domain = milterconfig.get('Domain')
         else:
             domain = ''
+        if milterconfig.get('SubDomains'):
+            self.fdomain = _get_parent_domain(self.fdomain, domain)
         if ((self.fdomain in domain) and not milterconfig.get('Mode') == 'v'
                 and not self.external_connection):
             txt = self.fp.read()
@@ -325,6 +327,16 @@ class dkimMilter(Milter.Base):
             )
         return
 
+# get parent domain to be signed for if fdomain is a subdomain
+def _get_parent_domain(fdomain, domains):
+    for domain in domains:
+        rhs = '.'+domain
+        # compare right hand side of fdomain against .domain
+        if fdomain[-len(rhs):] == rhs:
+            # return parent domain on match
+            return domain
+    # or return the fdomain itself
+    return fdomain
 
 def main():
     # Ugh, but there's no easy way around this.

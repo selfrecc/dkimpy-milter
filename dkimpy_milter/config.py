@@ -49,6 +49,7 @@ defaultConfigData = {
     'MacroList': '',
     'MacroListVerify': '',
     'DNSOverride': None,
+    'SubDomains': False,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -327,6 +328,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'PidFile': 'str',
         'UserID': 'str',
         'Domain': 'dataset',
+        'SubDomains': 'bool',
         'KeyFile': 'str',
         'KeyFileEd25519': 'str',
         'Selector': 'str',
