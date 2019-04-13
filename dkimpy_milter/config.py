@@ -309,7 +309,9 @@ def _readConfigFile(path, configData=None, configGlobal={}):
     dictionary of name/value pairs based on configData and the values
     read from path.'''
 
-    debugLevel = configGlobal.get('debugLevel', 0)
+    # No config file data is available yet, so to debug _readConfigFile, set
+    # the value here.
+    debugLevel = 0
     if debugLevel >= 5:
         syslog.syslog('readConfigFile: Loading "%s"' % path)
     if configData is None:
