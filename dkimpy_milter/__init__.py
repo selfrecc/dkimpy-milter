@@ -228,11 +228,11 @@ class dkimMilter(Milter.Base):
                 if (milterconfig.get('Syslog') and
                     (milterconfig.get('SyslogSuccess')
                      or milterconfig.get('debugLevel') >= 1)):
-                    syslog.syslog('{0}: {1} DKIM-Signature field added (s={2} '
+                    syslog.syslog('{0}: {1} DKIM signature added (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
-                                                  d.signature_fields.get(b'a'),
-                                                  d.signature_fields.get(b's'),
-                                                  d.domain.lower()))
+                                                  d.signature_fields.get(b'a').decode(),
+                                                  d.signature_fields.get(b's').decode(),
+                                                  d.domain.decode().lower()))
             if privateEd25519:
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(milterconfig.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
@@ -244,11 +244,11 @@ class dkimMilter(Milter.Base):
                 if (milterconfig.get('Syslog') and
                     (milterconfig.get('SyslogSuccess')
                      or milterconfig.get('debugLevel') >= 1)):
-                    syslog.syslog('{0}: {1} DKIM-Signature field added (s={2} '
+                    syslog.syslog('{0}: {1} DKIM signature added (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
-                                                  d.signature_fields.get(b'a'),
-                                                  d.signature_fields.get(b's'),
-                                                  d.domain.lower()))
+                                                  d.signature_fields.get(b'a').decode(),
+                                                  d.signature_fields.get(b's').decode(),
+                                                  d.domain.decode().lower()))
         except dkim.DKIMException as x:
             if milterconfig.get('Syslog'):
                 syslog.syslog('DKIM: {0}'.format(x))
@@ -296,9 +296,9 @@ class dkimMilter(Milter.Base):
                          milterconfig.get('debugLevel') >= 1)):
                     syslog.syslog('{0}: {1} DKIM signature verified (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
-                                                  d.signature_fields.get(b'a'),
-                                                  d.signature_fields.get(b's'),
-                                                  d.domain.lower()))
+                                                  d.signature_fields.get(b'a').decode(),
+                                                  d.signature_fields.get(b's').decode(),
+                                                  d.domain.decode().lower()))
                 self.dkim_domain = d.domain.lower()
             else:
                 if milterconfig.get('DiagnosticDirectory'):
