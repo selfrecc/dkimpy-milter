@@ -1,10 +1,11 @@
-1.1.0 UNRELEASED
- - Port to python3
+1.1.0 2019-04-12
+ - Port to python3 (LP: #1815502)
  - Add test suite using opendkim miltertest
  - When Socket is absolute path, do not strip leading /
  - Handle unix: socket prefix the same as local:
  - Set up correct AuthservID defaults
  - config: Reassemble strings sensibly
+ - Consistently prefer dnspython to Py3DNS (LP: #1815558)
 
 1.0.1 2019-02-11
  - Reorder milter start and dropping privileges so permissions on Unix socket
