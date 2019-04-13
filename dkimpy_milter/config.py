@@ -380,9 +380,15 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             value = data[1:]
 
         #  check validity of name
-        conversion = nameConversion.get(name)
+        try:
+            conversion = nameConversion.get(name)
+        except TypeError:
+            name = name[0]
+            syslog.syslog('Config item "%s" does not provide a value in file "%s"'
+                          % (name, path))
+            conversion = None
         if conversion is None:
-            syslog.syslog('ERROR: Unknown name "%s" in file "%s"'
+            syslog.syslog('ERROR: Unknown name or name missing value "%s" in file "%s"'
                           % (name, path))
             continue
 
