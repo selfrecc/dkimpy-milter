@@ -80,7 +80,7 @@ except ImportError:  # If PyDNS is not installed, prefer dnspython
 
 setup(
     name='dkimpy-milter',
-    version='1.1.0',
+    version='1.2.0',
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
