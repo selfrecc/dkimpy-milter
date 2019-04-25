@@ -9,17 +9,17 @@ Syslog			yes
 # privileged user (e.g. Postfix)
 UMask			007
 
-# Sign for example.com with key in /etc/dkimkeys/dkim.key using
+# Sign for example.com with key in @SYSCONFDIR@/dkimkeys/dkim.key using
 # selector '2007' (e.g. 2007._domainkey.example.com)
 #Domain			example.com
-#KeyFile			/etc/mail/dkim.key
+#KeyFile			@SYSCONFDIR@/mail/dkim.key
 #Selector		default
 
 # Commonly-used options; the commented-out versions show the defaults.
 #Canonicalization	relaxed/simple
 #Mode			sv
 
-# Socket local:/var/run/dkimpy-milter/dkimpy-milter.sock
+# Socket local:@RUNSTATEDIR@/dkimpy-milter/dkimpy-milter.sock
 #
 # ##  Socket socketspec
 # ##
@@ -33,12 +33,12 @@ UMask			007
 Socket			inet:8892@localhost
 
 ##  PidFile filename
-###      default /var/run/dkimpy-milter/dkimpy-milter.pid
+###      default /run/dkimpy-milter/dkimpy-milter.pid
 ###
 ###  Name of the file where the filter should write its pid before beginning
 ###  normal operations.
 #
-PidFile			/run/dkimpy-milter/dkimpy-milter.pid
+PidFile			@RUNSTATEDIR@/dkimpy-milter/dkimpy-milter.pid
 
 ##  Userid userid
 ###      default dkimpy-milter
