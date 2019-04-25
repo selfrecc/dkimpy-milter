@@ -17,9 +17,59 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA."""
 
 from setuptools import setup
+import distutils.cmd
+import distutils.log
+import sys
 import os
+import subprocess
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
+
+class FileMacroExpand(distutils.cmd.Command):
+    description = "Expand @@ variables in input files, simlar to make macros."
+    user_options = [
+        ('sysconfigdir=', 'e', 'Specify configuration directory. [/usr/local/etc]'),
+        ('sbindir=', 's', 'Specify system binary directory. [/usr/local/sbin]'),
+        ('bindir=', 'b', 'Specify binary directory. [/usr/loca/bin]'),
+        ('rundir=', 'r', 'Specify run state directory. [/run]'),
+    ]
+
+    def initialize_options(self):
+        self.sysconfigdir = '/usr/local/etc'
+        self.sbindir = '/usr/local/sbin'
+        self.bindir = '/usr/local/bin'
+        self.rundir = '/run'
+        # For this option, we find the system grep, wherever it is and use it,
+        # no override provided.
+        self.grep = subprocess.check_output(["which", "grep"]).decode()[:-1]
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        files = ['etc/dkimpy-milter.openrc',]
+        for infile in files:
+            outfile = ''
+            filein = open(infile + '.in')
+            for line in filein:
+                for function in ["@SYSCONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@", "@GREP@"]:
+                    splitline = line.split(function)
+                    if len(splitline) > 1:
+                        if function == "@SYSCONFDIR@":
+                            line = splitline[0] + self.sysconfigdir + splitline[1]
+                        elif function == "@SBINDIR@":
+                            line = splitline[0] + self.sbindir + splitline[1]
+                        elif function == "@BINDIR@":
+                            line = splitline[0] + self.bindir + splitline[1]
+                        elif function == "@RUNSTATEDIR@":
+                            line = splitline[0] + self.rundir + splitline[1]
+                        elif function == "@GREP@":
+                            line = splitline[0] + self.grep + splitline[1]
+                outfile += line
+            out = open(infile, 'w')
+            for line in outfile:
+                out.write(line)
+            out.close()
 
 kw = {}  # Work-around for lack of 'or' requires in setuptools.
 try:
@@ -62,5 +112,8 @@ setup(
         ['system/dkimpy-milter.service']),(os.path.join('etc', 'init.d'),
         ['system/dkimpy-milter'])],
     zip_safe = False,
+    cmdclass={
+        'expand': FileMacroExpand,
+    },
     **kw
 )
