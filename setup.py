@@ -39,15 +39,12 @@ class FileMacroExpand(distutils.cmd.Command):
         self.sbindir = '/usr/local/sbin'
         self.bindir = '/usr/local/bin'
         self.rundir = '/run'
-        # For this option, we find the system grep, wherever it is and use it,
-        # no override provided.
-        self.grep = subprocess.check_output(["which", "grep"]).decode()[:-1]
 
     def finalize_options(self):
         pass
 
     def run(self):
-        files = ['etc/dkimpy-milter.conf', 'etc/dkimpy-milter.openrc', 'man/dkimpy-milter.conf.5']
+        files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', 'system/dkimpy-milter.openrc', ]
         for infile in files:
             outfile = ''
             filein = open(infile + '.in')
