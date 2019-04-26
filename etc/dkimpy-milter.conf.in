@@ -19,7 +19,7 @@ UMask			007
 #Canonicalization	relaxed/simple
 #Mode			sv
 
-# Socket local:@RUNSTATEDIR@/dkimpy-milter/dkimpy-milter.sock
+# Socket local:@RUNSTATEDIR@/dkimpy-milter.sock
 #
 # ##  Socket socketspec
 # ##
@@ -30,15 +30,15 @@ UMask			007
 # ##  inet:port                   to listen on all interfaces
 # ##  local:/path/to/socket       to listen on a UNIX domain socket
 #
-Socket			inet:8892@localhost
+#Socket			inet:8892@localhost
 
 ##  PidFile filename
-###      default /run/dkimpy-milter/dkimpy-milter.pid
+###      default /run/dkimpy-milter/kimpy-milter.pid
 ###
 ###  Name of the file where the filter should write its pid before beginning
 ###  normal operations.
 #
-PidFile			@RUNSTATEDIR@/dkimpy-milter/dkimpy-milter.pid
+PidFile			@RUNSTATEDIR@/dkimpy-milter.pid
 
 ##  Userid userid
 ###      default dkimpy-milter

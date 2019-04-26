@@ -31,7 +31,7 @@ class FileMacroExpand(distutils.cmd.Command):
         ('sysconfigdir=', 'e', 'Specify system configuration directory. [/usr/local/etc]'),
         ('sbindir=', 's', 'Specify system binary directory. [/usr/local/sbin]'),
         ('bindir=', 'b', 'Specify binary directory. [/usr/loca/bin]'),
-        ('rundir=', 'r', 'Specify run state directory. [/run/dkimpy-milter]'),
+        ('rundir=', 'r', 'Specify run state directory. [/run]'),
     ]
 
     def initialize_options(self):
@@ -42,6 +42,7 @@ class FileMacroExpand(distutils.cmd.Command):
 
     def finalize_options(self):
         self.configdir = self.sysconfigdir + '/dkimpy-milter'
+        self.rundir += '/dkimpy-milter'
 
     def run(self):
         files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', \
@@ -53,7 +54,7 @@ class FileMacroExpand(distutils.cmd.Command):
             outfile = ''
             filein = open(infile + '.in')
             for line in filein:
-                for function in ["@SYSCONFDIR@", "@CONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@", "@GREP@"]:
+                for function in ["@SYSCONFDIR@", "@CONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@"]:
                     splitline = line.split(function)
                     if len(splitline) > 1:
                         if function == "@SYSCONFDIR@":
