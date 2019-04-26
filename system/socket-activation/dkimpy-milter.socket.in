@@ -3,7 +3,7 @@ Description=DKIMpy Milter socket
 Documentation=man:dkimpy-milter(8) man:dkimpy-milter.conf(5)
 
 [Socket]
-ListenStream=/run/dkimpy-milter/dkimpy-milter.sock
+ListenStream=@RUNSTATEDIR@/dkimpy-milter.sock
 SocketMode=0660
 # override SocketGroup to grant access to members of another system group:
 SocketGroup=dkimpy-milter
