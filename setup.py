@@ -38,7 +38,7 @@ class FileMacroExpand(distutils.cmd.Command):
         self.sysconfigdir = '/usr/local/etc'
         self.sbindir = '/usr/local/sbin'
         self.bindir = '/usr/local/bin'
-        self.rundir = '/run/dkimpy-milter'
+        self.rundir = '/run'
 
     def finalize_options(self):
         self.configdir = self.sysconfigdir + '/dkimpy-milter'
