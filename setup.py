@@ -28,23 +28,24 @@ description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for P
 class FileMacroExpand(distutils.cmd.Command):
     description = "Expand @@ variables in input files, simlar to make macros."
     user_options = [
-        ('sysconfigdir=', 'e', 'Specify configuration directory. [/usr/local/etc]'),
+        ('sysconfigdir=', 'e', 'Specify configuration directory. [/usr/local/etc/dkimpy-milter]'),
         ('sbindir=', 's', 'Specify system binary directory. [/usr/local/sbin]'),
         ('bindir=', 'b', 'Specify binary directory. [/usr/loca/bin]'),
-        ('rundir=', 'r', 'Specify run state directory. [/run]'),
+        ('rundir=', 'r', 'Specify run state directory. [/run/dkimpy-milter]'),
     ]
 
     def initialize_options(self):
-        self.sysconfigdir = '/usr/local/etc'
+        self.sysconfigdir = '/usr/local/etc/dkimpy-milter'
         self.sbindir = '/usr/local/sbin'
         self.bindir = '/usr/local/bin'
-        self.rundir = '/run'
+        self.rundir = '/run/dkimpy-milter'
 
     def finalize_options(self):
         pass
 
     def run(self):
-        files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', 'system/dkimpy-milter.openrc', ]
+        files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', \
+                 'system/dkimpy-milter', 'system/dkimpy-milter.openrc', ]
         for infile in files:
             outfile = ''
             filein = open(infile + '.in')
@@ -60,8 +61,6 @@ class FileMacroExpand(distutils.cmd.Command):
                             line = splitline[0] + self.bindir + splitline[1]
                         elif function == "@RUNSTATEDIR@":
                             line = splitline[0] + self.rundir + splitline[1]
-                        elif function == "@GREP@":
-                            line = splitline[0] + self.grep + splitline[1]
                 outfile += line
             out = open(infile, 'w')
             for line in outfile:
