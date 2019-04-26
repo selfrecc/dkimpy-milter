@@ -1,3 +1,7 @@
+1.2.0 UNRELEASED
+ - Add new expand option to setup.py so various file system locations can be
+   specified at build/install time rather than being hard coded
+
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)
  - Port to python3 (LP: #1815502)
