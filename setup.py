@@ -112,7 +112,8 @@ setup(
         ['man/dkimpy-milter.8']), ('etc', ['etc/dkimpy-milter.conf']),
         (os.path.join('lib', 'systemd', 'system'),
         ['system/dkimpy-milter.service']),(os.path.join('etc', 'init.d'),
-        ['system/dkimpy-milter'])],
+        ['system/dkimpy-milter']), (os.path.join('etc', 'init.d'),
+        ['system/dkimpy-milter.openrc'])],
     zip_safe = False,
     cmdclass={
         'expand': FileMacroExpand,
