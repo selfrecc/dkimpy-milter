@@ -33,7 +33,7 @@ UMask			007
 #Socket			inet:8892@localhost
 
 ##  PidFile filename
-###      default /run/dkimpy-milter/kimpy-milter.pid
+###      default /run/dkimpy-milter/dkimpy-milter.pid
 ###
 ###  Name of the file where the filter should write its pid before beginning
 ###  normal operations.
