@@ -5,7 +5,7 @@
 CONFFILE="@SYSCONFDIR@/${RC_SVCNAME}.conf"
 required_files="${CONFFILE}"
 
-command="@SBINDIR@/dkimpy-milter"
+command="@BINDIR@/dkimpy-milter"
 pidfile="@RUNSTATEDIR@/${RC_SVCNAME}.pid"
 command_args="-P ${pidfile} ${CONFFILE}"
 
