@@ -127,11 +127,11 @@
 .rm #[ #] #H #V #F C
 .\" ========================================================================
 .\"
-.TH dkimpy-milter.conf 5 "2018-02-12"
+.TH dkimpy-milter.conf 5 "2019-04-25"
 .SH "NAME"
 dkimpy-milter \- Python milter for DKIM signing and validation
 .SH "VERSION"
-1\.1\.0
+1\.2\.0
 
 .SH "DESCRIPTION"
 .I dkimpy-milter(8)
@@ -152,13 +152,14 @@ the value is processed.  For positive values, the following are accepted:
 "F", "f", "N", "n", "0".
 
 The provided setup.py installs this configuration file in /etc or
-/usr/local/etc.
+/usr/local/etc based on the value of expand sysconfigdir= used when the
+package was installed.
 
 Command line invocation of parameters as is done by OpenDKIM is not supported.
 
 .SH "USAGE"
 Usage:
-  dkimpy-milter [/etc/dkimpy-milter.conf]
+  dkimpy-milter [@SYSCONFDIR@/dkimpy-milter.conf]
 
 .SH "OTHER DOCUMENTATION"
 This documentation assumes you have read Postfix's README_FILES/MILTER_README
@@ -486,7 +487,7 @@ is specified.
 
 .SH "AUTHORS"
 \ddkimpy-milter\fR was written by Scott Kitterman <scott@kitterman.com>.
-It is based on dkimpy-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
+It is based on dkim-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
 Copyright (c) 2013-2015 Stuart D. Gathman
 Copyright (c) 2018 Scott Kitterman <scott@kitterman.com>.  
 .PP
