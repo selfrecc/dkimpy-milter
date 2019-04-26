@@ -1,0 +1,12 @@
+[Unit]
+Description=DKIMpy Milter
+Documentation=man:dkimpy-milter(8) man:dkimpy-milter.conf(5) 
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/dkimpy-milter/dkimpy-milter.pid
+ExecStart=/usr/local/bin/dkimpy-milter /usr/local/etc/dkimpy-milter/dkimpy-milter.conf
+
+[Install]
+WantedBy=multi-user.target

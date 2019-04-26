@@ -1,0 +1,11 @@
+[Unit]
+Description=DKIMpy Milter
+Documentation=man:dkimpy-milter(8) man:dkimpy-milter.conf(5)
+Requires=dkimpy-milter.socket
+
+[Service]
+ExecStart=/usr/local/bin/dkimpy-milter /usr/local/etc/dkimpy-milter/dkimpy-milter.conf
+User=dkimpy-milter
+
+[Install]
+Also=dkimpy-milter.socket

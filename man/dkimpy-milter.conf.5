@@ -1,0 +1,506 @@
+\"
+.\" Standard preamble:
+.\" ========================================================================
+.de Sh \" Subsection heading
+.br
+.if t .Sp
+.ne 5
+.PP
+\fB\\$1\fR
+.PP
+..
+.de Sp \" Vertical space (when we can't use .PP)
+.if t .sp .5v
+.if n .sp
+..
+.de Vb \" Begin verbatim text
+.ft CW
+.nf
+.ne \\$1
+..
+.de Ve \" End verbatim text
+.ft R
+.fi
+..
+.\" Set up some character translations and predefined strings.  \*(-- will
+.\" give an unbreakable dash, \*(PI will give pi, \*(L" will give a left
+.\" double quote, and \*(R" will give a right double quote.  \*(C+ will
+.\" give a nicer C++.  Capital omega is used to do unbreakable dashes and
+.\" therefore won't be available.  \*(C` and \*(C' expand to `' in nroff,
+.\" nothing in troff, for use with C<>.
+.tr \(*W-
+.ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
+.ie n \{\
+.    ds -- \(*W-
+.    ds PI pi
+.    if (\n(.H=4u)&(1m=24u) .ds -- \(*W\h'-12u'\(*W\h'-12u'-\" diablo 10 pitch
+.    if (\n(.H=4u)&(1m=20u) .ds -- \(*W\h'-12u'\(*W\h'-8u'-\"  diablo 12 pitch
+.    ds L" ""
+.    ds R" ""
+.    ds C` ""
+.    ds C' ""
+'br\}
+.el\{\
+.    ds -- \|\(em\|
+.    ds PI \(*p
+.    ds L" ``
+.    ds R" ''
+'br\}
+.\"
+.\" If the F register is turned on, we'll generate index entries on stderr for
+.\" titles (.TH), headers (.SH), subsections (.Sh), items (.Ip), and index
+.\" entries marked with X<> in POD.  Of course, you'll have to process the
+.\" output yourself in some meaningful fashion.
+.if \nF \{\
+.    de IX
+.    tm Index:\\$1\t\\n%\t"\\$2"
+..
+.    nr % 0
+.    rr F
+.\}
+.\"
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
+.hy 0
+.if n .na
+.\"
+.\" Accent mark definitions (@(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2).
+.\" Fear.  Run.  Save yourself.  No user-serviceable parts.
+.    \" fudge factors for nroff and troff
+.if n \{\
+.    ds #H 0
+.    ds #V .8m
+.    ds #F .3m
+.    ds #[ \f1
+.    ds #] \fP
+.\}
+.if t \{\
+.    ds #H ((1u-(\\\\n(.fu%2u))*.13m)
+.    ds #V .6m
+.    ds #F 0
+.    ds #[ \&
+.    ds #] \&
+.\}
+.    \" simple accents for nroff and troff
+.if n \{\
+.    ds ' \&
+.    ds ` \&
+.    ds ^ \&
+.    ds , \&
+.    ds ~ ~
+.    ds /
+.\}
+.if t \{\
+.    ds ' \\k:\h'-(\\n(.wu*8/10-\*(#H)'\'\h"|\\n:u"
+.    ds ` \\k:\h'-(\\n(.wu*8/10-\*(#H)'\`\h'|\\n:u'
+.    ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'^\h'|\\n:u'
+.    ds , \\k:\h'-(\\n(.wu*8/10)',\h'|\\n:u'
+.    ds ~ \\k:\h'-(\\n(.wu-\*(#H-.1m)'~\h'|\\n:u'
+.    ds / \\k:\h'-(\\n(.wu*8/10-\*(#H)'\z\(sl\h'|\\n:u'
+.\}
+.    \" troff and (daisy-wheel) nroff accents
+.ds : \\k:\h'-(\\n(.wu*8/10-\*(#H+.1m+\*(#F)'\v'-\*(#V'\z.\h'.2m+\*(#F'.\h'|\\n:u'\v'\*(#V'
+.ds 8 \h'\*(#H'\(*b\h'-\*(#H'
+.ds o \\k:\h'-(\\n(.wu+\w'\(de'u-\*(#H)/2u'\v'-.3n'\*(#[\z\(de\v'.3n'\h'|\\n:u'\*(#]
+.ds d- \h'\*(#H'\(pd\h'-\w'~'u'\v'-.25m'\f2\(hy\fP\v'.25m'\h'-\*(#H'
+.ds D- D\\k:\h'-\w'D'u'\v'-.11m'\z\(hy\v'.11m'\h'|\\n:u'
+.ds th \*(#[\v'.3m'\s+1I\s-1\v'-.3m'\h'-(\w'I'u*2/3)'\s-1o\s+1\*(#]
+.ds Th \*(#[\s+2I\s-2\h'-\w'I'u*3/5'\v'-.3m'o\v'.3m'\*(#]
+.ds ae a\h'-(\w'a'u*4/10)'e
+.ds Ae A\h'-(\w'A'u*4/10)'E
+.    \" corrections for vroff
+.if v .ds ~ \\k:\h'-(\\n(.wu*9/10-\*(#H)'\s-2\u~\d\s+2\h'|\\n:u'
+.if v .ds ^ \\k:\h'-(\\n(.wu*10/11-\*(#H)'\v'-.4m'^\v'.4m'\h'|\\n:u'
+.    \" for low resolution devices (crt and lpr)
+.if \n(.H>23 .if \n(.V>19 \
+\{\
+.    ds : e
+.    ds 8 ss
+.    ds o a
+.    ds d- d\h'-1'\(ga
+.    ds D- D\h'-1'\(hy
+.    ds th \o'bp'
+.    ds Th \o'LP'
+.    ds ae ae
+.    ds Ae AE
+.\}
+.rm #[ #] #H #V #F C
+.\" ========================================================================
+.\"
+.TH dkimpy-milter.conf 5 "2019-04-25"
+.SH "NAME"
+dkimpy-milter \- Python milter for DKIM signing and validation
+.SH "VERSION"
+1\.2\.0
+
+.SH "DESCRIPTION"
+.I dkimpy-milter(8)
+implements the
+.B DKIM
+specification for signing and verifying e-mail messages on a per-domain
+basis.  This file is its configuration file.
+
+Blank lines are ignored.  Lines containing a hash ("#") character are
+truncated at the hash character to allow for comments in the file.
+
+Other content should be the name of a parameter, followed by white space,
+followed by the value of that parameter, each on a separate line.
+
+For parameters that are Boolean in nature, only the first byte of
+the value is processed.  For positive values, the following are accepted:
+"T", "t", "Y", "y", "1".  For negative values, the following are accepted:
+"F", "f", "N", "n", "0".
+
+The provided setup.py installs this configuration file in /etc or
+/usr/local/etc based on the value of expand sysconfigdir= used when the
+package was installed.
+
+Command line invocation of parameters as is done by OpenDKIM is not supported.
+
+.SH "USAGE"
+Usage:
+  dkimpy-milter [/usr/local/etc/dkimpy-milter/dkimpy-milter.conf]
+
+.SH "OTHER DOCUMENTATION"
+This documentation assumes you have read Postfix's README_FILES/MILTER_README
+(or Sendmail equivalent) and are generally familiar with Domain Keys Identified
+Mail (DKIM).  See RFC 6376 for details.
+
+.SH "SYNOPSIS"
+
+dkimpy-milter operates with a default installed configuration file and 
+set of default configuration options that are used if the configuration file
+cannot be found.  These options can be changed by changing the installed 
+configuration files.  For users transitioning from OpenDKIM, OpenDKIM config
+files can be used directly.  Not all OpenDKIM options are supported.  If an
+unsupported option from OpenDKIM is specified, an error will be raised.
+
+.SH "DESCRIPTION"
+
+Configuration options are described here and in the configuration file 
+provided with the package.  The provided setup.py installs this configuration 
+file in /etc or /usr/local/etc.
+
+.SH "OPTIONS"
+
+.TP
+.I AuthservID (string)
+Sets the "authserv-id" to use when generating the Authentication-Results:
+header field after verifying a message.  The default is to use the name of
+the MTA processing the message.  If the string "HOSTNAME" is provided, the
+name of the host running the filter (as returned by the
+.I gethostname(3)
+function) will be used.
+
+.TP
+.I Canonicalization (string)
+Selects the canonicalization method(s) to be used when signing messages.
+When verifying, the message's DKIM-Signature: header field specifies
+the canonicalization method.  The recognized values are
+.I relaxed
+and
+.I simple
+as defined by the DKIM specification.  The default is
+.I relaxed
+/
+.I simple.
+The value may include two different canonicalizations separated by a
+slash ("/") character, in which case the first will be applied to the
+header and the second to the body.
+
+.TP
+.I DiagnosticDirectory (string)
+Directory into which to write diagnostic reports when message verification
+fails.  If not set (the default), these files are not generated.  [Unlike
+OpenDKIM, this applies to all messages, not just  on messages bearing a "z=" tag
+because dkimpy does not yet support "z=".]
+
+.TP
+.I Domain (dataset)
+A set of domains whose mail should be signed by this filter.  Mail from other
+domains will be verified rather than being signed.
+
+This parameter is not required if a
+.I SigningTable
+or
+.I SigningTableEd25519
+is in use; in that case, the list of signed domains is implied by the
+lines in that file.
+
+This parameter is ignored if a
+.I KeyTable
+or
+.I KeyTableD25119
+is defined.
+
+.TP
+.I InternalHosts (dataset)
+Identifies a set internal hosts whose mail should be signed rather
+than verified.  Entries in this data set follow the same form as those of
+the
+.I PeerList
+option below.  If not specified, the default of "127.0.0.1" is applied.
+Naturally, providing a value here overrides the default, so if mail from
+127.0.0.1 should be signed, the list provided here should include that
+address explicitly. [PeerList NOT IMPLEMENTED]
+
+.TP
+.I KeyFile (string)
+Gives the location of a PEM-formatted private key to be used for RSA signing
+all messages.  Ignored if a
+.I KeyTable
+is defined.
+
+.TP
+.I KeyFileEd25519 (string)
+Gives the location of a Ed25519 private key to be used for Ed25519 signing
+all messages.  File is the Base64 encoded output of RFC 8032 Ed25519 private Key
+generation (as used in dkimpy).  Ignored if a 
+.I KeyTableEd25519
+is defined.
+
+.TP
+.I KeyTable (dataset)
+Gives the location of a file mapping key names to RSA signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not supported.
+
+.TP
+.I KeyTableEd25519 (dataset)
+Gives the location of a file mapping key names to Ed25519 signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not support
+ed.
+
+
+.TP
+.I MacroList (dataset)
+Defines a set of MTA-provided
+.I macros
+that should be checked to see if the sender has been determined to be a
+local user and therefore whether or not the message should be signed.  If
+a
+.I value
+is specified matching a macro name in the data set, the value of the macro
+must match a value specified (matching is case-sensitive), otherwise the
+macro must be defined but may contain any value.  The set is empty by
+default, meaning macros are not considered when making the sign-verify
+decision.  The general format of the value is
+.I value1[|value2[|...]];
+if one or more value is defined then the macro must be set to one of the
+listed values, otherwise the macro must be set but can contain any
+value.
+
+In order for the macro and its value to be available to the filter for
+checking, the MTA must send it during the protocol exchange.  This is either
+accomplished via manual configuration of the MTA to send the desired macros
+or, for MTA/filter combinations that support the feature, the filter can
+request those macros that are of interest.  The latter is a feature negotiated
+at the time the filter receives a connection from the MTA and its availability
+depends upon the version of milter used to compile the filter and the version
+of the MTA making the connection.
+
+.TP
+.I MacroListVerify (dataset)
+Defines a set of MTA-provided
+.I macros
+that should be checked to see if the sender has been determined to be an
+external source and therefore whether or not the message should be signed.
+Entries in this data set follow the same form as those of the
+.I MacroList
+option above.  [this option is not inhereted from OpenDKIM]  
+
+.TP
+.I Mode (string)
+Selects operating modes.  The string is a concatenation of characters that
+indicate which mode(s) of operation are desired.  Valid modes are
+.I s
+(signer) and
+.I v
+(verifier).  The default is
+.I sv
+except in test mode (see the
+.I opendkim(8)
+man page)
+in which case the default is
+.I v.
+When signing mode is enabled, one of the following combinations must also
+be set:
+(a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
+(b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
+
+.TP 
+.I DNSOverride (string)
+Provide a text string that a verifying milter should use instead of
+consulting the DNS on each message.  This is useful primarily for
+testing purposes in environments where it is awkward to modify the
+system DNS resolution.  It should not be used in production.
+
+.TP
+.I PeerList (dataset)
+Identifies a set of "peers" that identifies clients whose connections
+should be accepted without processing by this filter.  The set
+should contain on each line a hostname, domain name (e.g. ".example.com"),
+IP address, an IPv6 address (including an IPv4 mapped address), or a
+CIDR-style IP specification (e.g. "192.168.1.0/24").  An entry beginning
+with a bang ("!") character means "not", allowing exclusions of specific
+hosts that are otherwise members of larger sets.  Host and domain names are 
+matched first, then the IP or IPv6 address depending on the connection 
+type.  More precise entries are preferred over less precise ones, i.e. 
+"192.168.1.1" will match before "!192.168.1.0/24".  The text form of IPv6 
+addresses will be forced to lowercase when queried (RFC5952), so the contents
+of this data set should also use lowercase.  The IP address portion of an
+entry may optionally contain square brackets; both forms (with and without)
+will be checked. [PeerList NOT IMPLEMENTED - included for reference only]
+
+.TP
+.I PidFile (string)
+Specifies the path to a file that should be created at process start
+containing the process ID.  If not specified, no such file will be created.
+
+.TP
+.I Selector (string)
+Defines the name of the selector to be used when signing messages using RSA.
+See the
+.B DKIM
+specification for details.  Used only when signing with a single key;
+see the
+.I SigningTable
+parameter below for more information.
+
+This parameter is ignored if a
+.I KeyTable
+is defined.
+
+.TP
+.I SelectorEd25519 (string)
+Defines the name of the selector to be used when signing messages using Ed25519.
+See the
+.B DKIM
+specification for details.  Used only when signing with a single key;
+see the
+.I SigningTable
+parameter below for more information.
+
+This parameter is ignored if a
+.I KeyTableEd25519
+is defined.
+
+.TP
+.I SigningTable (dataset)
+
+Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
+
+If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
+
+If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file. ["refile support not implemented"].
+
+For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
+
+In any case, only the first match is applied.
+
+.TP
+.I SigningTableEd25519 (dataset)
+
+Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
+
+If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
+
+If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file. ["refile support not implemented"].
+
+For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
+
+In any case, only the first match is applied.
+
+.TP
+.I Socket (string)
+Specifies the socket that should be established by the filter to receive
+connections from
+.I postfix(1)
+in order to provide service.
+.I socketspec
+is in one of two forms:
+.I local:path,
+which creates a UNIX domain socket at the specified
+.I path,
+or
+.I inet:port[@host]
+or
+.I inet6:port[@host]
+which creates a TCP socket on the specified
+.I port
+and in the specified protocol family.  If the
+.I host
+is not given as either a hostname or an IP address, the socket will be
+listening on all interfaces.  A literal IP address must be enclosed in
+square brackets.  This option is mandatory in the configuration file.
+
+.TP
+.I SubDomains (Boolean)
+Sign subdomains of those listed by the
+.I Domain
+parameter as well as the actual domains.
+
+.TP
+.I Syslog (Boolean)
+Log via calls to
+.I syslog(3)
+any interesting activity.
+
+.TP
+.I SyslogFacility (string)
+Log via calls to
+.I syslog(3)
+using the named facility.  The facility names are the same as the ones
+allowed in
+.I syslog.conf(5).
+The default is "mail".
+
+.TP
+.I SyslogSuccess (Boolean)
+Log via calls to
+.I syslog(3)
+additional entries indicating successful signing or verification of
+messages.
+
+.TP
+.I UMask (integer)
+Requests a specific permissions mask to be used for file creation.
+This only really applies to creation of the socket when
+.I Socket
+specifies a UNIX domain socket, and to the
+.I PidFile
+(if any); temporary files are created by the
+.I mkstemp(3)
+function that enforces a specific file mode on creation regardless
+of the process umask.  See
+.I umask(2)
+for more information.
+
+.TP
+.I UserID (string)
+Attempts to become the specified userid before starting operations.
+The value is of the form
+.I userid[:group].
+The process will be assigned all of the groups and primary group ID of
+the named
+.I userid
+unless an alternate
+.I group
+is specified.
+
+.SH "AUTHORS"
+\ddkimpy-milter\fR was written by Scott Kitterman <scott@kitterman.com>.
+It is based on dkim-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
+Copyright (c) 2013-2015 Stuart D. Gathman
+Copyright (c) 2018 Scott Kitterman <scott@kitterman.com>.  
+.PP
+This man-page was created by Scott Kitterman <scott@kitterman.com>.
+
+.SH COPYRIGHT
+Configuration items derived from OpenDKIM 2.11.0 opendkim.conf.5.in:
+Copyright (c) 2007, 2008, Sendmail, Inc. and its suppliers.  All rights
+reserved.  See LICENSE.Sendmail.
+
+Copyright (c) 2009-2015, The Trusted Domain Project.  All rights reserved.
+See LICENSE.
+
+Updated for dkimpy-milter.  Updates licensed under the same terms as the rest
+of the package.
+Copyright (c) 2018, Scott Kitterman <scott@kitterman.com>
