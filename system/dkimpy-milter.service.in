@@ -5,8 +5,8 @@ After=network.target
 
 [Service]
 Type=simple
-PIDFile=/run/dkimpy-milter/dkimpy-milter.pid
-ExecStart=/usr/local/bin/dkimpy-milter /usr/local/etc/dkimpy-milter.conf 
+PIDFile=@RUNSTATEDIR@/dkimpy-milter.pid
+ExecStart=@BINDIR@/dkimpy-milter @SYSCONFDIR@/dkimpy-milter.conf
 
 [Install]
 WantedBy=multi-user.target
