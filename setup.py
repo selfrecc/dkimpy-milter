@@ -46,7 +46,9 @@ class FileMacroExpand(distutils.cmd.Command):
     def run(self):
         files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', \
                  'system/dkimpy-milter.service', 'system/dkimpy-milter', \
-                 'system/dkimpy-milter.openrc', ]
+                 'system/dkimpy-milter.openrc', \
+                 'system/socket-activation/dkimpy-milter.service', \
+                 'system/socket-activation/dkimpy-milter.socket',]
         for infile in files:
             outfile = ''
             filein = open(infile + '.in')
