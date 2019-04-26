@@ -4,7 +4,7 @@ Documentation=man:dkimpy-milter(8) man:dkimpy-milter.conf(5)
 Requires=dkimpy-milter.socket
 
 [Service]
-ExecStart=@BINDIR@/dkimpy-milter /etc/dkimpy-milter.conf
+ExecStart=@BINDIR@/dkimpy-milter @SYSCONFDIR@/dkimpy-milter.conf
 User=dkimpy-milter
 
 [Install]
