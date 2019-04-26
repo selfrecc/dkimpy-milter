@@ -17,13 +17,21 @@ to be installed when installing using setup.py, the following incantation is
 required because setuptools developers decided not being able to do this by
 default is a feature:
 
-python3 setup.py install --single-version-externally-managed --record=/dev/null
+[sudo] python3 setup.py install --single-version-externally-managed --record=/dev/null
 
 For users of Debian Stable (Debian 9, Codename Squeeze), all dependencies are
 available in either the main or backports repositories:
 
 [sudo] apt install python3-milter python3-nacl python3-dnspython
 [sudo] apt install -t stretch-backports python3-authres python3-dkim
+
+It is also available in the Debian package archive:
+
+[sudo] apt install dkimpy-milter [Debian 10]
+[sudo] apt install -t stretch-backports dkimpy-milter [Debian 9]
+
+When installing using the Debian package, all dependencies are automatically
+installed.
 
 The preferred method of installation is from PyPi using pip (if distribution
 packages are not available):
@@ -37,9 +45,34 @@ an C compiler.  Alternately, install these dependencies from distribution/OS
 packages and then pip install dkimpy_milter.
 
 The milter will work with either py3dns (DNS) or dnspython (dns), preferring
-dnspython is both are available.  The dkimpy DKIM module also works with
+dnspython if both are available.  The dkimpy DKIM module also works with
 either.
 
+NON-STANDARD INSTALLATION PATHS
+============ ============ =====
+
+The package includes a custom setup command called expand.  It allows various
+file locations in init scripts, man pages, and config files to be over-ridden
+at install time.
+
+expand: Expand @@ variables in input files, simlar to make macros.
+user_options:
+ --sysconfigdir=, e: Specify system configuration directory.
+ --sbindir=, s: Specify system binary directory [not used].
+ --bindir=, b: Specify binary directory.
+ --rundir=,r: Specify run state directory.
+
+As an example, to change the run directory to /var/run, one would do:
+
+python3 setup.py expand --rundir=/var/run
+[sudo] python3 setup.py install --single-version-externally-managed \
+                                --record=/dev/null
+
+or in a single step (the order matters):
+
+[sudo] python3 setup.py expand --rundir=/var/run install \
+                               --single-version-externally-managed \
+                               --record=/dev/null
 
 SETUP
 ====
