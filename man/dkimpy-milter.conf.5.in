@@ -159,7 +159,7 @@ Command line invocation of parameters as is done by OpenDKIM is not supported.
 
 .SH "USAGE"
 Usage:
-  dkimpy-milter [@SYSCONFDIR@/dkimpy-milter.conf]
+  dkimpy-milter [@CONFDIR@/dkimpy-milter.conf]
 
 .SH "OTHER DOCUMENTATION"
 This documentation assumes you have read Postfix's README_FILES/MILTER_README

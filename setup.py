@@ -28,20 +28,20 @@ description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for P
 class FileMacroExpand(distutils.cmd.Command):
     description = "Expand @@ variables in input files, simlar to make macros."
     user_options = [
-        ('sysconfigdir=', 'e', 'Specify configuration directory. [/usr/local/etc/dkimpy-milter]'),
+        ('sysconfigdir=', 'e', 'Specify system configuration directory. [/usr/local/etc]'),
         ('sbindir=', 's', 'Specify system binary directory. [/usr/local/sbin]'),
         ('bindir=', 'b', 'Specify binary directory. [/usr/loca/bin]'),
         ('rundir=', 'r', 'Specify run state directory. [/run/dkimpy-milter]'),
     ]
 
     def initialize_options(self):
-        self.sysconfigdir = '/usr/local/etc/dkimpy-milter'
+        self.sysconfigdir = '/usr/local/etc'
         self.sbindir = '/usr/local/sbin'
         self.bindir = '/usr/local/bin'
         self.rundir = '/run/dkimpy-milter'
 
     def finalize_options(self):
-        pass
+        self.configdir = self.sysconfigdir + '/dkimpy-milter'
 
     def run(self):
         files = ['etc/dkimpy-milter.conf', 'man/dkimpy-milter.conf.5', \
@@ -53,11 +53,13 @@ class FileMacroExpand(distutils.cmd.Command):
             outfile = ''
             filein = open(infile + '.in')
             for line in filein:
-                for function in ["@SYSCONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@", "@GREP@"]:
+                for function in ["@SYSCONFDIR@", "@CONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@", "@GREP@"]:
                     splitline = line.split(function)
                     if len(splitline) > 1:
                         if function == "@SYSCONFDIR@":
                             line = splitline[0] + self.sysconfigdir + splitline[1]
+                        elif function == "@CONFDIR@":
+                            line = splitline[0] + self.configdir + splitline[1]
                         elif function == "@SBINDIR@":
                             line = splitline[0] + self.sbindir + splitline[1]
                         elif function == "@BINDIR@":

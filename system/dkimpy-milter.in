@@ -18,7 +18,7 @@
 # Short-Description: dkimpy-milter
 # Description:       Python DKIM Milter for Sendmail and Postfix
 ### END INIT INFO
-sysconfdir="@SYSCONFDIR@"
+sysconfdir="@CONFDIR@"
 bindir="@BINDIR@"
 RUNDIR="@RUNSTATEDIR@"
 DAEMON=${bindir}/dkimpy-milter
@@ -33,8 +33,8 @@ test -x $DAEMON || exit 0
 
 # Include dkimpy-python defaults if available
 # Typically not used
-if [ -f /etc/default/dkimpy-milter ] ; then
-	. /etc/default/dkimpy-milter
+if [ -f @SYSCONFDIR@/default/dkimpy-milter ] ; then
+	. @SYSCONFDIR@/default/dkimpy-milter
 fi
 
 set -e

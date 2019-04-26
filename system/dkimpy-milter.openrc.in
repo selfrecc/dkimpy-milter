@@ -2,7 +2,7 @@
 # Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-CONFFILE="@SYSCONFDIR@/${RC_SVCNAME}.conf"
+CONFFILE="@CONFDIR@/${RC_SVCNAME}.conf"
 required_files="${CONFFILE}"
 
 command="@BINDIR@/dkimpy-milter"
