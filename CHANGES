@@ -2,6 +2,8 @@
  - Add new expand option to setup.py so various file system locations can be
    specified at build/install time rather than being hard coded
  - Install openrc init file for Gentoo and other openrc users
+ - Add support for passing PID file name on command line to make it easier to
+   keep system init and daemon configuration in sync
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

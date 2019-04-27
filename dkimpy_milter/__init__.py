@@ -347,11 +347,16 @@ def main():
     privateEd25519 = False
     configFile = '/usr/local/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
-        if sys.argv[1] in ('-?', '--help', '-h'):
-            print('usage: dkimpy-milter [<configfilename>]')
+        if (sys.argv[1] in ('-?', '--help', '-h')) or len(sys.argv) == 3 or \
+               (len(sys.argv) == 4 and sys.argv[2] != '-P'):
+            print('usage: dkimpy-milter [<configfilename>] [-P <pidfile>]')
             sys.exit(1)
         configFile = sys.argv[1]
     milterconfig = config._processConfigFile(filename=configFile)
+    if len(sys.argv) == 4:
+        if sys.argv[2] == '-P':
+            # Command line PID file argument overrides config file
+            milterconfig['PidFile'] = sys.argv[3]
     if milterconfig.get('Syslog'):
         facility = eval("syslog.LOG_{0}"
                         .format(milterconfig.get('SyslogFacility').upper()))

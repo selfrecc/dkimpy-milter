@@ -7,7 +7,7 @@ required_files="${CONFFILE}"
 
 command="@BINDIR@/dkimpy-milter"
 pidfile="@RUNSTATEDIR@/${RC_SVCNAME}.pid"
-command_args="-P ${pidfile} ${CONFFILE}"
+command_args="${CONFFILE} -P ${pidfile}"
 
 depend() {
 	use dns logger net
