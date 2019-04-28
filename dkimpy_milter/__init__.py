@@ -349,7 +349,7 @@ def main():
     if len(sys.argv) > 1:
         if (sys.argv[1] in ('-?', '--help', '-h')) or len(sys.argv) == 3 or \
                (len(sys.argv) == 4 and sys.argv[2] != '-P'):
-            print('usage: dkimpy-milter [<configfilename>] [-P <pidfile>]')
+            print('usage: dkimpy-milter [<configfilename> [-P <pidfile>]]')
             sys.exit(1)
         configFile = sys.argv[1]
     milterconfig = config._processConfigFile(filename=configFile)
