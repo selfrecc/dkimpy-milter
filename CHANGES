@@ -4,6 +4,7 @@
  - Install openrc init file for Gentoo and other openrc users
  - Add support for passing PID file name on command line to make it easier to
    keep system init and daemon configuration in sync
+ - Fix startup logging so it provides information at a useful time
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)
