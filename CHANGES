@@ -6,7 +6,7 @@
    keep system init and daemon configuration in sync
  - Fix startup logging so it provides information at a useful time
  - Fix verify processing so missing (optional) i= tag doesn't cause the milter
-   to fail
+   to fail  (LP: #1842250)
  - Fix message extraction so that signing in the same pass through the milter
    as verifying works correctly
 
