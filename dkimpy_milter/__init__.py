@@ -292,7 +292,7 @@ class dkimMilter(Milter.Base):
                 # i= is optional and dkimpy is fine if it's not provided
                 self.header_i = codecs.decode(d.signature_fields.get(b'i'), 'ascii')
             except TypeError as x:
-                pass
+                self.header_i = None
             self.header_d = codecs.decode(d.signature_fields.get(b'd'), 'ascii')
             self.header_a = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
             if res:
