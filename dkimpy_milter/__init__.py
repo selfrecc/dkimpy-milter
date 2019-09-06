@@ -177,8 +177,9 @@ class dkimMilter(Milter.Base):
             except:
                 # Don't error out on unparseable AR header fiels
                 pass
-        # Check or sign DKIM
+        # Check and/or sign DKIM
         self.fp.seek(0)
+        txt = self.fp.read()
         if milterconfig.get('Domain'):
             domain = milterconfig.get('Domain')
         else:
@@ -187,12 +188,10 @@ class dkimMilter(Milter.Base):
             self.fdomain = _get_parent_domain(self.fdomain, domain)
         if ((self.fdomain in domain) and not milterconfig.get('Mode') == 'v'
                 and not self.external_connection):
-            txt = self.fp.read()
             self.sign_dkim(txt)
         if ((self.has_dkim) and (not self.internal_connection) and
             (milterconfig.get('Mode') == 'v' or
              milterconfig.get('Mode') == 'sv')):
-            txt = self.fp.read()
             self.check_dkim(txt)
         if self.arresults:
             h = authres.AuthenticationResultsHeader(authserv_id=
