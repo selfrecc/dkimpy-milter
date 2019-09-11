@@ -27,7 +27,7 @@ available in either the main or backports repositories:
 
 It is also available in the Debian package archive:
 
-[sudo] apt install dkimpy-milter [Debian 10]
+[sudo] apt install dkimpy-milter [Debian 10 or later]
 [sudo] apt install -t stretch-backports dkimpy-milter [Debian 9]
 
 When installing using the Debian package, all dependencies are automatically
@@ -141,7 +141,12 @@ the following steps:
 [sudo] systemctl status dkimpy-milter (to verify it started correctly)
 
 As with all milters, dkimpy-milter needs to be integrated with your MTA of
-choice (Sendmail or Postfix).
+choice (Sendmail or Postfix).  When integrating with your MTA, the risk of
+signature invalidation due to content conversion of the message body needs to
+be considered.  See RFC 6376, Section 5.3 for discussion of this issue.  As a
+practical matter, when signing, configure the milter to follow all others that
+might modify the message body.  When verifying, configure the milter before
+other processes that might modify the message body.
 
 SENDMAIL
 ========

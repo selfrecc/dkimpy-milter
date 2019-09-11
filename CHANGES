@@ -1,5 +1,6 @@
 1.2.0 UNRELEASED
  - Add support for SignHeaders feature, thanks to Ralph Seichter for the patch
+ - Add information on message content conversion to README
  - Add new expand option to setup.py so various file system locations can be
    specified at build/install time rather than being hard coded
  - Install openrc init file for Gentoo and other openrc users
