@@ -217,13 +217,18 @@ class dkimMilter(Milter.Base):
             if (milterconfig.get('Syslog') and
                     milterconfig.get('debugLevel') >= 1):
                 syslog.syslog('canonicalize: {0}'.format(canonicalize))
+        sign_headers = milterconfig.get('SignHeaders')
+        if not sign_headers:
+            # None or empty. DKIM explicitly tests for None.
+            sign_headers = None
         try:
             if privateRSA:
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(milterconfig.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
                            codecs.encode(privateRSA, 'ascii'),
                            canonicalize=(canonicalize[0],
-                                         canonicalize[1]))
+                                         canonicalize[1]),
+                           include_headers=sign_headers)
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
                 if (milterconfig.get('Syslog') and
@@ -239,6 +244,7 @@ class dkimMilter(Milter.Base):
                 h = d.sign(codecs.encode(milterconfig.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
                            privateEd25519, canonicalize=(canonicalize[0],
                                                          canonicalize[1]),
+                           include_headers=sign_headers,
                            signature_algorithm=b'ed25519-sha256')
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)

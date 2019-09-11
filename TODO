@@ -49,6 +49,9 @@ Port to Python 3  implemented	verified
 Subdomain support implemented	verified
 Test suite	  implemented	verified
 
+1.2.0
+SignHeaders	 implemented
+
 Planned dataset type support (if needed):
 mdb:
 

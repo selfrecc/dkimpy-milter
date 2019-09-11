@@ -325,6 +325,23 @@ be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 
+.TP
+.I OmitHeaders (dataset)
+Specifies a set of header fields that should be omitted when generating
+signatures.  If an entry in the list names any header field that is mandated
+by the DKIM specification, the entry is ignored.  A set of header fields is
+listed in the DKIM specification (RFC6376, Section 5.4) as "SHOULD NOT" be
+signed; the default list for this parameter contains those fields
+(Return-Path, Received, Comments, Keywords, Bcc, Resent-Bcc and
+DKIM-Signature).  To omit no headers, simply use the string "." (or any
+string that will match no header field names).
+Specifying a list with this parameter replaces the default entirely, unless
+one entry is "*" in which case the list is interpreted as a delta to the
+default; for example, "*,+foobar" will use the entire default list plus
+the name "foobar", while "*,-Bcc" would use the entire default list except
+for the "Bcc" entry. [OmitHeaders NOT IMPLEMENTED - included for reference
+only]
+
 .TP 
 .I DNSOverride (string)
 Provide a text string that a verifying milter should use instead of
@@ -381,6 +398,17 @@ parameter below for more information.
 This parameter is ignored if a
 .I KeyTableEd25519
 is defined.
+
+.TP
+.I SignHeaders (dataset)
+Specifies the set of header fields that should be included when generating
+signatures.  If the list omits any header field that is mandated by the DKIM
+specification, those fields are implicitly added.  By default, those fields
+listed in the DKIM specification as "SHOULD" be signed (RFC6376, Section 5.4)
+will be signed by the filter.  See the
+.I OmitHeaders
+configuration option for more information about the format and interpretation
+of this field.
 
 .TP
 .I SigningTable (dataset)
@@ -489,7 +517,7 @@ is specified.
 \ddkimpy-milter\fR was written by Scott Kitterman <scott@kitterman.com>.
 It is based on dkim-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
 Copyright (c) 2013-2015 Stuart D. Gathman
-Copyright (c) 2018 Scott Kitterman <scott@kitterman.com>.  
+Copyright (c) 2018,2019 Scott Kitterman <scott@kitterman.com>.
 .PP
 This man-page was created by Scott Kitterman <scott@kitterman.com>.
 
@@ -503,4 +531,4 @@ See LICENSE.
 
 Updated for dkimpy-milter.  Updates licensed under the same terms as the rest
 of the package.
-Copyright (c) 2018, Scott Kitterman <scott@kitterman.com>
+Copyright (c) 2018,2019 Scott Kitterman <scott@kitterman.com>

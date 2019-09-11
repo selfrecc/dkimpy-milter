@@ -340,7 +340,8 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset',
         'DNSOverride': 'str',
-        'debugLevel': 'int'
+        'debugLevel': 'int',
+        'SignHeaders': 'dataset'
         }
 
     #  check to see if it's a file
