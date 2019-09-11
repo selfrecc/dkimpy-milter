@@ -50,23 +50,25 @@ Subdomain support implemented	verified
 Test suite	  implemented	verified
 
 1.2.0
-SignHeaders	 implemented
+DNSTimeout (requires dkimpy change)
+KeyTable
+KeytableEd25519
+SignHeaders	 	implemented
+SigningTable
+SigningTableEd25519
+TemporaryDirectory
 
 Planned dataset type support (if needed):
 mdb:
 
 Considered for near-term feature release
 
-KeyTable
-KeytableEd25519
-SigningTable
-SigningTableEd25519
 AlwaysAddARHeader
 ChangeRootDirectory
 ClockDrift (requires dkimpy change)
-DNSTimeout (requires dkimpy change)
 MilterDebug
 MinimumKeyBits
+OmitHeaders
 OversignHeaders (may require dkimpy changes)
 PeerList
 SignatureAlgorithm
@@ -88,7 +90,6 @@ MaximumSignaturesToVerify
 MultipleSignatures
 MustBeSigned
 NoHeaderB 
-OmitHeaders
 On-BadSignature
 On-Default
 On-DNSError
@@ -103,11 +104,9 @@ RequiredHeaders
 RequireSafeKeys
 SignatureAlgorithm
 SignatureTTL
-SignHeaders
 SoftwareHeader
 StrictHeaders
 SubDomains
-TemporaryDirectory
 TestDNSData
 TestPublicKeys
 
