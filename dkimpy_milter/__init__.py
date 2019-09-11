@@ -126,6 +126,11 @@ class dkimMilter(Milter.Base):
     @Milter.noreply
     def header(self, name, val):
         lname = name.lower()
+        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 4:
+            if lname == 'content-transfer-encoding':
+                syslog.syslog("content-transfer-encodeing: {0}".format(val))
+            if lname == 'content-type':
+                syslog.syslog("content-type: {0}".format(val))
         if lname == 'dkim-signature':
             if (milterconfig.get('Syslog') and
                     milterconfig.get('debugLevel') >= 1):

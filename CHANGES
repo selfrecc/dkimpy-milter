@@ -11,6 +11,8 @@
    to fail  (LP: #1842250)
  - Fix message extraction so that signing in the same pass through the milter
    as verifying works correctly
+ - Add debug logging for content type to assist troubleshooting MIME
+   conversion issues
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)
