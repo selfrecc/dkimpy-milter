@@ -13,6 +13,8 @@
    as verifying works correctly
  - Add debug logging for content type to assist troubleshooting MIME
    conversion issues
+ - Fix variable initialization so mailformed mails missing body From do not
+   cause a traceback (LP: #1844161)
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

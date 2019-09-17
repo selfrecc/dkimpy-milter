@@ -55,6 +55,7 @@ class dkimMilter(Milter.Base):
         self.privatersa = privateRSA
         self.privateed25519 = privateEd25519
         self.fp = None
+        self.fdomain = ''
 
     @Milter.noreply
     def connect(self, hostname, unused, hostaddr):
@@ -141,7 +142,7 @@ class dkimMilter(Milter.Base):
             try:
                 self.fdomain = self.author.split('@')[1].lower()
             except IndexError as er:
-                self.fdomain = ''  # self.author was not a proper email address
+                pass # self.author was not a proper email address
             if (milterconfig.get('Syslog') and
                     milterconfig.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
