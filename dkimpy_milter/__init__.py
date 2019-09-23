@@ -276,6 +276,7 @@ class dkimMilter(Milter.Base):
 
     def check_dkim(self, txt):
         res = False
+        self.header_a = None
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
             d = dkim.DKIM(txt)
             try:
@@ -316,6 +317,7 @@ class dkimMilter(Milter.Base):
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
                     syslog.syslog("check_dkim: {0}".format(x))
+                self.header_d = None
             if not self.header_a:
                 self.header_a = 'rsa-sha256'
             if res:
@@ -357,6 +359,7 @@ class dkimMilter(Milter.Base):
                                                  result_comment=
                                                  self.dkim_comment)
             )
+            self.header_a = None
         return
 
 # get parent domain to be signed for if fdomain is a subdomain
