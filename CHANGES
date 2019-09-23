@@ -15,6 +15,8 @@
    conversion issues
  - Fix variable initialization so mailformed mails missing body From do not
    cause a traceback (LP: #1844161)
+ - Catch more ascii encoding errors to improve resilience against bad data
+   (LP: #1844189)
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

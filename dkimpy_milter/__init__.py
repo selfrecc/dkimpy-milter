@@ -149,7 +149,11 @@ class dkimMilter(Milter.Base):
         elif lname == 'authentication-results':
             self.arheaders.append(val)
         if self.fp:
-            self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'ascii')))
+            try:
+                self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'ascii')))
+            except:
+                # Don't choke on header fields with non-ascii garbage in them.
+                pass
         return Milter.CONTINUE
 
     @Milter.noreply
@@ -305,8 +309,13 @@ class dkimMilter(Milter.Base):
                 self.header_i = codecs.decode(d.signature_fields.get(b'i'), 'ascii')
             except TypeError as x:
                 self.header_i = None
-            self.header_d = codecs.decode(d.signature_fields.get(b'd'), 'ascii')
-            self.header_a = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
+            try:
+                self.header_d = codecs.decode(d.signature_fields.get(b'd'), 'ascii')
+                self.header_a = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
+            except Exception as x:
+                self.dkim_comment = str(x)
+                if milterconfig.get('Syslog'):
+                    syslog.syslog("check_dkim: {0}".format(x))
             if res:
                 if (milterconfig.get('Syslog') and
                         (milterconfig.get('SyslogSuccess') or
