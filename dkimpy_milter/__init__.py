@@ -316,6 +316,8 @@ class dkimMilter(Milter.Base):
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
                     syslog.syslog("check_dkim: {0}".format(x))
+            if not self.header_a:
+                self.header_a = 'rsa-sha256'
             if res:
                 if (milterconfig.get('Syslog') and
                         (milterconfig.get('SyslogSuccess') or
@@ -340,14 +342,15 @@ class dkimMilter(Milter.Base):
                             syslog.syslog('DKIM: Fail ({0})'
                                           .format(d.domain.lower()))
                         else:
-                            syslog.syslog('DKIM: Fail, unextractable domain'
+                            syslog.syslog('DKIM: Fail, unextractable domain')
             if res:
                 result = 'pass'
             else:
                 result = 'fail'
             res = False
-            self.arresults.append(
-                authres.DKIMAuthenticationResult(result=result,
+            if self.header_d:
+                self.arresults.append(
+                    authres.DKIMAuthenticationResult(result=result,
                                                  header_i=self.header_i,
                                                  header_d=self.header_d,
                                                  header_a=self.header_a,
