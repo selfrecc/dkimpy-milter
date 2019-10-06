@@ -1,5 +1,4 @@
-OVERVIEW
-========
+# OVERVIEW
 
 This is a DKIM signing and verification milter.  It has been tested with both
 Postfix and Sendmail.
@@ -9,8 +8,7 @@ a subset of OpenDKIM options are supported.  If an unsupported option is
 specified, an error will be raised.
 
 
-INSTALLATION
-===========
+# INSTALLATION
 
 This package includes a default configuration file and man pages.  For those
 to be installed when installing using setup.py, the following incantation is
@@ -48,8 +46,7 @@ The milter will work with either py3dns (DNS) or dnspython (dns), preferring
 dnspython if both are available.  The dkimpy DKIM module also works with
 either.
 
-NON-STANDARD INSTALLATION PATHS
-============ ============ =====
+## NON-STANDARD INSTALLATION PATHS
 
 The package includes a custom setup command called expand.  It allows various
 file locations in init scripts, man pages, and config files to be over-ridden
@@ -74,19 +71,16 @@ or in a single step (the order matters):
                                --single-version-externally-managed \
                                --record=/dev/null
 
-SETUP
-====
+# SETUP
 
-SIGNING KEYS
-============
+## SIGNING KEYS
 
 In order to create DKIM signatures, a private key must be available.  Signing
 keys should be protected (owned by root:root with permissions 600 in a
 directory that is not world readable).  Different keys are required for RSA
 and (if used) Ed25519.
 
-RSA
-===
+### RSA
 
 Both public and private keys for RSA have standard formats and there are many
 tools available to create them.  Keys must (RFC 8302) have a minimum size of
@@ -99,8 +93,7 @@ will produce both the private key file (.key suffix) and a file with the DKIM
 public key record to be published DNS (.dns suffix).  RSA is the default key
 type.  2048 bits is the default key size.
 
-ED25519
-=======
+### ED25519
 
 There is no standardized non-binary representation for Ed25519 private keys,
 so in order to generate Ed25519 keys for dkimpy-milter, dkimpy specific tools
@@ -112,8 +105,7 @@ will provide both the private key file (.key suffix) and a file with the DKIM
 public key record to be published DNS (.dns suffix).  Ed25519 keys do not have
 variable bit lengths.
 
-MTA INTEGRATION
-==============
+## MTA INTEGRATION
 
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
@@ -147,8 +139,7 @@ practical matter, when signing, configure the milter to follow all others that
 might modify the message body.  When verifying, configure the milter before
 other processes that might modify the message body.
 
-SENDMAIL
-========
+### SENDMAIL
 
 Configuration is very similar to opendkim, but needs some adjustment for
 dkimpy-milter. Here's an example configuration line to include in your
@@ -164,8 +155,7 @@ Milter support should be present by default in most versions of sendmail
 these days, but if not included in your Sendmail build, see:
 http://www.elandsys.com/resources/sendmail/milter.html
 
-ISSUES USING SENDMAIL TO SIGN AND VERIFY
-========================================
+#### ISSUES USING SENDMAIL TO SIGN AND VERIFY
 
 When using the sendmail MTA in both signing and verifying mode, there are
 a few issues of which to be aware that might cause operational problems
@@ -215,8 +205,7 @@ and deserve consideration.
     in the rewritten form, guaranteeing the input and output are the same
     and thus the signature matches the payload.
 
-POSTFIX
-=======
+### POSTFIX
 
 Integration of dkimpy-milter into Postfix is like any milter (See Postfix's
 README_FILES/MILTER_README).  Here's an example master.cf excerpt that talks
@@ -266,8 +255,7 @@ MacroListVerify		daemon_name|VERIFYING
 ...
 
 
-NOTES
-=====
+# NOTES
 
 The python DKIM library, dkimpy, requires the entire message being signed or
 verified to be in memory, so dkimpy-milter does not write messages out to a

@@ -25,6 +25,10 @@ import subprocess
 
 description = "Domain Keys Identified Mail (DKIM) signing/verifying milter for Postfix/Sendmail."
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 class FileMacroExpand(distutils.cmd.Command):
     description = "Expand @@ variables in input files, simlar to make macros."
     user_options = [
@@ -87,6 +91,8 @@ setup(
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
     description=description,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     download_url = "https://pypi.python.org/pypi/dkimpy-milter",
     classifiers= [
         'Development Status :: 5 - Production/Stable',
