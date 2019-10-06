@@ -117,9 +117,8 @@ MTA INTEGRATION
 
 Both a systemd unit file and a sysv init file are provided.  Both make
 assumptions about defaults being used, e.g. if a non-standard pidfile name is
-used, they will need to be updated.  The sysv init file is Debian specific and
-untested, since the developers are not using sysv init.  Feedback/patches
-welcome.
+used, they will need to be updated.  The sysv init file uses start-stop-deamon
+from Debian.  It is not portable to systems without that available.
 
 The dkimpy-milter drops priviledges after setup to the user/group specified in
 UserID.  During initial setup, this system user needs to be manually created.
