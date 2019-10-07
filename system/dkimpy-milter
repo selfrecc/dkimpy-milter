@@ -35,8 +35,8 @@ test -x $DAEMON || exit 0
 
 # Include dkimpy-python defaults if available
 # Typically not used
-if [ -f /usr/local/etc/default/dkimpy-milter ] ; then
-	. /usr/local/etc/default/dkimpy-milter
+if [ -f $sysconfdir/default/dkimpy-milter ] ; then
+	. $sysconfdir/default/dkimpy-milter
 fi
 
 set -e
