@@ -18,6 +18,7 @@
  - Catch more ascii encoding errors to improve resilience against bad data
    (LP: #1844189)
  - Fix sysv init so it works (LP: #1839487)
+ - Make error logging more explicit to aid debugging
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

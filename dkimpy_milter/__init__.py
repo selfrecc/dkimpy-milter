@@ -304,7 +304,7 @@ class dkimMilter(Milter.Base):
             except Exception as x:
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
-                    syslog.syslog("check_dkim: {0}".format(x))
+                    syslog.syslog("check_dkim: Internal program fault while verifying: {0}".format(x))
             try:
                 # i= is optional and dkimpy is fine if it's not provided
                 self.header_i = codecs.decode(d.signature_fields.get(b'i'), 'ascii')
@@ -316,7 +316,7 @@ class dkimMilter(Milter.Base):
             except Exception as x:
                 self.dkim_comment = str(x)
                 if milterconfig.get('Syslog'):
-                    syslog.syslog("check_dkim: {0}".format(x))
+                    syslog.syslog("check_dkim: Internal proram fuault extracting header a or d: {0}".format(x))
                 self.header_d = None
             if not self.header_a:
                 self.header_a = 'rsa-sha256'
