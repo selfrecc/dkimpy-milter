@@ -65,19 +65,19 @@ class dkimMilter(Milter.Base):
         if self.receiver is not None:
             self.receiver = self.receiver.strip()
         try:
-            self.AuthservID = milterconfig['AuthservID']
+            self.AuthservID = self.conf['AuthservID']
         except:
             self.AuthservID = self.receiver
         if hostaddr and len(hostaddr) > 0:
             ipaddr = hostaddr[0]
-            if milterconfig['IntHosts']:
-                if milterconfig['IntHosts'].match(ipaddr):
+            if self.conf['IntHosts']:
+                if self.conf['IntHosts'].match(ipaddr):
                     self.internal_connection = True
         else:
             ipaddr = ''
         self.connectip = ipaddr
-        if milterconfig.get('MacroList') and not self.internal_connection:
-            macrolist = milterconfig.get('MacroList')
+        if self.conf.get('MacroList') and not self.internal_connection:
+            macrolist = self.conf.get('MacroList')
             for macro in macrolist:
                 macroname = macro.split('|')[0]
                 macroname = '{' + macroname + '}'
@@ -85,8 +85,8 @@ class dkimMilter(Milter.Base):
                 if ((len(macro.split('|')) == 1 and macroresult) or macroresult
                         in macro.split('|')[1:]):
                     self.internal_connection = True
-        if milterconfig.get('MacroListVerify'):
-            macrolist = milterconfig.get('MacroListVerify')
+        if self.conf.get('MacroListVerify'):
+            macrolist = self.conf.get('MacroListVerify')
             for macro in macrolist:
                 macroname = macro.split('|')[0]
                 macroname = '{' + macroname + '}'
@@ -98,7 +98,7 @@ class dkimMilter(Milter.Base):
             connecttype = 'INTERNAL'
         else:
             connecttype = 'EXTERNAL'
-        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 1:
+        if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 1:
             syslog.syslog("connect from {0} at {1} {2}"
                           .format(hostname, hostaddr, connecttype))
         return Milter.CONTINUE
@@ -108,7 +108,7 @@ class dkimMilter(Milter.Base):
     # of each message.
     @Milter.noreply
     def envfrom(self, f, *str):
-        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 2:
+        if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 2:
             syslog.syslog("mail from: {0} {1}".format(f, str))
         self.fp = io.BytesIO()
         self.mailfrom = f
@@ -125,14 +125,14 @@ class dkimMilter(Milter.Base):
     @Milter.noreply
     def header(self, name, val):
         lname = name.lower()
-        if milterconfig.get('Syslog') and milterconfig.get('debugLevel') >= 4:
+        if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 4:
             if lname == 'content-transfer-encoding':
                 syslog.syslog("content-transfer-encodeing: {0}".format(val))
             if lname == 'content-type':
                 syslog.syslog("content-type: {0}".format(val))
         if lname == 'dkim-signature':
-            if (milterconfig.get('Syslog') and
-                    milterconfig.get('debugLevel') >= 1):
+            if (self.conf.get('Syslog') and
+                    self.conf.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
             self.has_dkim += 1
         if lname == 'from':
@@ -141,8 +141,8 @@ class dkimMilter(Milter.Base):
                 self.fdomain = self.author.split('@')[1].lower()
             except IndexError as er:
                 pass # self.author was not a proper email address
-            if (milterconfig.get('Syslog') and
-                    milterconfig.get('debugLevel') >= 1):
+            if (self.conf.get('Syslog') and
+                    self.conf.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
         elif lname == 'authentication-results':
             self.arheaders.append(val)
@@ -179,8 +179,8 @@ class dkimMilter(Milter.Base):
                       .parse_value(FWS.sub('', val)))
                 if ar.authserv_id == self.AuthservID:
                     self.chgheader('authentication-results', i, '')
-                    if (milterconfig.get('Syslog') and
-                            milterconfig.get('debugLevel') >= 1):
+                    if (self.conf.get('Syslog') and
+                            self.conf.get('debugLevel') >= 1):
                         syslog.syslog('REMOVE: {0}'.format(val))
             except:
                 # Don't error out on unparseable AR header fiels
@@ -188,33 +188,33 @@ class dkimMilter(Milter.Base):
         # Check and/or sign DKIM
         self.fp.seek(0)
         txt = self.fp.read()
-        if milterconfig.get('Domain'):
-            domain = milterconfig.get('Domain')
+        if self.conf.get('Domain'):
+            domain = self.conf.get('Domain')
         else:
             domain = ''
-        if milterconfig.get('SubDomains'):
+        if self.conf.get('SubDomains'):
             self.fdomain = _get_parent_domain(self.fdomain, domain)
-        if ((self.fdomain in domain) and not milterconfig.get('Mode') == 'v'
+        if ((self.fdomain in domain) and not self.conf.get('Mode') == 'v'
                 and not self.external_connection):
             self.sign_dkim(txt)
         if ((self.has_dkim) and (not self.internal_connection) and
-            (milterconfig.get('Mode') == 'v' or
-             milterconfig.get('Mode') == 'sv')):
+            (self.conf.get('Mode') == 'v' or
+             self.conf.get('Mode') == 'sv')):
             self.check_dkim(txt)
         if self.arresults:
             h = authres.AuthenticationResultsHeader(authserv_id=
                                                     self.AuthservID,
                                                     results=self.arresults)
             h = fold(codecs.encode(str(h), 'ascii'))
-            if (milterconfig.get('Syslog') and
-                    milterconfig.get('debugLevel') >= 2):
+            if (self.conf.get('Syslog') and
+                    self.conf.get('debugLevel') >= 2):
                 syslog.syslog(codecs.decode(h, 'ascii'))
             name, val = codecs.decode(h, 'ascii').split(': ', 1)
             self.addheader(name, val, 0)
         return Milter.CONTINUE
 
     def sign_dkim(self, txt):
-        canon = codecs.encode(milterconfig.get('Canonicalization'), 'ascii')
+        canon = codecs.encode(self.conf.get('Canonicalization'), 'ascii')
         canonicalize = []
         if len(canon.split(b'/')) == 2:
             canonicalize.append(canon.split(b'/')[0])
@@ -222,53 +222,53 @@ class dkimMilter(Milter.Base):
         else:
             canonicalize.append(canon)
             canonicalize.append(canon)
-            if (milterconfig.get('Syslog') and
-                    milterconfig.get('debugLevel') >= 1):
+            if (self.conf.get('Syslog') and
+                    self.conf.get('debugLevel') >= 1):
                 syslog.syslog('canonicalize: {0}'.format(canonicalize))
-        sign_headers = milterconfig.get('SignHeaders')
+        sign_headers = self.conf.get('SignHeaders')
         if not sign_headers:
             # None or empty. DKIM explicitly tests for None.
             sign_headers = None
         try:
-            if milterconfig.get('privateRSA'):
+            if self.conf.get('privateRSA'):
                 d = dkim.DKIM(txt)
-                h = d.sign(codecs.encode(milterconfig.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           codecs.encode(milterconfig.get('privateRSA'), 'ascii'),
+                h = d.sign(codecs.encode(self.conf.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
+                           codecs.encode(self.conf.get('privateRSA'), 'ascii'),
                            canonicalize=(canonicalize[0],
                                          canonicalize[1]),
                            include_headers=sign_headers)
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
-                if (milterconfig.get('Syslog') and
-                    (milterconfig.get('SyslogSuccess')
-                     or milterconfig.get('debugLevel') >= 1)):
+                if (self.conf.get('Syslog') and
+                    (self.conf.get('SyslogSuccess')
+                     or self.conf.get('debugLevel') >= 1)):
                     syslog.syslog('{0}: {1} DKIM signature added (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a').decode(),
                                                   d.signature_fields.get(b's').decode(),
                                                   d.domain.decode().lower()))
-            if milterconfig.get('privateEd25519'):
+            if self.conf.get('privateEd25519'):
                 d = dkim.DKIM(txt)
-                h = d.sign(codecs.encode(milterconfig.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           milterconfig.get('privateEd25519'), canonicalize=(canonicalize[0],
+                h = d.sign(codecs.encode(self.conf.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
+                           self.conf.get('privateEd25519'), canonicalize=(canonicalize[0],
                                                          canonicalize[1]),
                            include_headers=sign_headers,
                            signature_algorithm=b'ed25519-sha256')
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
-                if (milterconfig.get('Syslog') and
-                    (milterconfig.get('SyslogSuccess')
-                     or milterconfig.get('debugLevel') >= 1)):
+                if (self.conf.get('Syslog') and
+                    (self.conf.get('SyslogSuccess')
+                     or self.conf.get('debugLevel') >= 1)):
                     syslog.syslog('{0}: {1} DKIM signature added (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a').decode(),
                                                   d.signature_fields.get(b's').decode(),
                                                   d.domain.decode().lower()))
         except dkim.DKIMException as x:
-            if milterconfig.get('Syslog'):
+            if self.conf.get('Syslog'):
                 syslog.syslog('DKIM: {0}'.format(x))
         except Exception as x:
-            if milterconfig.get('Syslog'):
+            if self.conf.get('Syslog'):
                 syslog.syslog("sign_dkim: {0}".format(x))
             raise
 
@@ -278,7 +278,7 @@ class dkimMilter(Milter.Base):
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
             d = dkim.DKIM(txt)
             try:
-                dnsoverride = milterconfig.get('DNSOverride')
+                dnsoverride = self.conf.get('DNSOverride')
                 if isinstance(dnsoverride, str):
                     syslog.syslog("DNSOverride: {0}".format(dnsoverride))
                     res = d.verify(idx=y, dnsfunc=lambda _x: dnsoverride)
@@ -297,11 +297,11 @@ class dkimMilter(Milter.Base):
                                          .format(d.keysize, algo))
             except dkim.DKIMException as x:
                 self.dkim_comment = str(x)
-                if milterconfig.get('Syslog'):
+                if self.conf.get('Syslog'):
                     syslog.syslog('DKIM: {0}'.format(x))
             except Exception as x:
                 self.dkim_comment = str(x)
-                if milterconfig.get('Syslog'):
+                if self.conf.get('Syslog'):
                     syslog.syslog("check_dkim: Internal program fault while verifying: {0}".format(x))
             try:
                 # i= is optional and dkimpy is fine if it's not provided
@@ -313,15 +313,15 @@ class dkimMilter(Milter.Base):
                 self.header_a = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
             except Exception as x:
                 self.dkim_comment = str(x)
-                if milterconfig.get('Syslog'):
+                if self.conf.get('Syslog'):
                     syslog.syslog("check_dkim: Internal proram fuault extracting header a or d: {0}".format(x))
                 self.header_d = None
             if not self.header_a:
                 self.header_a = 'rsa-sha256'
             if res:
-                if (milterconfig.get('Syslog') and
-                        (milterconfig.get('SyslogSuccess') or
-                         milterconfig.get('debugLevel') >= 1)):
+                if (self.conf.get('Syslog') and
+                        (self.conf.get('SyslogSuccess') or
+                         self.conf.get('debugLevel') >= 1)):
                     syslog.syslog('{0}: {1} DKIM signature verified (s={2} '
                                   'd={3})'.format(self.getsymval('i'),
                                                   d.signature_fields.get(b'a').decode(),
@@ -329,15 +329,15 @@ class dkimMilter(Milter.Base):
                                                   d.domain.decode().lower()))
                 self.dkim_domain = d.domain.lower()
             else:
-                if milterconfig.get('DiagnosticDirectory'):
+                if self.conf.get('DiagnosticDirectory'):
                     fd, fname = tempfile.mkstemp(".dkim")
                     with os.fdopen(fd, "w+b") as fp:
                         fp.write(txt)
-                    if milterconfig.get('Syslog'):
+                    if self.conf.get('Syslog'):
                         syslog.syslog('DKIM: Fail (saved as {0})'
                                       .format(fname))
                 else:
-                    if milterconfig.get('Syslog'):
+                    if self.conf.get('Syslog'):
                         if d.domain:
                             syslog.syslog('DKIM: Fail ({0})'
                                           .format(d.domain.lower()))
