@@ -82,3 +82,5 @@ for x in ${TESTS:-"$TESTDIR"/*.miltertest}; do
     printf -- "-> running %s...\n" "$x"
     miltertest -s "$x"
 done
+
+rm -rf "$(dirname $TESTDIR)/dkimpy_milter/__pycache__"
