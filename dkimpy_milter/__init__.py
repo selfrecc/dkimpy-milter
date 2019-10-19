@@ -52,8 +52,6 @@ class dkimMilter(Milter.Base):
         self.id = Milter.uniqueID()
         # we don't want config used to change during a connection
         self.conf = milterconfig
-        self.privatersa = privateRSA
-        self.privateed25519 = privateEd25519
         self.fp = None
         self.fdomain = ''
 
@@ -232,10 +230,10 @@ class dkimMilter(Milter.Base):
             # None or empty. DKIM explicitly tests for None.
             sign_headers = None
         try:
-            if privateRSA:
+            if milterconfig.get('privateRSA'):
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(milterconfig.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           codecs.encode(privateRSA, 'ascii'),
+                           codecs.encode(milterconfig.get('privateRSA'), 'ascii'),
                            canonicalize=(canonicalize[0],
                                          canonicalize[1]),
                            include_headers=sign_headers)
@@ -249,10 +247,10 @@ class dkimMilter(Milter.Base):
                                                   d.signature_fields.get(b'a').decode(),
                                                   d.signature_fields.get(b's').decode(),
                                                   d.domain.decode().lower()))
-            if privateEd25519:
+            if milterconfig.get('privateEd25519'):
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(milterconfig.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           privateEd25519, canonicalize=(canonicalize[0],
+                           milterconfig.get('privateEd25519'), canonicalize=(canonicalize[0],
                                                          canonicalize[1]),
                            include_headers=sign_headers,
                            signature_algorithm=b'ed25519-sha256')
@@ -376,10 +374,6 @@ def _get_parent_domain(fdomain, domains):
 def main():
     # Ugh, but there's no easy way around this.
     global milterconfig
-    global privateRSA
-    global privateEd25519
-    privateRSA = False
-    privateEd25519 = False
     configFile = '/usr/local/etc/dkimpy-milter.conf'
     if len(sys.argv) > 1:
         if (sys.argv[1] in ('-?', '--help', '-h')) or len(sys.argv) == 3 or \
@@ -399,9 +393,13 @@ def main():
         setExceptHook()
     pid = write_pid(milterconfig)
     if milterconfig.get('KeyFile'):
-        privateRSA = read_keyfile(milterconfig, 'RSA')
+        milterconfig['privateRSA'] = read_keyfile(milterconfig, 'RSA')
+    else:
+        milterconfig['privateRSA'] = False
     if milterconfig.get('KeyFileEd25519'):
-        privateEd25519 = read_keyfile(milterconfig, 'Ed25519')
+        milterconfig['privateEd25519'] = read_keyfile(milterconfig, 'Ed25519')
+    else:
+        milterconfig['privateEd25519'] = False
     Milter.factory = dkimMilter
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
