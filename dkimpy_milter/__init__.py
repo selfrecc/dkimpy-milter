@@ -40,7 +40,7 @@ from dkimpy_milter.util import get_keys
 from dkimpy_milter.util import own_socketfile
 from dkimpy_milter.util import fold
 
-__version__ = "1.0.1"
+__version__ = "1.2.0"
 FWS = re.compile(r'\r?\n[ \t]+')
 
 
@@ -314,7 +314,7 @@ class dkimMilter(Milter.Base):
             except Exception as x:
                 self.dkim_comment = str(x)
                 if self.conf.get('Syslog'):
-                    syslog.syslog("check_dkim: Internal proram fuault extracting header a or d: {0}".format(x))
+                    syslog.syslog("check_dkim: Internal program fault extracting header a or d: {0}".format(x))
                 self.header_d = None
             if not self.header_a:
                 self.header_a = 'rsa-sha256'
