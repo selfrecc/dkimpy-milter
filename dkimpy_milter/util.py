@@ -213,3 +213,15 @@ def read_keytable(milterconfig, tabletype):
             raise
         
     return keytabledata
+
+def get_keys(milterconfig):
+    """Read keys (table or file) into memory before dropping priviledges"""
+    if milterconfig.get('KeyFile'):
+        milterconfig['privateRSA'] = read_keyfile(milterconfig, 'RSA')
+    else:
+        milterconfig['privateRSA'] = False
+    if milterconfig.get('KeyFileEd25519'):
+        milterconfig['privateEd25519'] = read_keyfile(milterconfig, 'Ed25519')
+    else:
+        milterconfig['privateEd25519'] = False
+    return milterconfig

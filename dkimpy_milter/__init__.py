@@ -36,7 +36,7 @@ import dkimpy_milter.config as config
 from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
-from dkimpy_milter.util import read_keyfile
+from dkimpy_milter.util import get_keys
 from dkimpy_milter.util import own_socketfile
 from dkimpy_milter.util import fold
 
@@ -392,14 +392,7 @@ def main():
         syslog.openlog(os.path.basename(sys.argv[0]), syslog.LOG_PID, facility)
         setExceptHook()
     pid = write_pid(milterconfig)
-    if milterconfig.get('KeyFile'):
-        milterconfig['privateRSA'] = read_keyfile(milterconfig, 'RSA')
-    else:
-        milterconfig['privateRSA'] = False
-    if milterconfig.get('KeyFileEd25519'):
-        milterconfig['privateEd25519'] = read_keyfile(milterconfig, 'Ed25519')
-    else:
-        milterconfig['privateEd25519'] = False
+    milterconfig = get_keys(milterconfig)
     Milter.factory = dkimMilter
     Milter.set_flags(Milter.CHGHDRS + Milter.ADDHDRS)
     miltername = 'dkimpy-filter'
