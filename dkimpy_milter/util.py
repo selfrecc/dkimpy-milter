@@ -170,13 +170,9 @@ def own_socketfile(milterconfig, sockname=None):
             os.chown(sockname[offset:], user, group)
 
 
-def read_keyfile(milterconfig, keytype):
+def read_keyfile(keyfile):
     """Read private key from file."""
     import syslog
-    if keytype == "RSA":
-        keyfile = milterconfig.get('KeyFile')
-    if keytype == "Ed25519":
-        keyfile = milterconfig.get('KeyFileEd25519')
     try:
         f = open(keyfile, 'r')
         keylist = f.readlines()
@@ -191,20 +187,26 @@ def read_keyfile(milterconfig, keytype):
         key += line
     return key
 
-def read_keytable(milterconfig, tabletype):
+def read_keytable(tablefile):
     """Read keytables into in memory configuration data so all keys are read
-    before priviledges are dropped."""
+    before priviledges are dropped.
+    KeyTable contains a filename of the table.
+    File contains comma separated rows of:
+        domain, selector, key file location
+    When loaded, KeyTableData is a dict:
+        {domain: [selector, key]}"""
     import syslog
     if tabletype == "RSA":
         tablefile = milterconfig.get('KeyTable')
     if tabletype == "Ed25519":
         tablefile = milterconfig.get('KeyTableEd25519')
     if milterconfig.get(tablefile):
-        keytabledata = []
+        keytabledata = {}
         try:
             f = open(milterconfig.get(tablefile))
             for row in f:
-                keytabledata.append(row) 
+                key = read_keyfile(row[2])
+                keytabledata.update({row[0]:[row[1], key]})
             f.close()
         except IOError as e:
             if milterconfig.get('Syslog'):
@@ -216,12 +218,16 @@ def read_keytable(milterconfig, tabletype):
 
 def get_keys(milterconfig):
     """Read keys (table or file) into memory before dropping priviledges"""
-    if milterconfig.get('KeyFile'):
-        milterconfig['privateRSA'] = read_keyfile(milterconfig, 'RSA')
-    else:
-        milterconfig['privateRSA'] = False
-    if milterconfig.get('KeyFileEd25519'):
-        milterconfig['privateEd25519'] = read_keyfile(milterconfig, 'Ed25519')
-    else:
-        milterconfig['privateEd25519'] = False
+    milterconfig['privateRSA'] = False
+    milterconfig['privateRSATable'] = False
+    milterconfig['privateEd25519'] = False
+    milterconfig['privateEd25519Table'] = False
+    if milterconfig.get('KeyTable'):
+        milterconfig['privateRSATable'] = read_keytable(milterconfig.get('KeyTable'))
+    elif milterconfig.get('KeyFile'):
+        milterconfig['privateRSA'] = read_keyfile(milterconfig.get('KeyFile'))
+    if milterconfig.get('KeyTableEd25519'):
+        milterconfig['privateEd25519Table'] = read_keytable(milterconfig.get('KeyTableEd25519'))
+    elif milterconfig.get('KeyFileEd25519'):
+        milterconfig['privateEd25519'] = read_keyfile(milterconfig.get('KeyFileEd25519'))
     return milterconfig
