@@ -170,7 +170,7 @@ def own_socketfile(milterconfig, sockname=None):
             os.chown(sockname[offset:], user, group)
 
 
-def read_keyfile(keyfile):
+def read_keyfile(keyfile, milterconfig):
     """Read private key from file."""
     import syslog
     try:
@@ -187,33 +187,25 @@ def read_keyfile(keyfile):
         key += line
     return key
 
-def read_keytable(tablefile):
+def read_keytable(tablelist, milterconfig):
     """Read keytables into in memory configuration data so all keys are read
     before priviledges are dropped.
-    KeyTable contains a filename of the table.
-    File contains comma separated rows of:
+    tablelist contains a list of KeyTable rows (three elements, comma separated):
         domain, selector, key file location
     When loaded, KeyTableData is a dict:
         {domain: [selector, key]}"""
+    import dkim
     import syslog
-    if tabletype == "RSA":
-        tablefile = milterconfig.get('KeyTable')
-    if tabletype == "Ed25519":
-        tablefile = milterconfig.get('KeyTableEd25519')
-    if milterconfig.get(tablefile):
-        keytabledata = {}
-        try:
-            f = open(milterconfig.get(tablefile))
-            for row in f:
-                key = read_keyfile(row[2])
-                keytabledata.update({row[0]:[row[1], key]})
-            f.close()
-        except IOError as e:
-            if milterconfig.get('Syslog'):
-                syslog.syslog('Unable to read keytable {0}.  IOError: {1}'
-                              .format(tablefile, e))
-            raise
-        
+    keytabledata = {}
+    for row in tablelist:
+        rowl = row.split(',')
+        for element in rowl:
+            rowl[rowl.index(element)] = element.strip().strip(',')
+        if len(rowl) != 3:
+            raise dkim.ParameterError('Invalid KeyTable element (need three paramters per row): {0}'
+                                      .format(str(rowl)))
+        key = read_keyfile(rowl[2], milterconfig)
+        keytabledata.update({rowl[0]:[rowl[1], key]})
     return keytabledata
 
 def get_keys(milterconfig):
@@ -223,11 +215,15 @@ def get_keys(milterconfig):
     milterconfig['privateEd25519'] = False
     milterconfig['privateEd25519Table'] = False
     if milterconfig.get('KeyTable'):
-        milterconfig['privateRSATable'] = read_keytable(milterconfig.get('KeyTable'))
+        milterconfig['privateRSATable'] = read_keytable(milterconfig.get('KeyTable'),
+                                                        milterconfig)
     elif milterconfig.get('KeyFile'):
-        milterconfig['privateRSA'] = read_keyfile(milterconfig.get('KeyFile'))
+        milterconfig['privateRSA'] = read_keyfile(milterconfig.get('KeyFile'),
+                                                  milterconfig)
     if milterconfig.get('KeyTableEd25519'):
-        milterconfig['privateEd25519Table'] = read_keytable(milterconfig.get('KeyTableEd25519'))
+        milterconfig['privateEd25519Table'] = read_keytable(milterconfig.get('KeyTableEd25519'),
+                                                            milterconfig)
     elif milterconfig.get('KeyFileEd25519'):
-        milterconfig['privateEd25519'] = read_keyfile(milterconfig.get('KeyFileEd25519'))
+        milterconfig['privateEd25519'] = read_keyfile(milterconfig.get('KeyFileEd25519'),
+                                                      milterconfig)
     return milterconfig
