@@ -15,8 +15,15 @@ for keytype in "${KEY_TYPES[@]}"; do
     if [ "$keytype" = ed25519 ]; then
         keyfile=KeyFileEd25519
         selector=SelectorEd25519
-    else
+    elif [ "$keytype" = rsa ]; then
         keyfile=KeyFile
+        selector=Selector
+    fi
+    if [ "$keytype" = ed25519 ]; then
+        keytable=KeyTableEd25519
+        selector=SelectorEd25519
+    elif [ "$keytype" = rsa ]; then
+        keytable=KeyTable
         selector=Selector
     fi
     cat > "$keytype.signing.conf" <<EOF
@@ -36,13 +43,26 @@ Mode v
 DNSOverride $(cat testkey.$keytype.dns)
 UserID $(id --name --user):$(id --name --group)
 EOF
+
+    cat > "$keytype.table.conf" <<EOF
+$keytable $WORKDIR/$keytype-table
+Socket unix:$keytype.table.sock
+PidFile $keytype.table.pid
+Mode s
+UserID $(id --name --user):$(id --name --group)
+EOF
+
+    cat >  "$keytype-table" <<EOF
+example.org, testnokey, testkey.$keytype.key
+example.net, testkey, testkey.$keytype.key
+EOF
 done
 
 cleanup() {
     echo cleaning up jobs:
     jobs
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify; do
+        for func in signing verify table; do
             if [ -s "$keytype.$func.pid" ] && kill -0 "$(cat "$keytype.$func.pid")"; then
                 kill "$(cat $keytype.$func.pid)"
             fi
@@ -50,7 +70,7 @@ cleanup() {
     done
     wait
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify; do
+        for func in signing verify table; do
             errdata="$keytype.$func.stderr"
             if [ -s "$errdata" ]; then
                 printf -- "-> %s:\n" "$errdata"
@@ -63,7 +83,7 @@ cleanup() {
 }
 
 for keytype in "${KEY_TYPES[@]}"; do
-    for func in signing verify; do
+    for func in signing verify table; do
         PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" "$keytype.$func.conf" 2>"$keytype.$func.stderr" &
     done
 done
