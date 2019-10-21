@@ -288,6 +288,18 @@ def _dataset_to_list(dataset):
                     else:
                         for element in line.split(':'):
                             ds.append(element.strip().strip(':'))
+                        if ds[0] == 'KeyTable' or ds[0] == 'KeyTableEd25519' or ds[0] =='SigningTable' or ds[0] =='SigningTableEd25519':
+                            # These are the only multi-line dataset types
+                            for row in ds[1]:
+                                rowl = row.split(',')
+                                for element in rowl:
+                                    rowl[rowl.index(element)] = element.strip().strip(',')
+                                if (ds[0] == 'KeyTable' or ds[0] == 'KeyTableEd25519') and len(rowl) != 3:
+                                    raise dkim.ParameterError('Invalid {0} element (need three paramters per row): {1}'
+                                                              .format(str(ds[0]), str(rowl)))
+                                if (ds[0] == 'SigningTable' or ds[0] == 'SigningTableEd25519') and len(rowl)  > 2:
+                                    raise dkim.ParameterError('Invalid {0} element (need one or two paramters per row): {1}'
+                                                              .format(str(ds[0]), str(rowl)))
             dsf.close()
             return ds
         # If it's a str and csl, it has one value and we return a list
