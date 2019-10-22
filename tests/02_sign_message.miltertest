@@ -69,7 +69,7 @@ function connect_and_send (sockname, headers, body)
    return conn
 end
 
-for _, keytype in ipairs({"ed25519", "rsa"}) do
+for _, keytype in ipairs({"ed25519", "rsa", "ed25519.table", "rsa.table"}) do
    mt.echo("testing "..keytype)
    signing = connect_and_send("unix:"..keytype..".signing.sock", msg.headers, msg.body)
    -- verify that a test header field got added
