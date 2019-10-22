@@ -54,6 +54,7 @@ class dkimMilter(Milter.Base):
         self.conf = milterconfig
         self.fp = None
         self.fdomain = ''
+        self.iequals = None
 
     @Milter.noreply
     def connect(self, hostname, unused, hostaddr):
@@ -188,13 +189,8 @@ class dkimMilter(Milter.Base):
         # Check and/or sign DKIM
         self.fp.seek(0)
         txt = self.fp.read()
-        if self.conf.get('Domain'):
-            domain = self.conf.get('Domain')
-        else:
-            domain = ''
-        if self.conf.get('SubDomains'):
-            self.fdomain = _get_parent_domain(self.fdomain, domain)
-        if ((self.fdomain in domain) and not self.conf.get('Mode') == 'v'
+        self.get_identities_sign()
+        if ((self.fdomain in self.domain) and not self.conf.get('Mode') == 'v'
                 and not self.external_connection):
             self.sign_dkim(txt)
         if ((self.has_dkim) and (not self.internal_connection) and
@@ -212,6 +208,16 @@ class dkimMilter(Milter.Base):
             name, val = codecs.decode(h, 'ascii').split(': ', 1)
             self.addheader(name, val, 0)
         return Milter.CONTINUE
+
+    def get_identities_sign(self):
+        """Determine d= and i= identiies for signature"""
+        if self.conf.get('Domain'):
+            self.domain = self.conf.get('Domain')
+        else:
+            self.domain = ''
+        if self.conf.get('SubDomains'):
+            self.fdomain = _get_parent_domain(self.fdomain, self.domain)
+
 
     def sign_dkim(self, txt):
         canon = codecs.encode(self.conf.get('Canonicalization'), 'ascii')
@@ -234,9 +240,8 @@ class dkimMilter(Milter.Base):
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(self.conf.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
                            codecs.encode(self.conf.get('privateRSA'), 'ascii'),
-                           canonicalize=(canonicalize[0],
-                                         canonicalize[1]),
-                           include_headers=sign_headers)
+                           canonicalize=(canonicalize[0], canonicalize[1]),
+                           identity=self.iequals, include_headers=sign_headers)
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
                 if (self.conf.get('Syslog') and
@@ -250,9 +255,9 @@ class dkimMilter(Milter.Base):
             if self.conf.get('privateEd25519'):
                 d = dkim.DKIM(txt)
                 h = d.sign(codecs.encode(self.conf.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           self.conf.get('privateEd25519'), canonicalize=(canonicalize[0],
-                                                         canonicalize[1]),
-                           include_headers=sign_headers,
+                           self.conf.get('privateEd25519'),
+                           canonicalize=(canonicalize[0], canonicalize[1]),
+                           identity=self.iequals, include_headers=sign_headers,
                            signature_algorithm=b'ed25519-sha256')
                 name, val = h.split(b': ', 1)
                 self.addheader(codecs.decode(name, 'ascii'), codecs.decode(val, 'ascii').strip().replace('\r\n', '\n'), 0)
