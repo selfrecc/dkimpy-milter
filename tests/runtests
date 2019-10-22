@@ -21,9 +21,11 @@ for keytype in "${KEY_TYPES[@]}"; do
     fi
     if [ "$keytype" = ed25519 ]; then
         keytable=KeyTableEd25519
+        signingtable=SigningTableEd25519
         selector=SelectorEd25519
     elif [ "$keytype" = rsa ]; then
         keytable=KeyTable
+        signingtable=SigningTable
         selector=Selector
     fi
     cat > "$keytype.signing.conf" <<EOF
@@ -46,15 +48,21 @@ EOF
 
     cat > "$keytype.table.conf" <<EOF
 $keytable $WORKDIR/$keytype-table
-Socket unix:$keytype.table.sock
+$signingtable $WORKDIR/signing-table
+Socket unix:$keytype.table.signing.sock
 PidFile $keytype.table.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
+debugLevel 5
 EOF
 
     cat >  "$keytype-table" <<EOF
 example.org, testnokey, testkey.$keytype.key
 example.net, testkey, testkey.$keytype.key
+EOF
+
+    cat > "signing-table" <<EOF
+%, @test.example.net
 EOF
 done
 
