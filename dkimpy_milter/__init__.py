@@ -209,6 +209,17 @@ class dkimMilter(Milter.Base):
             self.addheader(name, val, 0)
         return Milter.CONTINUE
 
+    # get parent domain to be signed for if fdomain is a subdomain
+    def get_parent_domain(self, get_parent_domainfdomain, domains):
+        for domain in domains:
+            rhs = '.'+domain
+            # compare right hand side of fdomain against .domain
+            if self.fdomain[-len(rhs):] == rhs:
+                # return parent domain on match
+                return domain
+        # or return the fdomain itself
+        return fdomain
+
     def get_identities_sign(self):
         """Determine d= and i= identiies for signature"""
         if self.conf.get('Domain'):
@@ -216,7 +227,7 @@ class dkimMilter(Milter.Base):
         else:
             self.domain = ''
         if self.conf.get('SubDomains'):
-            self.fdomain = _get_parent_domain(self.fdomain, self.domain)
+            self.fdomain = self.get_parent_domain(self.fdomain, self.domain)
 
 
     def sign_dkim(self, txt):
@@ -364,17 +375,6 @@ class dkimMilter(Milter.Base):
             )
             self.header_a = None
         return
-
-# get parent domain to be signed for if fdomain is a subdomain
-def _get_parent_domain(fdomain, domains):
-    for domain in domains:
-        rhs = '.'+domain
-        # compare right hand side of fdomain against .domain
-        if fdomain[-len(rhs):] == rhs:
-            # return parent domain on match
-            return domain
-    # or return the fdomain itself
-    return fdomain
 
 def main():
     # Ugh, but there's no easy way around this.
