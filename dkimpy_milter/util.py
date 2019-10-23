@@ -198,14 +198,13 @@ def read_keytable(tablelist, milterconfig):
     import syslog
     keytabledata = {}
     for row in tablelist:
-        rowl = row.split(',')
-        for element in rowl:
-            rowl[rowl.index(element)] = element.strip().strip(',')
-        if len(rowl) != 3:
+        for element in row:
+            row[row.index(element)] = element.strip().strip(',')
+        if len(row) != 3:
             raise dkim.ParameterError('Invalid KeyTable element (need three paramters per row): {0}'
-                                      .format(str(rowl)))
-        key = read_keyfile(rowl[2], milterconfig)
-        keytabledata.update({rowl[0]:[rowl[1], key]})
+                                      .format(str(row)))
+        key = read_keyfile(row[2], milterconfig)
+        keytabledata.update({row[0]:[row[1], key]})
     return keytabledata
 
 def get_keys(milterconfig):

@@ -50,6 +50,8 @@ defaultConfigData = {
     'MacroListVerify': '',
     'DNSOverride': None,
     'SubDomains': False,
+    'SigningTable': None,
+    'SigningTableEd25519': None,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -260,6 +262,22 @@ def _make_authserv_id(as_id):
         as_id = socket.gethostname()
     return as_id
 
+def _dataset_multiline(dst, dataset):
+    """Convert one list element per line on multi-line datasets to a list of
+    lists"""
+    result = []
+    for row in dataset:
+        rowl = row.split(',')
+        for element in rowl:
+            rowl[rowl.index(element)] = element.strip().strip(',')
+        if dst == 'KeyTable' and len(rowl) != 3:
+                raise dkim.ParameterError('Invalid {0} element (need three paramters per row): {1}'
+                                           .format(str(dst), str(rowl)))
+        if dst == 'SigningTable' and len(rowl) > 2:
+            raise dkim.ParameterError('Invalid {0} element (need one or two paramters per row): {1}'
+                                       .format(str(dst), str(rowl)))
+        result.append(rowl)
+    return result
 
 def _dataset_to_list(dataset):
     """Convert a dataset (as defined in dkimpymilter.8) and return a python
@@ -288,18 +306,6 @@ def _dataset_to_list(dataset):
                     else:
                         for element in line.split(':'):
                             ds.append(element.strip().strip(':'))
-                        if ds[0] == 'KeyTable' or ds[0] == 'KeyTableEd25519' or ds[0] =='SigningTable' or ds[0] =='SigningTableEd25519':
-                            # These are the only multi-line dataset types
-                            for row in ds[1]:
-                                rowl = row.split(',')
-                                for element in rowl:
-                                    rowl[rowl.index(element)] = element.strip().strip(',')
-                                if (ds[0] == 'KeyTable' or ds[0] == 'KeyTableEd25519') and len(rowl) != 3:
-                                    raise dkim.ParameterError('Invalid {0} element (need three paramters per row): {1}'
-                                                              .format(str(ds[0]), str(rowl)))
-                                if (ds[0] == 'SigningTable' or ds[0] == 'SigningTableEd25519') and len(rowl)  > 2:
-                                    raise dkim.ParameterError('Invalid {0} element (need one or two paramters per row): {1}'
-                                                              .format(str(ds[0]), str(rowl)))
             dsf.close()
             return ds
         # If it's a str and csl, it has one value and we return a list
@@ -424,7 +430,14 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         elif conversion == 'int':
             configData[name] = int(value)
         elif conversion == 'dataset':
-            configData[name] = _dataset_to_list(value)
+            interim_value = _dataset_to_list(value)
+            # These are the only multi-line dataset types
+            if name == 'KeyTable' or name == 'KeyTableEd25519':
+                configData[name] = _dataset_multiline('KeyTable', interim_value)
+            elif name == 'SigningTable' or name == 'SigningTableEd25519':
+                configData[name] = _dataset_multiline('SigningTable', interim_value)
+            else:
+                configData[name] = interim_value
         else:
             syslog.syslog(str('name: ' + name + ' value: ' + value +
                               ' conversion: ' + conversion))
