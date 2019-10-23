@@ -46,6 +46,17 @@ DNSOverride $(cat testkey.$keytype.dns)
 UserID $(id --name --user):$(id --name --group)
 EOF
 
+cat > "$keytype.stable.conf" <<EOF
+$keyfile testkey.$keytype.key
+$selector testkey
+$signingtable $WORKDIR/signing-table
+Socket unix:$keytype.stable.signing.sock
+PidFile $keytype.stable.pid
+Mode s
+UserID $(id --name --user):$(id --name --group)
+debugLevel 5
+EOF
+
     cat > "$keytype.table.conf" <<EOF
 $keytable $WORKDIR/$keytype-table
 $signingtable $WORKDIR/signing-table
@@ -70,7 +81,7 @@ cleanup() {
     echo cleaning up jobs:
     jobs
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify table; do
+        for func in signing verify stable table; do
             if [ -s "$keytype.$func.pid" ] && kill -0 "$(cat "$keytype.$func.pid")"; then
                 kill "$(cat $keytype.$func.pid)"
             fi
@@ -78,7 +89,7 @@ cleanup() {
     done
     wait
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify table; do
+        for func in signing verify stable table; do
             errdata="$keytype.$func.stderr"
             if [ -s "$errdata" ]; then
                 printf -- "-> %s:\n" "$errdata"
@@ -91,7 +102,7 @@ cleanup() {
 }
 
 for keytype in "${KEY_TYPES[@]}"; do
-    for func in signing verify table; do
+    for func in signing verify stable table; do
         PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" "$keytype.$func.conf" 2>"$keytype.$func.stderr" &
     done
 done
