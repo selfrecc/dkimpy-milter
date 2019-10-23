@@ -36,6 +36,7 @@ Socket unix:$keytype.signing.sock
 PidFile $keytype.signing.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
+debugLevel 5
 EOF
 
     cat > "$keytype.verify.conf" <<EOF
@@ -46,7 +47,7 @@ DNSOverride $(cat testkey.$keytype.dns)
 UserID $(id --name --user):$(id --name --group)
 EOF
 
-cat > "$keytype.stable.conf" <<EOF
+    cat > "$keytype.stable.conf" <<EOF
 $keyfile testkey.$keytype.key
 $selector testkey
 $signingtable $WORKDIR/signing-table
@@ -57,6 +58,14 @@ UserID $(id --name --user):$(id --name --group)
 debugLevel 5
 EOF
 
+    cat > "$keytype.stable.verify.conf" <<EOF
+Socket unix:$keytype.stable.verify.sock
+PidFile $keytype.stable.verify.pid
+Mode v
+DNSOverride $(cat testkey.$keytype.dns)
+UserID $(id --name --user):$(id --name --group)
+EOF
+
     cat > "$keytype.table.conf" <<EOF
 $keytable $WORKDIR/$keytype-table
 $signingtable $WORKDIR/signing-table
@@ -65,6 +74,14 @@ PidFile $keytype.table.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
 debugLevel 5
+EOF
+
+cat > "$keytype.table.verify.conf" <<EOF
+    Socket unix:$keytype.stable.verify.sock
+    PidFile $keytype.table.verify.pid
+    Mode v
+    DNSOverride $(cat testkey.$keytype.dns)
+    UserID $(id --name --user):$(id --name --group)
 EOF
 
     cat >  "$keytype-table" <<EOF
@@ -81,7 +98,7 @@ cleanup() {
     echo cleaning up jobs:
     jobs
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify stable table; do
+        for func in signing verify stable stable.verify table table.verify; do
             if [ -s "$keytype.$func.pid" ] && kill -0 "$(cat "$keytype.$func.pid")"; then
                 kill "$(cat $keytype.$func.pid)"
             fi
@@ -89,7 +106,7 @@ cleanup() {
     done
     wait
     for keytype in "${KEY_TYPES[@]}"; do
-        for func in signing verify stable table; do
+        for func in signing verify stable stable.verify table table.verify; do
             errdata="$keytype.$func.stderr"
             if [ -s "$errdata" ]; then
                 printf -- "-> %s:\n" "$errdata"
@@ -102,7 +119,7 @@ cleanup() {
 }
 
 for keytype in "${KEY_TYPES[@]}"; do
-    for func in signing verify stable table; do
+    for func in signing verify stable stable.verify table table.verify; do
         PYTHONPATH="$(dirname "$TESTDIR")" "$DKIMPY_MILTER" "$keytype.$func.conf" 2>"$keytype.$func.stderr" &
     done
 done
