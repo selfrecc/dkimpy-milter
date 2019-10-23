@@ -21,7 +21,7 @@ for keytype in "${KEY_TYPES[@]}"; do
     fi
     if [ "$keytype" = ed25519 ]; then
         keytable=KeyTableEd25519
-        signingtable=SigningTableEd25519
+        signingtable=SigningTable
         selector=SelectorEd25519
     elif [ "$keytype" = rsa ]; then
         keytable=KeyTable
@@ -90,7 +90,8 @@ example.net, testkey, testkey.$keytype.key
 EOF
 
     cat > "signing-table" <<EOF
-%, @test.example.net
+example.org
+%, @test.test.example.net
 EOF
 done
 

@@ -51,7 +51,6 @@ defaultConfigData = {
     'DNSOverride': None,
     'SubDomains': False,
     'SigningTable': None,
-    'SigningTableEd25519': None,
     'debugLevel': 0  # Undocumented config item for developer use
     }
 
@@ -354,7 +353,6 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'Selector': 'str',
         'SelectorEd25519': 'str',
         'SigningTable': 'dataset',
-        'SigningTableEd25519': 'dataset',
         'Canonicalization': 'str',
         'InternalHosts': 'dataset',
         'IntHosts': 'bool',
@@ -434,7 +432,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             # These are the only multi-line dataset types
             if name == 'KeyTable' or name == 'KeyTableEd25519':
                 configData[name] = _dataset_multiline('KeyTable', interim_value)
-            elif name == 'SigningTable' or name == 'SigningTableEd25519':
+            elif name == 'SigningTable':
                 configData[name] = _dataset_multiline('SigningTable', interim_value)
             else:
                 configData[name] = interim_value

@@ -55,7 +55,6 @@ KeyTable
 KeytableEd25519
 SignHeaders	 	implemented
 SigningTable
-SigningTableEd25519
 TemporaryDirectory
 
 Planned dataset type support (if needed):

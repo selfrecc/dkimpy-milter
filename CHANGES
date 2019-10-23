@@ -19,6 +19,8 @@
    (LP: #1844189)
  - Fix sysv init so it works (LP: #1839487)
  - Make error logging more explicit to aid debugging
+ - Remove SigningTableEd25519 from documentation - it was never implemented
+   and a per algorithm signing table turns out not to be needed
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

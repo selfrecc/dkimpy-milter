@@ -222,8 +222,6 @@ domains will be verified rather than being signed.
 
 This parameter is not required if a
 .I SigningTable
-or
-.I SigningTableEd25519
 is in use; in that case, the list of signed domains is implied by the
 lines in that file.
 
@@ -384,19 +382,6 @@ is defined.
 
 .TP
 .I SigningTable (dataset)
-
-Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
-
-If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
-
-If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file. ["refile support not implemented"].
-
-For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
-
-In any case, only the first match is applied.
-
-.TP
-.I SigningTableEd25519 (dataset)
 
 Defines a table used to select one or more signatures to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
 
