@@ -187,9 +187,13 @@ class dkimMilter(Milter.Base):
                 # Don't error out on unparseable AR header fiels
                 pass
         # Check and/or sign DKIM
+        if (self.conf.get('Syslog') and self.conf.get('debugLevel') >= 4):
+            syslog.syslog('self.conf: {0}'.format(self.conf))
         self.fp.seek(0)
         txt = self.fp.read()
         self.get_identities_sign()
+        if (self.conf.get('Syslog') and self.conf.get('debugLevel') >= 3):
+            syslog.syslog('self.domain: {0}, self.fdomain: {1}, self.iequals: {2}'.format(self.domain, self.fdomain, self.iequals))
         if ((self.fdomain in self.domain) and not self.conf.get('Mode') == 'v'
                 and not self.external_connection):
             self.sign_dkim(txt)
@@ -210,7 +214,7 @@ class dkimMilter(Milter.Base):
         return Milter.CONTINUE
 
     # get parent domain to be signed for if fdomain is a subdomain
-    def get_parent_domain(self, get_parent_domainfdomain, domains):
+    def get_parent_domain(self, fdomain, domains):
         for domain in domains:
             rhs = '.'+domain
             # compare right hand side of fdomain against .domain
@@ -222,10 +226,38 @@ class dkimMilter(Milter.Base):
 
     def get_identities_sign(self):
         """Determine d= and i= identiies for signature"""
-        if self.conf.get('Domain'):
+        self.domain = []
+        iequals = None
+        if self.conf.get('SigningTableEd25519'):
+            for tablerow in self.conf.get('SigningTableEd25519'):
+                if tablerow[0] == '%':
+                    self.domain.append(self.fdomain)
+                try:
+                    if tablerow[1]:
+                        if tablerow[1] =='%':
+                            self.iequals = codces.encode('@' + self.fdomain)
+                        elif tablerow[1][1:] == self.fdomain or tablerow[1][1:] == self.get_parent_domain(tablerow[1][1:], self.domain):
+                            self.iequals = codces.encode(tablerow[1])
+                except:
+                    pass
+        domain2 = []
+        if self.conf.get('SigningTable'):
+            for tablerow in self.conf.get('SigningTable'):
+                if tablerow[0] == '%':
+                    domain2.append(self.fdomain)
+                try:
+                    if tablerow[1]:
+                        iequals = codces.encode('@' + self.fdomain)
+                    elif tablerow[1][1:] == fdomain or tablerow[1][1:] == self.get_parent_domain(tablerow[1][1:], domain):
+                        iequals = codces.encode(tablerow[1])
+                except:
+                    pass
+        if not self.domain:
+            self.domain = domain2
+        if not self.iequals:
+            self.iequals = iequals
+        if not self.domain and self.conf.get('Domain'):
             self.domain = self.conf.get('Domain')
-        else:
-            self.domain = ''
         if self.conf.get('SubDomains'):
             self.fdomain = self.get_parent_domain(self.fdomain, self.domain)
 
