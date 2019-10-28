@@ -105,6 +105,75 @@ will provide both the private key file (.key suffix) and a file with the DKIM
 public key record to be published DNS (.dns suffix).  Ed25519 keys do not have
 variable bit lengths.
 
+### COMPLEX SIGNING CONFIGURATIONS
+
+The KeyTable, KeyTableEd25519, and SigningTable are used to define signing
+instructions to the filter where use of Domain, Selector and KeyFile together
+are insufficient.
+
+First, select the type of database you will use for each.  They need not
+be the same.  The "DATA SETS" portion of the dkimpy-milter(8) man page
+describes the possibilities and how they are formatted.  Then, construct those
+databases.
+
+Let's suppose you want to sign for two domains, example.com and example.net.
+Within example.com, you want to sign for user "president" differently than
+everyone else.  Let's say further that you want to use a flat text file.
+
+You've generated private key files for each of these and stored them
+in the directory /usr/local/etc/dkim/keys as files "president", "excom" and
+"exnet", with the obvious intents.  You want to use selectors "foo", "bar"
+and "baz" for those, respectively.  The signing domains match the senders
+(i.e. the signatures for example.com's stuff will be held by example.com,
+and example.net likewise).
+
+First, write the KeyTable.  This is a list of the keys you intend to use,
+and you just assign arbitrary names to them.  So as a flat file, the KeyTable
+for the above might look like this:
+
+	preskey	example.com:foo:/usr/local/etc/dkim/keys/president
+	comkey	example.com:bar:/usr/local/etc/dkim/keys/excom
+	netkey	example.net:baz:/usr/local/etc/dkim/keys/exnet
+
+If also signing with ed25519, specify a KeyTableEd25519 pointing to the keys
+needed for ed25519.  Both KeyTable and KeyTableEd25519 are evaluated if there
+is a SigningTable (see below).
+
+Per the documentation, multi-field data sets that are made of flat files have
+the fields separated by colons, but the key and value(s) are separated by
+whitespace.
+
+So now we've named each key file, and specified with which selector and domain
+each will be used, and then given each of those groupings a name.  This
+is your KeyTable.  Let's say you put it in /usr/local/etc/dkim/keytable.
+
+Next, write the SigningTable.  This maps senders (by default, taken from the
+From: header field of a message passing through the filter) to which keys
+will be used to sign their mail.  Wildcards are allowed.  So to do what was
+described above, we write it as follows:
+
+	president@example.com	preskey
+	*@example.com		comkey
+	*@example.net		netkey
+
+Since we want to use wildcards, we can't actually use a regular flat file.
+Wildcards require a regular expression file, or "refile".  The above is
+valid format for one of those.  Let's say you put this in
+/usr/local/etc/dkim/signingtable.
+
+Finally, tell the filter that it should use these files by adding this to
+your configuration file:
+
+	KeyTable	/usr/local/etc/dkim/keytable
+	SigningTable	refile:/usr/local/etc/dkim/signingtable
+
+You could put "file:" in front of the filename for the KeyTable just to be
+precise, but "file:" is assumed if the value starts with a "/".
+
+Note: Unlike opendkim, dkimpy-milter will check for "\*" in the signing table
+regardless of if refile is specified or not.  Use of refile is supported for
+compatibility with configurations initially developed for use with opendkim.
+
 ## MTA INTEGRATION
 
 Both a systemd unit file and a sysv init file are provided.  Both make
