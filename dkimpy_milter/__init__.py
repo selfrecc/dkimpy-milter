@@ -218,8 +218,9 @@ class dkimMilter(Milter.Base):
         for domain in domains:
             rhs = '.'+domain
             # compare right hand side of fdomain against .domain
-            if self.fdomain[-len(rhs):] == rhs:
+            if fdomain[-len(rhs):] == rhs:
                 # return parent domain on match
+                syslog.syslog('domain: {0}'.format(domain))
                 return domain
         # or return the fdomain itself
         return fdomain
@@ -228,39 +229,37 @@ class dkimMilter(Milter.Base):
         """Determine d= and i= identiies for signature"""
         self.domain = []
         iequals = None
-        if self.conf.get('SigningTableEd25519'):
-            for tablerow in self.conf.get('SigningTableEd25519'):
-                if tablerow[0] == '%':
+        if self.conf.get('SigningTable'):
+            match = False
+            for dictkey, dictvalues in self.conf.get('SigningTable').items():
+                if dictkey == '%':
+                    self.domain.append(self.fdomain)
+                    match = True
+                elif len(dictkey.split('*')) == 1:
+                    if dictkey == self.author:
+                        self.domain.append(self.fdomain)
+                        match = True
+                else:
+                    if len(dictkey.split('*')) == 2:
+                        if dictkey.split('*')[1] == self.author[:-len(dictkey.split('*')[1])]:
+                            self.domain.append(self.fdomain)
+                            match = True
                     self.domain.append(self.fdomain)
                 try:
-                    if tablerow[1]:
-                        if tablerow[1] =='%':
-                            self.iequals = codces.encode('@' + self.fdomain)
-                        elif tablerow[1][1:] == self.fdomain or tablerow[1][1:] == self.get_parent_domain(tablerow[1][1:], self.domain):
-                            self.iequals = codces.encode(tablerow[1])
-                except:
+                    if len(dictvalues) == 2 and match:
+                        if dictvalues[0] =='%':
+                            self.iequals = codecs.encode('@' + self.fdomain)
+                        elif dictvalues[0][1:] == self.fdomain or self.get_parent_domain(dictvalues[0][1:], self.domain) == self.fdomain:
+                            self.iequals = codecs.encode(dictvalues[0])
+                except IndexError:
                     pass
-        domain2 = []
-        if self.conf.get('SigningTable'):
-            for tablerow in self.conf.get('SigningTable'):
-                if tablerow[0] == '%':
-                    domain2.append(self.fdomain)
-                try:
-                    if tablerow[1]:
-                        iequals = codces.encode('@' + self.fdomain)
-                    elif tablerow[1][1:] == fdomain or tablerow[1][1:] == self.get_parent_domain(tablerow[1][1:], domain):
-                        iequals = codces.encode(tablerow[1])
-                except:
-                    pass
-        if not self.domain:
-            self.domain = domain2
-        if not self.iequals:
-            self.iequals = iequals
+                if match:
+                    #TODO add KeyTable stuffs here.
+                    break
         if not self.domain and self.conf.get('Domain'):
             self.domain = self.conf.get('Domain')
         if self.conf.get('SubDomains'):
             self.fdomain = self.get_parent_domain(self.fdomain, self.domain)
-
 
     def sign_dkim(self, txt):
         canon = codecs.encode(self.conf.get('Canonicalization'), 'ascii')
@@ -446,11 +445,11 @@ def main():
         if socketname is None:
             socketname = 'local:/var/run/dkimpy-milter/dkimpy-milter.sock'
     own_socketfile(milterconfig, socketname)
-    drop_privileges(milterconfig)
     sys.stdout.flush()
     if milterconfig.get('Syslog'):
         syslog.syslog('dkimpy-milter starting:{0} user:{1}'
                       .format(pid, milterconfig.get('UserID')))
+    drop_privileges(milterconfig)
     Milter.runmilter(miltername, socketname, 240)
 
 if __name__ == "__main__":
