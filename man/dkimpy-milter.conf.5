@@ -259,13 +259,13 @@ is defined.
 
 .TP
 .I KeyTable (dataset)
-Gives the location of a file mapping key names to RSA signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not supported.
+Gives the location of a file mapping key names to RSA signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.
 
 See the COMPLEX SIGNING CONFIGURATIONS section of README.md for examples.
 
 .TP
 .I KeyTableEd25519 (dataset)
-Gives the location of a file mapping key names to Ed25519 signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: direct specification of keys in the table as is done by OpenDKIM is not supported.
+Gives the location of a file mapping key names to Ed25519 signing keys. If present, overrides any KeyFile setting in the configuration file. The data set named here maps each key name to three values: (a) the name of the domain to use in the signature’s "d=" value; (b) the name of the selector to use in the signature’s "s=" value; and (c) the  path to a file containing a private key. If the first value consists solely of a percent sign ("%") character, it will be replaced by the apparent domain of the sender when generating a signature. The third value must start with a slash ("/") character, or "./" or "../" to indicate it refers to a file from which the private key should be read.  The SigningTable (see below) is used to select records from this table to be used to add signatures based on the message sender.  NOTE: There is a limitation of the current implementation that a private key can't be directly included in the file if it starts with '/', './', or '../'.  If you have such a key, you may store it in a file and reference the file in the table.
 
 See the COMPLEX SIGNING CONFIGURATIONS section of README.md for examples.
 
@@ -325,6 +325,23 @@ be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 
+.TP
+.I OmitHeaders (dataset)
+Specifies a set of header fields that should be omitted when generating
+signatures.  If an entry in the list names any header field that is mandated
+by the DKIM specification, the entry is ignored.  A set of header fields is
+listed in the DKIM specification (RFC6376, Section 5.4) as "SHOULD NOT" be
+signed; the default list for this parameter contains those fields
+(Return-Path, Received, Comments, Keywords, Bcc, Resent-Bcc and
+DKIM-Signature).  To omit no headers, simply use the string "." (or any
+string that will match no header field names).
+Specifying a list with this parameter replaces the default entirely, unless
+one entry is "*" in which case the list is interpreted as a delta to the
+default; for example, "*,+foobar" will use the entire default list plus
+the name "foobar", while "*,-Bcc" would use the entire default list except
+for the "Bcc" entry. [OmitHeaders NOT IMPLEMENTED - included for reference
+only]
+
 .TP 
 .I DNSOverride (string)
 Provide a text string that a verifying milter should use instead of
@@ -383,13 +400,24 @@ This parameter is ignored if a
 is defined.
 
 .TP
+.I SignHeaders (dataset)
+Specifies the set of header fields that should be included when generating
+signatures.  If the list omits any header field that is mandated by the DKIM
+specification, those fields are implicitly added.  By default, those fields
+listed in the DKIM specification as "SHOULD" be signed (RFC6376, Section 5.4)
+will be signed by the filter.  See the
+.I OmitHeaders
+configuration option for more information about the format and interpretation
+of this field.
+
+.TP
 .I SigningTable (dataset)
 
-Defines a table used to select one or more signing identites apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
+Defines a table used to select one or more signing identities to apply to a message based on the address found in the From: header field. Keys in this table vary depending on the type of table used; values in this data set should include one field that contains a name found in the KeyTable (see above) that identifies which key should be used in generating the signature, and an optional second field naming the signer of the message that will be included in the "i=" tag in the generated signature. Note that the "i=" value will not be included in the signature if it conflicts with the signing domain (the "d=" value).
 
 If the first field contains only a "%" character, it will be replaced by the domain found in the From: header field. Similarly, within the optional second field, any "%" character will be replaced by the domain found in the From: header field.
 
-If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field. Entries are checked in the order in which they appear in the file.  Note: These are not true regular expressions.  The terminology is inherited from opendkim.  Only wildcards ("*") are supported.
+If this table specifies a regular expression file ("refile"), then the keys are wildcard patterns that are matched against the address found in the From: header field.  Entries are checked in the order in which they appear in the file.   Note: These are not true regular expressions.  The terminology is inherited from opendkim.  Only wildcards ("*") are supported.
 
 For all other database types, the full user@host is checked first, then simply host, then user@.domain (with all superdomains checked in sequence, so "foo.example.com" would first check "user@foo.example.com", then "user@.example.com", then "user@.com"), then .domain, then user@*, and finally *.
 
@@ -478,7 +506,7 @@ is specified.
 \ddkimpy-milter\fR was written by Scott Kitterman <scott@kitterman.com>.
 It is based on dkim-milter.py  Copyright (c) 2001-2013 Business Management Systems, Inc.
 Copyright (c) 2013-2015 Stuart D. Gathman
-Copyright (c) 2018 Scott Kitterman <scott@kitterman.com>.  
+Copyright (c) 2018,2019 Scott Kitterman <scott@kitterman.com>.
 .PP
 This man-page was created by Scott Kitterman <scott@kitterman.com>.
 
@@ -492,4 +520,4 @@ See LICENSE.
 
 Updated for dkimpy-milter.  Updates licensed under the same terms as the rest
 of the package.
-Copyright (c) 2018, Scott Kitterman <scott@kitterman.com>
+Copyright (c) 2018,2019 Scott Kitterman <scott@kitterman.com>
