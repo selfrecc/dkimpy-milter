@@ -149,27 +149,6 @@ def write_pid(milterconfig):
     return pid
 
 
-def own_socketfile(milterconfig, sockname=None):
-    """If socket is Unix socket, chown to UserID before dropping privileges"""
-    import os
-    user, group = user_group(milterconfig.get('UserID'))
-    offset = None
-    if sockname is None:
-        sockname = milterconfig.get('Socket')
-    if sockname is None:
-        return
-    if sockname[:1] == '/':
-        offset = 0
-    elif sockname[:6] == "local:":
-        offset = 6
-    elif sockname[:5] == "unix:":
-        offset = 5
-
-    if offset is not None:
-        if os.path.exists(sockname[offset:]):
-            os.chown(sockname[offset:], user, group)
-
-
 def read_keyfile(keyfile, milterconfig):
     """Read private key from file."""
     import syslog

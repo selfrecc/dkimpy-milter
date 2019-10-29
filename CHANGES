@@ -21,6 +21,10 @@
  - Make error logging more explicit to aid debugging
  - Remove SigningTableEd25519 from documentation - it was never implemented
    and a per algorithm signing table turns out not to be needed
+ - Delete own_socketfile to resolve race condition where the permissions
+   change fails on a Unix socket because it hasn't been created yet (libmilter
+   will do this correctly on its own based on umask, the milter doesn't need
+   to do it) (LP: #1849712)
 
 1.1.0 2019-04-12
  - Add SubDomains option to enable signing for sub-domains (LP: #1811535)

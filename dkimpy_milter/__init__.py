@@ -37,7 +37,6 @@ from dkimpy_milter.util import drop_privileges
 from dkimpy_milter.util import setExceptHook
 from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import get_keys
-from dkimpy_milter.util import own_socketfile
 from dkimpy_milter.util import fold
 
 __version__ = "1.2.0"
@@ -444,7 +443,6 @@ def main():
                     socketname = 'fd:3'
         if socketname is None:
             socketname = 'local:/var/run/dkimpy-milter/dkimpy-milter.sock'
-    own_socketfile(milterconfig, socketname)
     sys.stdout.flush()
     if milterconfig.get('Syslog'):
         syslog.syslog('dkimpy-milter starting:{0} user:{1}'
