@@ -77,21 +77,23 @@ debugLevel 5
 EOF
 
 cat > "$keytype.table.verify.conf" <<EOF
-    Socket unix:$keytype.stable.verify.sock
-    PidFile $keytype.table.verify.pid
-    Mode v
-    DNSOverride $(cat testkey.$keytype.dns)
-    UserID $(id --name --user):$(id --name --group)
+Socket unix:$keytype.stable.verify.sock
+PidFile $keytype.table.verify.pid
+Mode v
+DNSOverride $(cat testkey.$keytype.dns)
+UserID $(id --name --user):$(id --name --group)
 EOF
 
     cat >  "$keytype-table" <<EOF
-example.org, testnokey, testkey.$keytype.key
-example.net, testkey, testkey.$keytype.key
+preskey example.org:testkey:$WORKDIR/testkey.$keytype.key
+orgkey  example.org:testkey:$WORKDIR/testkey.$keytype.key
+netkey  example.net:testkey:$WORKDIR/testkey.$keytype.key
 EOF
 
     cat > "signing-table" <<EOF
-example.org
-%, @test.test.example.net
+president@example.org	@special.example.org:preskey
+*@example.org		orgkey
+*@example.net		netkey
 EOF
 done
 

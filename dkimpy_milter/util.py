@@ -187,25 +187,19 @@ def read_keyfile(keyfile, milterconfig):
         key += line
     return key
 
-def read_keytable(tablelist, milterconfig):
+def read_keytable(tabledict, milterconfig):
     """Read keytables into in memory configuration data so all keys are read
     before priviledges are dropped.
-    tablelist contains a list of KeyTable rows (three elements, comma separated):
-        domain, selector, key file location
-    When loaded, KeyTableData is a dict:
-        {domain: [selector, key]}"""
+    When loaded, tabeldict is a dict:
+        {searchkey: [donamin, selector, key]}
+    If key is a file (startswith('/'), then the key is returned in its place."""
     import dkim
     import syslog
-    keytabledata = {}
-    for row in tablelist:
-        for element in row:
-            row[row.index(element)] = element.strip().strip(',')
-        if len(row) != 3:
-            raise dkim.ParameterError('Invalid KeyTable element (need three paramters per row): {0}'
-                                      .format(str(row)))
-        key = read_keyfile(row[2], milterconfig)
-        keytabledata.update({row[0]:[row[1], key]})
-    return keytabledata
+    for dictkey, values in tabledict.items():
+        if values[-1][:1] == '/':
+            key = read_keyfile(values[-1], milterconfig)
+        tabledict[dictkey] = [values[0], values[1], key]
+    return tabledict
 
 def get_keys(milterconfig):
     """Read keys (table or file) into memory before dropping priviledges"""
