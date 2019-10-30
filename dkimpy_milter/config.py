@@ -39,6 +39,7 @@ defaultConfigData = {
     'SyslogFacility': 'mail',
     'UMask': 0o07,
     'Mode': 'sv',
+    'MinimumKeyBits': 1024,
     'Socket': None,
     'PidFile': None,
     'UserID': 'dkimpy-milter',
@@ -336,6 +337,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'SyslogSuccess': 'bool',
         'UMask': 'int',
         'Mode': 'str',
+        'MinimumKeyBits': 'int',
         'Socket': 'str',
         'PidFile': 'str',
         'UserID': 'str',
@@ -421,6 +423,10 @@ def _readConfigFile(path, configData=None, configGlobal={}):
             else:
                 configData[name] = str(value)
         elif conversion == 'int':
+            if name == 'MinimumKeyBits':
+                if int(value) == 0:
+                    # Odd inheritence from OpenDKIM where value of 0 means use default.
+                    value = configData.get(name)
             configData[name] = int(value)
         elif conversion == 'dataset':
             configData[name] = _dataset_to_list(value)

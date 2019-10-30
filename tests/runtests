@@ -43,6 +43,7 @@ Socket unix:$keytype.verify.sock
 PidFile $keytype.verify.pid
 Mode v
 DNSOverride $(cat testkey.$keytype.dns)
+MinimumKeyBits 2048
 UserID $(id --name --user):$(id --name --group)
 EOF
 

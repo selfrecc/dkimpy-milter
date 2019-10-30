@@ -53,7 +53,7 @@ Test suite	  implemented	verified
 DNSTimeout (requires dkimpy change)
 KeyTable            implemented  verified
 KeytableEd25519     implemented  verified
-MinimumKeyBits
+MinimumKeyBits      implemented  verified
 SignHeaders	    implemented
 SigningTable        implemented  verified
 TemporaryDirectory
