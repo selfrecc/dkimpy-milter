@@ -228,6 +228,26 @@ class dkimMilter(Milter.Base):
         """Determine d= and i= identiies for signature"""
         self.domain = []
         iequals = None
+        try:
+            self.privkeyRSA = self.conf.get('privateRSA')
+        except:
+            self.privkeyRSA = ''
+        try:
+            self.privkeyEd25519 = self.conf.get('privateEd25519')
+        except:
+            self.privkeyEd25519 = ''
+        try:
+            self.selectorRSA = self.conf.get('Selector')
+        except:
+            self.selectorRSA = ''
+        try:
+            self.selectorEd25519 = self.conf.get('SelectorEd25519')
+        except:
+            self.selectorEd25519 = ''
+        if not self.domain and self.conf.get('Domain'):
+            self.domain = self.conf.get('Domain')
+        if self.conf.get('SubDomains'):
+            self.fdomain = self.get_parent_domain(self.fdomain, self.domain)
         if self.conf.get('SigningTable'):
             match = False
             for dictkey, dictvalues in self.conf.get('SigningTable').items():
@@ -240,7 +260,7 @@ class dkimMilter(Milter.Base):
                         match = True
                 else:
                     if len(dictkey.split('*')) == 2:
-                        if dictkey.split('*')[1] == self.author[:-len(dictkey.split('*')[1])]:
+                        if dictkey.split('*')[1] == self.author[-len(dictkey.split('*')[1]):]:
                             self.domain.append(self.fdomain)
                             match = True
                     self.domain.append(self.fdomain)
@@ -254,11 +274,28 @@ class dkimMilter(Milter.Base):
                     pass
                 if match:
                     #TODO add KeyTable stuffs here.
+                    keytablekey = dictvalues[-1] # Last value in the SigningTable row.
+                    if self.conf.get('privateRSATable'):
+                        # Table data is a list of [ signing domain, selector, key ]
+                        keytabledata = self.conf.get('privateRSATable')[keytablekey]
+                        try:
+                            self.fdomain = keytabledata[0]
+                            self.selectorRSA = keytabledata[1]
+                            self.privkeyRSA = keytabledata[2]
+                        except:
+                            if (self.conf.get('Syslog')):
+                                    syslog.syslog('Error: Invalid KeyTable data {0}'.format(keytabledata))
+                    if self.conf.get('privateEd25519Table'):
+                        # Table data is a list of [ signing domain, selector, key ]
+                        keytabledata = self.conf.get('privateEd25519Table')[keytablekey]
+                        try:
+                            self.fdomain = keytabledata[0]
+                            self.selectorEd25519 = keytabledata[1]
+                            self.privkeyEd25519 = keytabledata[2]
+                        except:
+                            if (self.conf.get('Syslog')):
+                                    syslog.syslog('Error: Invalid KeyTable data {0}'.format(keytabledata))
                     break
-        if not self.domain and self.conf.get('Domain'):
-            self.domain = self.conf.get('Domain')
-        if self.conf.get('SubDomains'):
-            self.fdomain = self.get_parent_domain(self.fdomain, self.domain)
 
     def sign_dkim(self, txt):
         canon = codecs.encode(self.conf.get('Canonicalization'), 'ascii')
@@ -277,10 +314,10 @@ class dkimMilter(Milter.Base):
             # None or empty. DKIM explicitly tests for None.
             sign_headers = None
         try:
-            if self.conf.get('privateRSA'):
+            if self.privkeyRSA:
                 d = dkim.DKIM(txt)
-                h = d.sign(codecs.encode(self.conf.get('Selector'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           codecs.encode(self.conf.get('privateRSA'), 'ascii'),
+                h = d.sign(codecs.encode(self.selectorRSA, 'ascii'), codecs.encode(self.fdomain, 'ascii'),
+                           codecs.encode(self.privkeyRSA, 'ascii'),
                            canonicalize=(canonicalize[0], canonicalize[1]),
                            identity=self.iequals, include_headers=sign_headers)
                 name, val = h.split(b': ', 1)
@@ -293,10 +330,10 @@ class dkimMilter(Milter.Base):
                                                   d.signature_fields.get(b'a').decode(),
                                                   d.signature_fields.get(b's').decode(),
                                                   d.domain.decode().lower()))
-            if self.conf.get('privateEd25519'):
+            if self.privkeyEd25519:
                 d = dkim.DKIM(txt)
-                h = d.sign(codecs.encode(self.conf.get('SelectorEd25519'), 'ascii'), codecs.encode(self.fdomain, 'ascii'),
-                           self.conf.get('privateEd25519'),
+                h = d.sign(codecs.encode(self.selectorEd25519, 'ascii'), codecs.encode(self.fdomain, 'ascii'),
+                           self.privkeyEd25519,
                            canonicalize=(canonicalize[0], canonicalize[1]),
                            identity=self.iequals, include_headers=sign_headers,
                            signature_algorithm=b'ed25519-sha256')
