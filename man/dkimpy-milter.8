@@ -182,7 +182,10 @@ should be separated by colons.
 .TP
 .I i)
 If the string contains none of these prefixes but starts with a slash ("/")
-character, it is presumed to be a flat file as described above.
+character, or "./" or "../", it is presumed to be a flat file as described
+above. Note: In OpenDKIM "./" and "../" only apply to KeyTable, but for
+dkimpy-milter it is generally applicable and KeyTable specification is not
+a special case.
 .TP
 .I j)
 If the string begins with "csl:", the string is treated as a comma-separated

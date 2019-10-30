@@ -175,7 +175,7 @@ def read_keytable(tabledict, milterconfig):
     import dkim
     import syslog
     for dictkey, values in tabledict.items():
-        if values[-1][:1] == '/':
+        if values[-1][:1] == '/' or values[-1][:2] == './' or values[-1][:3] == '../':
             key = read_keyfile(values[-1], milterconfig)
         tabledict[dictkey] = [values[0], values[1], key]
     return tabledict

@@ -278,7 +278,7 @@ def _dataset_to_list(dataset):
             # This is a flat file dataset, which are key value:value stores
             ds = []
             dsd = {}
-            if dataset[0] == '/':
+            if dataset[0] == '/' or dataset[:2] == './' or dataset[:3] == '../':
                 dsname = dataset
             elif dataset[:5] == 'file:':
                 dsname = dataset[5:]
