@@ -1,4 +1,5 @@
 1.2.0 UNRELEASED
+ - Add support for SigningTable, KeyTable, and KeyTableEd25519 (LP: #1797397)
  - Add support for SignHeaders feature, thanks to Ralph Seichter for the patch
  - Add information on message content conversion to README
  - Add new expand option to setup.py so various file system locations can be
