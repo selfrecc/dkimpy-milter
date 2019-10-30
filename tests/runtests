@@ -36,7 +36,6 @@ Socket unix:$keytype.signing.sock
 PidFile $keytype.signing.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
-debugLevel 5
 EOF
 
     cat > "$keytype.verify.conf" <<EOF
@@ -55,7 +54,6 @@ Socket unix:$keytype.stable.signing.sock
 PidFile $keytype.stable.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
-debugLevel 5
 EOF
 
     cat > "$keytype.stable.verify.conf" <<EOF
@@ -73,11 +71,10 @@ Socket unix:$keytype.table.signing.sock
 PidFile $keytype.table.pid
 Mode s
 UserID $(id --name --user):$(id --name --group)
-debugLevel 5
 EOF
 
 cat > "$keytype.table.verify.conf" <<EOF
-Socket unix:$keytype.stable.verify.sock
+Socket unix:$keytype.table.verify.sock
 PidFile $keytype.table.verify.pid
 Mode v
 DNSOverride $(cat testkey.$keytype.dns)
