@@ -211,9 +211,11 @@ header and the second to the body.
 .TP
 .I DiagnosticDirectory (string)
 Directory into which to write diagnostic reports when message verification
-fails.  If not set (the default), these files are not generated.  [Unlike
-OpenDKIM, this applies to all messages, not just  on messages bearing a "z=" tag
-because dkimpy does not yet support "z=".]
+fails.  If not set (the default), these files are not generated.  The
+directory must exist, dkimpy-milter will not create it and an error will be
+raised if it does not.  [Unlike OpenDKIM, this applies to all messages, not
+just  on messages bearing a "z=" tag because dkimpy does not yet support
+"z=" processing.]
 
 .TP
 .I Domain (dataset)

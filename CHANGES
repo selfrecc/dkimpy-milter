@@ -8,6 +8,8 @@
  - Install openrc init file for Gentoo and other openrc users
  - Add support for passing PID file name on command line to make it easier to
    keep system init and daemon configuration in sync
+ - Add support for storing DKIM failed mails in a specified
+   DiagnosticDirectory
  - Fix startup logging so it provides information at a useful time
  - Fix verify processing so missing (optional) i= tag doesn't cause the milter
    to fail  (LP: #1842250)

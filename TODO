@@ -56,7 +56,7 @@ KeytableEd25519     implemented  verified
 MinimumKeyBits      implemented  verified
 SignHeaders	    implemented  verified by inspection
 SigningTable        implemented  verified
-TemporaryDirectory
+TemporaryDirectory  implemented  verified by inspection
 
 Planned dataset type support (if needed):
 mdb:

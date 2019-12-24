@@ -413,6 +413,7 @@ class dkimMilter(Milter.Base):
                 self.dkim_domain = d.domain.lower()
             else:
                 if self.conf.get('DiagnosticDirectory'):
+                    tempfile.tempdir = self.conf.get('DiagnosticDirectory')
                     fd, fname = tempfile.mkstemp(".dkim")
                     with os.fdopen(fd, "w+b") as fp:
                         fp.write(txt)
