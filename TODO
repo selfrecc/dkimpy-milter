@@ -50,11 +50,11 @@ Subdomain support implemented	verified
 Test suite	  implemented	verified
 
 1.2.0
-DNSTimeout (requires dkimpy change)
+DNSTimeout (dkimpy 1.0)
 KeyTable            implemented  verified
 KeytableEd25519     implemented  verified
 MinimumKeyBits      implemented  verified
-SignHeaders	    implemented
+SignHeaders	    implemented  verified by inspection
 SigningTable        implemented  verified
 TemporaryDirectory
 
