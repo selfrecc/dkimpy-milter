@@ -50,6 +50,7 @@ defaultConfigData = {
     'MacroList': '',
     'MacroListVerify': '',
     'DNSOverride': None,
+    'DNSTimeout': 5,
     'SubDomains': False,
     'SigningTable': None,
     'debugLevel': 0  # Undocumented config item for developer use
@@ -158,7 +159,7 @@ class HostsDataset(object):
         '''Get validated PTR name of IP address'''
         results = []
         s = Session()
-        ptrnames = s.dns(source.reverse_pointer, 'PTR')
+        ptrnames = s.dns(source.reverse_pointer, 'PTR', timeout=self.conf.get('DNSTimeout'))
         for name in ptrnames:
             if isinstance(source, ipaddress.IPv4Address):
                 ips = s.dns(name, 'A')
@@ -357,6 +358,7 @@ def _readConfigFile(path, configData=None, configGlobal={}):
         'MacroList': 'dataset',
         'MacroListVerify': 'dataset',
         'DNSOverride': 'str',
+        'DNSTimeout': 'int',
         'debugLevel': 'int',
         'SignHeaders': 'dataset'
         }

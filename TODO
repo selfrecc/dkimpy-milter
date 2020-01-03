@@ -50,7 +50,7 @@ Subdomain support implemented	verified
 Test suite	  implemented	verified
 
 1.2.0
-DNSTimeout (dkimpy 1.0)
+DNSTimeout (dkimpy 1.0)  implemented  verified by inspection
 KeyTable            implemented  verified
 KeytableEd25519     implemented  verified
 MinimumKeyBits      implemented  verified

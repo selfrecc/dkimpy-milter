@@ -88,7 +88,7 @@ class Session(object):
         result = self.dns(cname, qtype, cnames=cnames)
     return result
 
-def DNSLookup_pydns(name, qtype, tcpfallback=True, timeout=30):
+def DNSLookup_pydns(name, qtype, tcpfallback=True, timeout=5):
     try:
 	# FIXME: To be thread safe, we create a fresh DnsRequest with
 	# each call.  It would be more efficient to reuse
@@ -114,11 +114,11 @@ def DNSLookup_pydns(name, qtype, tcpfallback=True, timeout=30):
     except IOError as x:
         raise DNS.DNSError('DNS: ' + str(x))
 
-def DNSLookup_dnspython(name,qtype,tcpfallback=True,timeout=30):
+def DNSLookup_dnspython(name,qtype,tcpfallback=True,timeout=5):
   retVal = []
   try:
     # FIXME: how to disable TCP fallback in dnspython if not tcpfallback?
-    answers = dns.resolver.query(name, qtype)
+    answers = dns.resolver.query(name, qtype, raise_on_no_answer=False, lifetime=timeout)
     for rdata in answers:
       if qtype == 'A' or qtype == 'AAAA':
         retVal.append(((name, qtype), rdata.address))

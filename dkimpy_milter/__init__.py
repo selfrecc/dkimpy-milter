@@ -359,7 +359,7 @@ class dkimMilter(Milter.Base):
         res = False
         self.header_a = None
         for y in range(self.has_dkim):  # Verify _ALL_ the signatures
-            d = dkim.DKIM(txt, minkey=self.conf.get('MinimumKeyBits'))
+            d = dkim.DKIM(txt, minkey=self.conf.get('MinimumKeyBits'), timeout=self.conf.get('DNSTimeout'))
             try:
                 dnsoverride = self.conf.get('DNSOverride')
                 if isinstance(dnsoverride, str):
