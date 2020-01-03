@@ -18,10 +18,8 @@
 # Short-Description: dkimpy-milter
 # Description:       Python DKIM Milter for Sendmail and Postfix
 ### END INIT INFO
-prefix="/usr/local"
-exec_prefix=${prefix}
-sysconfdir="/usr/local/etc"
-bindir="${exec_prefix}/bin/"
+sysconfdir="/usr/local/etc/dkimpy-milter"
+bindir="/usr/local/bin"
 RUNDIR="/run/dkimpy-milter"
 DAEMON=${bindir}/dkimpy-milter
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:
