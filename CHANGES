@@ -1,4 +1,4 @@
-1.2.0 UNRELEASED
+1.2.0 2020-01-03
  - Add support for SigningTable, KeyTable, and KeyTableEd25519 (LP: #1797397)
  - Add support for specifying MinimumKeyBits for RSA signatures
  - Add support for SignHeaders feature, thanks to Ralph Seichter for the patch
