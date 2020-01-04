@@ -53,29 +53,32 @@ class FileMacroExpand(distutils.cmd.Command):
                  'system/dkimpy-milter.service', 'system/dkimpy-milter', \
                  'system/dkimpy-milter.openrc', \
                  'system/socket-activation/dkimpy-milter.service', \
-                 'system/socket-activation/dkimpy-milter.socket',]
+                 'system/socket-activation/dkimpy-milter.socket', ]
         for infile in files:
             outfile = ''
-            filein = open(infile + '.in')
-            for line in filein:
-                for function in ["@SYSCONFDIR@", "@CONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@"]:
-                    splitline = line.split(function)
-                    if len(splitline) > 1:
-                        if function == "@SYSCONFDIR@":
-                            line = splitline[0] + self.sysconfigdir + splitline[1]
-                        elif function == "@CONFDIR@":
-                            line = splitline[0] + self.configdir + splitline[1]
-                        elif function == "@SBINDIR@":
-                            line = splitline[0] + self.sbindir + splitline[1]
-                        elif function == "@BINDIR@":
-                            line = splitline[0] + self.bindir + splitline[1]
-                        elif function == "@RUNSTATEDIR@":
-                            line = splitline[0] + self.rundir + splitline[1]
-                outfile += line
-            out = open(infile, 'w')
-            for line in outfile:
-                out.write(line)
-            out.close()
+            try:
+                filein = open(infile + '.in')
+                for line in filein:
+                    for function in ["@SYSCONFDIR@", "@CONFDIR@", "@SBINDIR@", "@BINDIR@", "@RUNSTATEDIR@"]:
+                        splitline = line.split(function)
+                        if len(splitline) > 1:
+                            if function == "@SYSCONFDIR@":
+                                line = splitline[0] + self.sysconfigdir + splitline[1]
+                            elif function == "@CONFDIR@":
+                                line = splitline[0] + self.configdir + splitline[1]
+                            elif function == "@SBINDIR@":
+                                line = splitline[0] + self.sbindir + splitline[1]
+                            elif function == "@BINDIR@":
+                                line = splitline[0] + self.bindir + splitline[1]
+                            elif function == "@RUNSTATEDIR@":
+                                line = splitline[0] + self.rundir + splitline[1]
+                    outfile += line
+                out = open(infile, 'w')
+                for line in outfile:
+                    out.write(line)
+                out.close()
+            except FileNotFoundError as x:
+                pass
 
 kw = {}  # Work-around for lack of 'or' requires in setuptools.
 try:
