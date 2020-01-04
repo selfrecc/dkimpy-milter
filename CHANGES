@@ -1,6 +1,7 @@
 1.2.1
  - Fix expand option not to fail if files are missing since socket activation
    service files are not shipped in the sdist
+ - Correct dkimpy-milter.conf file install location to match expand locations
 
 1.2.0 2020-01-03
  - Add support for SigningTable, KeyTable, and KeyTableEd25519 (LP: #1797397)

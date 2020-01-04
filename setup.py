@@ -89,7 +89,7 @@ except ImportError:  # If PyDNS is not installed, prefer dnspython
 
 setup(
     name='dkimpy-milter',
-    version='1.2.0',
+    version='1.2.1',
     author='Scott Kitterman',
     author_email='scott@kitterman.com',
     url='https://launchpad.net/dkimpy-milter',
@@ -118,8 +118,8 @@ setup(
     include_package_data=True,
     data_files=[(os.path.join('share', 'man', 'man5'),
         ['man/dkimpy-milter.conf.5']), (os.path.join('share', 'man', 'man8'),
-        ['man/dkimpy-milter.8']), ('etc', ['etc/dkimpy-milter.conf']),
-        (os.path.join('lib', 'systemd', 'system'),
+        ['man/dkimpy-milter.8']), (os.path.join('etc', 'dkimpy-milter'),
+        ['etc/dkimpy-milter.conf']), (os.path.join('lib', 'systemd', 'system'),
         ['system/dkimpy-milter.service']),(os.path.join('etc', 'init.d'),
         ['system/dkimpy-milter']), (os.path.join('etc', 'init.d'),
         ['system/dkimpy-milter.openrc'])],
