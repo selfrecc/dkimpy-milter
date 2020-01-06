@@ -52,22 +52,23 @@ The package includes a custom setup command called expand.  It allows various
 file locations in init scripts, man pages, and config files to be over-ridden
 at install time.
 
-expand: Expand @@ variables in input files, simlar to make macros.
-user_options:
- --sysconfigdir=, e: Specify system configuration directory.
- --sbindir=, s: Specify system binary directory [not used].
- --bindir=, b: Specify binary directory.
- --rundir=,r: Specify run state directory.
+
+    expand: Expand @@ variables in input files, simlar to make macros.
+    user_options:
+      --sysconfigdir=, e: Specify system configuration directory.
+      --sbindir=, s: Specify system binary directory [not used].
+      --bindir=, b: Specify binary directory.
+      --rundir=,r: Specify run state directory.
 
 As an example, to change the run directory to /var/run, one would do:
 
-python3 setup.py expand --rundir=/var/run
-[sudo] python3 setup.py install --single-version-externally-managed \
+    python3 setup.py expand --rundir=/var/run
+    [sudo] python3 setup.py install --single-version-externally-managed \
                                 --record=/dev/null
 
 or in a single step (the order matters):
 
-[sudo] python3 setup.py expand --rundir=/var/run install \
+    [sudo] python3 setup.py expand --rundir=/var/run install \
                                --single-version-externally-managed \
                                --record=/dev/null
 
@@ -87,7 +88,7 @@ tools available to create them.  Keys must (RFC 8302) have a minimum size of
 1024 bits and should have a size of at least 2048 bits.  The dknewkey script
 that is provided with dkimpy is one such tool:
 
-dknewkey exampleprivkey
+    dknewkey exampleprivkey
 
 will produce both the private key file (.key suffix) and a file with the DKIM
 public key record to be published DNS (.dns suffix).  RSA is the default key
@@ -99,7 +100,7 @@ There is no standardized non-binary representation for Ed25519 private keys,
 so in order to generate Ed25519 keys for dkimpy-milter, dkimpy specific tools
 must be used to be compatible.  The same dknewkey script support Ed25519:
 
-dknewkey --ktype ed25519 anothernewkey
+    dknewkey --ktype ed25519 anothernewkey
 
 will provide both the private key file (.key suffix) and a file with the DKIM
 public key record to be published DNS (.dns suffix).  Ed25519 keys do not have
@@ -185,7 +186,7 @@ The dkimpy-milter drops priviledges after setup to the user/group specified in
 UserID.  During initial setup, this system user needs to be manually created.
 As an example, using the default dkimpy-user on Debian, the command would be:
 
-[sudo] adduser --system --no-create-home --quiet --disabled-password \
+    [sudo] adduser --system --no-create-home --quiet --disabled-password \
                --disabled-login --shell /bin/false --group \
                --home /run/dkimpy-milter dkimpy-milter
 
@@ -195,10 +196,10 @@ missing, the milter will create it on startup.
 To start dkimpy-milter with systemd for the first time, you will need to take
 the following steps:
 
-[sudo] systemctl daemon-reload
-[sudo] systemctl enable dkimpy-milter
-[sudo] systemctl start dkimpy-milter
-[sudo] systemctl status dkimpy-milter (to verify it started correctly)
+    [sudo] systemctl daemon-reload
+    [sudo] systemctl enable dkimpy-milter
+    [sudo] systemctl start dkimpy-milter
+    [sudo] systemctl status dkimpy-milter (to verify it started correctly)
 
 As with all milters, dkimpy-milter needs to be integrated with your MTA of
 choice (Sendmail or Postfix).  When integrating with your MTA, the risk of
@@ -214,7 +215,7 @@ Configuration is very similar to opendkim, but needs some adjustment for
 dkimpy-milter. Here's an example configuration line to include in your
 sendmail.mc:
 
-INPUT_MAIL_FILTER(`dkimpy-milter', `S=local:/run/dkimpy-milter/dkimpy-milter.sock')dnl
+    INPUT_MAIL_FILTER(`dkimpy-milter', `S=local:/run/dkimpy-milter/dkimpy-milter.sock')dnl
 
 Changing the sendmail.mc file requires a Make (to compile it into sendmail.cf)
 and a restart of sendmail.  Note that S= needs to match the value of Socket in
@@ -237,7 +238,7 @@ and deserve consideration.
 
     By default, sendmail quotes to address header fields when there are no
     quotes and the display part of the address contains a period or an
-    apostrophe.  However, opendkim only sees the raw, unmodified form of
+    apostrophe.  However, dkimpy-milter only sees the raw, unmodified form of
     the header field, and so the content that gets verified and what gets
     signed will not be the same, guaranteeing the attached signature is not
     valid.
@@ -263,16 +264,16 @@ and deserve consideration.
     To: very long name <a@example.org>,
     	anotherloo...ong name b <b@example.org>
 
-    This rewrite is also done after opendkim has seen the message, meaning
-    the signature opendkim attaches to the message does not match the
-    content it signed.  There is not a known configuration change to
+    This rewrite is also done after dkimpy-milter has seen the message,
+    meaning the signature dkimpy-milter attaches to the message does not match
+    the content it signed.  There is not a known configuration change to
     mitigate this mutation.
 
     The only known mechanism for dealing with this is to have distinct
-    instances of opendkim do the verifying (inbound) and signing (outbound)
-    so that the version that arrives at the signing instance is already
-    in the rewritten form, guaranteeing the input and output are the same
-    and thus the signature matches the payload.
+    instances of dkimpy-milter do the verifying (inbound) and signing
+    (outbound) so that the version that arrives at the signing instance is
+    already in the rewritten form, guaranteeing the input and output are the
+    same and thus the signature matches the payload.
 
 ### POSTFIX
 
@@ -281,15 +282,15 @@ README_FILES/MILTER_README).  Here's an example master.cf excerpt that talks
 to two dkimpy-milter instances, one configured for signing and one configured
 for verification:
 
-smtp       inet  n       -       -       -      -       smtpd
-    ...
-    -o smtpd_milters=inet:localhost:8892
-    ...
+    smtp       inet  n       -       -       -      -       smtpd
+        ...
+        -o smtpd_milters=inet:localhost:8892
+        ...
 
-submission inet  n       -       -       -      -       smtpd
-    ...
-    -o smtpd_milters=inet:localhost:8891
-    ...
+    submission inet  n       -       -       -      -       smtpd
+        ...
+        -o smtpd_milters=inet:localhost:8891
+        ...
 
 These need to match the Socket value for each dkimpy-milter instance.
 
@@ -300,28 +301,28 @@ macros to keep the mail streams segregated:
 
 Postfix master.cf:
 
-smtp       inet  n       -       -       -       -       smtpd
-    ...
-    -o smtpd_milters=inet:localhost:8891
-    -o milter_macro_daemon_name=VERIFYING
-    ...
+    smtp       inet  n       -       -       -       -       smtpd
+        ...
+        -o smtpd_milters=inet:localhost:8891
+        -o milter_macro_daemon_name=VERIFYING
+        ...
 
-submission inet n       -       -       -       -       smtpd
-    -o syslog_name=postfix/submission
-    -o smtpd_tls_security_level=encrypt
-    -o smtpd_sasl_auth_enable=yes
-    ...
-    -o milter_macro_daemon_name=ORIGINATING
-    -o smtpd_milters=inet:localhost:8891
-    ...
+    submission inet n       -       -       -       -       smtpd
+        -o syslog_name=postfix/submission
+        -o smtpd_tls_security_level=encrypt
+        -o smtpd_sasl_auth_enable=yes
+        ...
+        -o milter_macro_daemon_name=ORIGINATING
+        -o smtpd_milters=inet:localhost:8891
+        ...
 
 Dkimpy-milter.conf:
 
-...
-Mode			sv
-MacroList		dameon_name|ORIGINATING
-MacroListVerify		daemon_name|VERIFYING
-...
+    ...
+    Mode			sv
+    MacroList		dameon_name|ORIGINATING
+    MacroListVerify		daemon_name|VERIFYING
+    ...
 
 
 # NOTES
