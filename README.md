@@ -136,9 +136,9 @@ for the above might look like this:
 	comkey	example.com:bar:/usr/local/etc/dkim/keys/excom
 	netkey	example.net:baz:/usr/local/etc/dkim/keys/exnet
 
-If also signing with ed25519, specify a KeyTableEd25519 pointing to the keys
-needed for ed25519.  Both KeyTable and KeyTableEd25519 are evaluated if there
-is a SigningTable (see below).
+If also signing with ed25519, specify a KeyTableEd25519, with the same
+names, pointing to the keys needed for ed25519.  Both KeyTable and
+KeyTableEd25519 are evaluated if there is a SigningTable (see below).
 
 Per the documentation, multi-field data sets that are made of flat files have
 the fields separated by colons, but the key and value(s) are separated by
