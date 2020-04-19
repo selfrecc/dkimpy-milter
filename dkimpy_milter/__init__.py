@@ -363,8 +363,12 @@ class dkimMilter(Milter.Base):
             try:
                 dnsoverride = self.conf.get('DNSOverride')
                 if isinstance(dnsoverride, str):
+                    timeout = 5
+                    domain = self.fdomain
+                    def dnsfunc(domain, timeout=timeout, dnsoverride=dnsoverride):
+                        return dnsoverride
                     syslog.syslog("DNSOverride: {0}".format(dnsoverride))
-                    res = d.verify(idx=y, dnsfunc=lambda _x: dnsoverride)
+                    res = d.verify(idx=y, dnsfunc=dnsfunc)
                 else:
                     res = d.verify(idx=y)
                 algo = codecs.decode(d.signature_fields.get(b'a'), 'ascii')
