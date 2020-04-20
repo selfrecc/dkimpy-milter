@@ -1,4 +1,5 @@
 1.2.2
+ - Improve resilience to malformed email addresses
  - Improve README.md formating for markdown display on pypi
  - Improve documentation in dkimpy-milter.conf (5) and README.md for signing
    for multiple domains (Thanks to Stefano Rivera)

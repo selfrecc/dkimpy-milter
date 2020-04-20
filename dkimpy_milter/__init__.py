@@ -141,6 +141,8 @@ class dkimMilter(Milter.Base):
                 self.fdomain = self.author.split('@')[1].lower()
             except IndexError as er:
                 pass # self.author was not a proper email address
+            # This keeps non-ascii characters out of the From domain
+            self.fdomain = str(codecs.encode(self.fdomain, 'ascii', 'replace'), 'ascii', 'ignore')
             if (self.conf.get('Syslog') and
                     self.conf.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
@@ -148,7 +150,11 @@ class dkimMilter(Milter.Base):
             self.arheaders.append(val)
         if self.fp:
             try:
-                self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'ascii')))
+                if lname == 'from':
+                    # Non-ascii in email address localpart is legal, so this is a special case
+                    self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'UTF-8', 'replace')))
+                else:
+                    self.fp.write(b"%s: %s\n" % (codecs.encode(name, 'ascii'), codecs.encode(val, 'ascii')))
             except:
                 # Don't choke on header fields with non-ascii garbage in them.
                 pass
