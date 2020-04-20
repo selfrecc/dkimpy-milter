@@ -1,5 +1,7 @@
 1.2.2
  - Improve README.md formating for markdown display on pypi
+ - Improve documentation in dkimpy-milter.conf (5) and README.md for signing
+   for multiple domains (Thanks to Stefano Rivera)
 
 1.2.1 2020-01-04
  - Fix expand option not to fail if files are missing since socket activation
