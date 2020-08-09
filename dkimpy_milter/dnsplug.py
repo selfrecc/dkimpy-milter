@@ -127,7 +127,7 @@ def DNSLookup_dnspython(name,qtype,tcpfallback=True,timeout=5):
       elif qtype == 'PTR':
         retVal.append(((name, qtype), rdata.target.to_text(True)))
       elif qtype == 'TXT' or qtype == 'SPF':
-        retVal.append(((name, qtype), rdata.strings))
+        retVal.append(((name, qtype), list(rdata.strings)))
   except dns.resolver.NoAnswer:
     pass
   except dns.resolver.NXDOMAIN:
