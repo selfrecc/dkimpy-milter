@@ -26,7 +26,7 @@ function connect_and_send (sockname, headers, body)
    end
 
    -- mt.macro(conn, SMFIC_MAIL, "i", "simple-message")
-   if mt.mailfrom(conn, "<alice@example.net>") ~= nil then
+   if mt.mailfrom(conn, "<alicüe@example.net> (Alicþþÿÿe)") ~= nil then
       error "mt.mailfrom() failed"
    end
    if mt.getreply(conn) ~= SMFIR_CONTINUE then

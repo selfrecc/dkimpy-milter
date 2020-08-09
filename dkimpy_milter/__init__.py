@@ -107,9 +107,11 @@ class dkimMilter(Milter.Base):
     # envfrom (MAIL FROM in the SMTP protocol) seems to mark the start
     # of each message.
     @Milter.noreply
-    def envfrom(self, f, *str):
+    def envfrom(self, f, *moredata):
+        f = str(codecs.encode(f, 'UTF-8', 'replace'), 'UTF-8', 'ignore')
+        moredata = str(codecs.encode(str(moredata), 'UTF-8', 'replace'), 'UTF-8', 'ignore')
         if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 2:
-            syslog.syslog("mail from: {0} {1}".format(f, str))
+            syslog.syslog("mail from: {0} {1}".format(f, moredata))
         self.fp = io.BytesIO()
         self.mailfrom = f
         t = parse_addr(f)

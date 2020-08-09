@@ -1,4 +1,4 @@
-1.2.2
+1.3.0 WARNING LAST COMMIT IS WIP
  - Improve resilience to malformed email addresses
  - Improve README.md formating for markdown display on pypi
  - Improve documentation in dkimpy-milter.conf (5) and README.md for signing
