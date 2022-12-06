@@ -319,6 +319,8 @@ class dkimMilter(Milter.Base):
                         except:
                             if (self.conf.get('Syslog')):
                                     syslog.syslog('Error: Invalid KeyTable data {0}'.format(keytabledata))
+                    if (self.fdomain == '%'):
+                        self.fdomain = self.author.split('@')[1].lower()
                     break
 
     def sign_dkim(self, txt):
