@@ -105,7 +105,7 @@ class dkimMilter(Milter.Base):
             syslog.syslog("internal_conn: {0}, external_conn: {1}"
                           .format(self.internal_connection, self.external_connection))
 
-            return Milter.CONTINUE
+        return Milter.CONTINUE
 
     # multiple messages can be received on a single connection
     # envfrom (MAIL FROM in the SMTP protocol) seems to mark the start
