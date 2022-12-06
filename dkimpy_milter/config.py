@@ -89,16 +89,23 @@ class HostsDataset(object):
                 self.item = item[1:]
                 self.negative = True
             try:
-                self.item = ipaddress.ip_address(str(self.item, "utf-8"))
+                try:
+                    self.item = ipaddress.ip_address(str(self.item, "utf-8"))
+                except TypeError:
+                    self.item = ipaddress.ip_address(self.item)
                 if isinstance(self.item, ipaddress.IPv4Address):
                     self.isipv4 = True
                 elif isinstance(self.item, ipaddress.IPv6Address):
                     self.isipv6 = True
             except ValueError as e:
                 try:
-                    self.item = ipaddress.ip_network(str
-                                                     (self.item, "utf-8"),
-                                                     strict=False)
+                    try:
+                        self.item = ipaddress.ip_network(str
+                                                         (self.item, "utf-8"),
+                                                         strict=False)
+                    except TypeError:
+                        self.item = ipaddress.ip_network(self.item,
+                                                         strict=False)
                     if isinstance(self.item, ipaddress.IPv4Network):
                         self.isipv4cidr = True
                     elif isinstance(self.item, ipaddress.IPv6Network):
@@ -114,7 +121,10 @@ class HostsDataset(object):
 
     def match(self, connectip):
         '''Check if the connect IP is part of the dataset'''
-        source = ipaddress.ip_address(str(connectip, "utf-8"))
+        try:
+            source = ipaddress.ip_address(str(connectip, "utf-8"))
+        except TypeError:
+            source = ipaddress.ip_address(connectip)
         for item in self.dataset:
             if item.isdomain or item.ishostname:
                 result = self.matchname(source)   # Match host/domains first
@@ -164,13 +174,19 @@ class HostsDataset(object):
             if isinstance(source, ipaddress.IPv4Address):
                 ips = s.dns(name, 'A')
                 for ip in ips:
-                    ip = ipaddress.IPv4Address(str(ip, 'UTF-8'))
+                    try:
+                        ip = ipaddress.IPv4Address(str(ip, 'UTF-8'))
+                    except TypeError:
+                        ip = ipaddress.IPv4Address(ip)
                     if ip == source:
                         results.append(name)
             if isinstance(source, ipaddress.IPv6Address):
                 ips = s.dns(name, 'AAAA')
                 for ip in ips:
-                    ip = ipaddress.IPv6Address(str(ip, 'UTF-8'))
+                    try:
+                        ip = ipaddress.IPv6Address(str(ip, 'UTF-8'))
+                    except TypeError:
+                        ip = ipaddress.IPv6Address(ip)
                 if ip == source:
                     results.append(name)
         return results
@@ -439,8 +455,14 @@ def _readConfigFile(path, configData=None, configGlobal={}):
     fp.close()
     try:
         configData['AuthservID'] = _make_authserv_id(configData.get('AuthservID', 'HOSTNAME'))
+    except Exception as e:
+        syslog.syslog("Could not make AuthservID: {}".format(e))
+        pass
+
+    try:
         configData['IntHosts'] = HostsDataset(configData['InternalHosts'])
-    except:
+    except Exception as e:
+        syslog.syslog("Could not make HostDataset from InternalHosts: {}".format(e))
         pass
 
     return(configData)

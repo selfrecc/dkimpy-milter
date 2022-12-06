@@ -101,15 +101,26 @@ class dkimMilter(Milter.Base):
         if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 1:
             syslog.syslog("connect from {0} at {1} {2}"
                           .format(hostname, hostaddr, connecttype))
-        return Milter.CONTINUE
+        if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 3:
+            syslog.syslog("internal_conn: {0}, external_conn: {1}"
+                          .format(self.internal_connection, self.external_connection))
+
+            return Milter.CONTINUE
 
     # multiple messages can be received on a single connection
     # envfrom (MAIL FROM in the SMTP protocol) seems to mark the start
     # of each message.
     @Milter.noreply
     def envfrom(self, f, *moredata):
-        f = str(codecs.encode(f, 'UTF-8', 'replace'), 'UTF-8', 'ignore')
-        moredata = str(codecs.encode(str(moredata), 'UTF-8', 'replace'), 'UTF-8', 'ignore')
+        try:
+            f = str(codecs.encode(f, 'UTF-8', 'replace'), 'UTF-8', 'ignore')
+        except TypeError:
+            f = codecs.encode(f, 'UTF-8', 'replace').decode()
+        try:
+            moredata = str(codecs.encode(str(moredata), 'UTF-8', 'replace'), 'UTF-8', 'ignore')
+        except TypeError:
+            moredata = codecs.encode(str(moredata), 'UTF-8', 'replace').decode()
+
         if self.conf.get('Syslog') and self.conf.get('debugLevel') >= 2:
             syslog.syslog("mail from: {0} {1}".format(f, moredata))
         self.fp = io.BytesIO()
@@ -144,7 +155,10 @@ class dkimMilter(Milter.Base):
             except IndexError as er:
                 pass # self.author was not a proper email address
             # This keeps non-ascii characters out of the From domain
-            self.fdomain = str(codecs.encode(self.fdomain, 'ascii', 'replace'), 'ascii', 'ignore')
+            try:
+                self.fdomain = str(codecs.encode(self.fdomain, 'ascii', 'replace'), 'ascii', 'ignore')
+            except TypeError:
+                self.fdomain = codecs.encode(self.fdomain, 'ascii', 'replace').decode('ascii','ignore')
             if (self.conf.get('Syslog') and
                     self.conf.get('debugLevel') >= 1):
                 syslog.syslog("{0}: {1}".format(name, val))
@@ -203,6 +217,8 @@ class dkimMilter(Milter.Base):
             syslog.syslog('self.domain: {0}, self.fdomain: {1}, self.iequals: {2}'.format(self.domain, self.fdomain, self.iequals))
         if ((self.fdomain in self.domain) and not self.conf.get('Mode') == 'v'
                 and not self.external_connection):
+            if (self.conf.get('Syslog') and self.conf.get('debugLevel') >= 3):
+                syslog.syslog("Signing DKIM")
             self.sign_dkim(txt)
         if ((self.has_dkim) and (not self.internal_connection) and
             (self.conf.get('Mode') == 'v' or
