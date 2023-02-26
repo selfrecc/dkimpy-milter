@@ -327,7 +327,7 @@ be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
 
-TP
+.TP
 .I MinimumKeyBits (integer)
 Establishes a minimum key size for acceptable RSA signatures.  Signatures with
 smaller key sizes, even if they otherwise pass DKIM validation, will me marked
