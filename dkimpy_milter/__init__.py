@@ -251,7 +251,7 @@ class dkimMilter(Milter.Base):
     def get_identities_sign(self):
         """Determine d= and i= identiies for signature"""
         self.domain = []
-        iequals = None
+        self.iequals = None
         try:
             self.privkeyRSA = self.conf.get('privateRSA')
         except:
