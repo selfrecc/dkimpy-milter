@@ -2,9 +2,11 @@
  - Improve support for non-ASCII email messages.  Anything UTF-8 should work
    (including correct signing/verification).  For messages that contain header
    fields with non-ASCII or UTF-8 content, signatures are likely fail
-   verification, but the milter should continue to run.
+   verification, but the milter should continue to run.  (Thanks to Casper
+   Bruun for help with this)
  - Set minimum pymilter and dkimpy versions in setup.py to those that will
    work reliably with non-ASCII content.
+ - Fixed support for percent in KeyTable - Thanks to Mika Tiainen
 
 1.2.2 2020-08-09
  - Improve README.md formating for markdown display on pypi
