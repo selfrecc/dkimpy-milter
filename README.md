@@ -336,3 +336,8 @@ later support Ed25519 signing and verification.  RFC 8301 removed rsa-sha1
 from DKIM.  dkimpy-milter does not sign with rsa-sha1, but still considers
 rsa-sha1 signatures as valid for verification because they are still in
 common use and are not known to be cryptographically broken.
+
+Support for non-ASCII email messages:  Anything UTF-8 should work (including
+correct signing/verification).  For messages that contain header fields with
+non-ASCII or UTF-8 content, signatures are likely fail verification, but the
+milter should continue to run.  RFC 8616 is not supported.

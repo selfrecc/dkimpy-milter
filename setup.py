@@ -83,9 +83,9 @@ class FileMacroExpand(distutils.cmd.Command):
 kw = {}  # Work-around for lack of 'or' requires in setuptools.
 try:
     import dns
-    kw['install_requires'] = ['dkimpy>=1.0', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'dnspython>=1.16.0']
+    kw['install_requires'] = ['dkimpy>=1.1.0', 'pymilter>=1.0.5', 'authres>=1.1.0', 'PyNaCl', 'dnspython>=1.16.0']
 except ImportError:  # If PyDNS is not installed, prefer dnspython
-    kw['install_requires'] = ['dkimpy>=1.0', 'pymilter', 'authres>=1.1.0', 'PyNaCl', 'Py3DNS']
+    kw['install_requires'] = ['dkimpy>=1.1.0', 'pymilter>=1.0.5', 'authres>=1.1.0', 'PyNaCl', 'Py3DNS']
 
 setup(
     name='dkimpy-milter',
