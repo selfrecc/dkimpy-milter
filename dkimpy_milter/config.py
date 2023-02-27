@@ -322,9 +322,15 @@ def _dataset_to_list(dataset):
                 return dsd
         # If it's a str and csl, it has one value and we return a list
         if dataset[:4] == 'csl:':
-            return [dataset[4:].strip().strip(',')]
+            datalist = dataset[4:].split(',')
+            for item in datalist:
+                datalist[datalist.index(item)] = item.strip().strip(',')
+            return datalist
         else:
-            return [dataset.strip().strip(',')]
+            datalist = dataset.split(',')
+            for item in datalist:
+                datalist[datalist.index(item)] = item.strip().strip(',')
+            return datalist
         if dataset[-3:] == '.db' or dataset[:3] == 'db:':
             #  This is a Sleepycat (Oracle) DB  dataset, which we dont support
             raise dkim.ParameterError('Unsupported dataset db datase: {0}'
