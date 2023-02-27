@@ -10,6 +10,9 @@
  - Fix formatting for MinimumKeyBits in dkimpy-milter.conf(5)
    (Closes: #995335)
  - Reset the i= signature identity in get_identities_sign() (Closes: #981157)
+ - Improve documentation of inter-relationship between Mode, InternalHosts,
+   MacroList, and MacroListVerify options in dkimpy-milter.conf.5 (Closes:
+   #969215)
 
 1.2.2 2020-08-09
  - Improve README.md formating for markdown display on pypi

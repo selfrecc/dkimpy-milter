@@ -244,6 +244,10 @@ Naturally, providing a value here overrides the default, so if mail from
 127.0.0.1 should be signed, the list provided here should include that
 address explicitly. [PeerList NOT IMPLEMENTED]
 
+Mail sent via connections from InternalHosts will not have any existing DKIM
+signatures verified.  This is not overridden by MacroList or Mode.  If the
+Mode is 'v', then no actions will be performed.
+
 .TP
 .I KeyFile (string)
 Gives the location of a PEM-formatted private key to be used for RSA signing
@@ -298,6 +302,10 @@ at the time the filter receives a connection from the MTA and its availability
 depends upon the version of milter used to compile the filter and the version
 of the MTA making the connection.
 
+Mail sent via connections where macros that are in MacroList are provided
+will not have any existing DKIM signatures verified.  If the Mode is 'v', then
+no actions will be performed.
+
 .TP
 .I MacroListVerify (dataset)
 Defines a set of MTA-provided
@@ -307,6 +315,10 @@ external source and therefore whether or not the message should be signed.
 Entries in this data set follow the same form as those of the
 .I MacroList
 option above.  [this option is not inhereted from OpenDKIM]  
+
+Mail sent via connections where macros that are in MacroListVerify are
+provided will be not DKIM signed.  If the Mode is 's', then no actions will
+be performed.
 
 .TP
 .I Mode (string)
@@ -326,6 +338,11 @@ When signing mode is enabled, one of the following combinations must also
 be set:
 (a) Domain, KeyFile, Selector, no KeyTable, no SigningTable;
 (b) KeyTable, SigningTable, no Domain, no KeyFile, no Selector;
+
+The action to sign or verify is also affected by the InternalHosts, MacroList,
+and MacroListVerify options.  Those options may preclude signing or
+verification in some cases, but will not enable signing or verifying if not
+allowed by Mode.
 
 .TP
 .I MinimumKeyBits (integer)
