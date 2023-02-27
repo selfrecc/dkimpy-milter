@@ -39,7 +39,7 @@ from dkimpy_milter.util import write_pid
 from dkimpy_milter.util import get_keys
 from dkimpy_milter.util import fold
 
-__version__ = "1.2.0"
+__version__ = "1.2.3"
 FWS = re.compile(r'\r?\n[ \t]+')
 
 
