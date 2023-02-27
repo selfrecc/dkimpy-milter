@@ -304,6 +304,7 @@ class dkimMilter(Milter.Base):
                         keytabledata = self.conf.get('privateRSATable')[keytablekey]
                         try:
                             self.fdomain = keytabledata[0]
+                            self.domain.append(self.fdomain)
                             self.selectorRSA = keytabledata[1]
                             self.privkeyRSA = keytabledata[2]
                         except:
@@ -314,6 +315,7 @@ class dkimMilter(Milter.Base):
                         keytabledata = self.conf.get('privateEd25519Table')[keytablekey]
                         try:
                             self.fdomain = keytabledata[0]
+                            self.domain.append(self.fdomain)
                             self.selectorEd25519 = keytabledata[1]
                             self.privkeyEd25519 = keytabledata[2]
                         except:
