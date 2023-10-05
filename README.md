@@ -320,7 +320,7 @@ Dkimpy-milter.conf:
 
     ...
     Mode			sv
-    MacroList		dameon_name|ORIGINATING
+    MacroList		daemon_name|ORIGINATING
     MacroListVerify		daemon_name|VERIFYING
     ...
 
