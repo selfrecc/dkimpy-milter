@@ -299,9 +299,9 @@ class dkimMilter(Milter.Base):
                 if match:
                     #TODO add KeyTable stuffs here.
                     keytablekey = dictvalues[-1] # Last value in the SigningTable row.
-                    if self.conf.get('privateRSATable'):
+                    if (private_rsa_table := self.conf.get('privateRSATable')) and keytablekey in private_rsa_table:
                         # Table data is a list of [ signing domain, selector, key ]
-                        keytabledata = self.conf.get('privateRSATable')[keytablekey]
+                        keytabledata = private_rsa_table[keytablekey]
                         try:
                             self.fdomain = keytabledata[0]
                             self.domain.append(self.fdomain)
@@ -310,9 +310,9 @@ class dkimMilter(Milter.Base):
                         except:
                             if (self.conf.get('Syslog')):
                                     syslog.syslog('Error: Invalid KeyTable data {0}'.format(keytabledata))
-                    if self.conf.get('privateEd25519Table'):
+                    if (private_ed25519_table := self.conf.get('privateEd25519Table')) and keytablekey in private_ed25519_table:
                         # Table data is a list of [ signing domain, selector, key ]
-                        keytabledata = self.conf.get('privateEd25519Table')[keytablekey]
+                        keytabledata = private_ed25519_table[keytablekey]
                         try:
                             self.fdomain = keytabledata[0]
                             self.domain.append(self.fdomain)
